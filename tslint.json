@@ -1,0 +1,53 @@
+{
+  "extends": "tslint:recommended",
+  "rules": {
+    "max-line-length": {
+      "options": [120]
+    },
+    "new-parens": true,
+    "no-arg": true,
+    "no-bitwise": true,
+    "no-conditional-assignment": true,
+    "no-consecutive-blank-lines": false,
+    "no-console": {
+      "severity": "warning",
+      "options": [
+        "debug",
+        "info",
+        "log",
+        "time",
+        "timeEnd",
+        "trace"
+      ]
+    },
+    "no-empty-interface": true,
+    "only-arrow-functions": true,
+    "no-string-throw": true,
+    "no-unsafe-any": true,
+    "triple-equals": true,
+    "eofline": true,
+    "indent": [true, "spaces", 2],
+    "max-file-line-count": [true, 300],
+    "no-default-export": true,
+    "no-duplicate-imports": true,
+    "prefer-readonly": true,
+    "align": [true, "parameters", "statements"],
+    "class-name": true,
+    "file-name-casing": true,
+    "import-spacing": true,
+    "interface-name": [true, "always-prefix"],
+    "newline-before-return": true,
+    "no-irregular-whitespace": true,
+    "no-trailing-whitespace": true,
+    "one-line": [true, "check-catch", "check-finally", "check-else"],
+    "one-variable-per-declaration": [true, "ignore-for-loop"],
+    "ordered-imports": true,
+    "semicolon": [true, "never"],
+    "quotemark": [true, "single", "avoid-escape", "avoid-template"]
+  },
+  "jsRules": {
+    "max-line-length": {
+      "options": [120]
+    }
+  }
+}

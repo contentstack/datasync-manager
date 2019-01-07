@@ -1,0 +1,14 @@
+# Runtime data
+.tokens
+
+# IDE config
+.vscode
+
+# Dependency directories
+node_modules
+
+# Coverage directories
+coverage
+
+# Data logs
+logs
