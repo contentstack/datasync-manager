@@ -6,14 +6,16 @@
 
 import Debug from 'debug'
 import Request from 'request'
-
 import { stringify } from './util/stringify'
 
 const debug = Debug('api:get-requests')
-
 let MAX_RETRY_LIMIT = 5
 let Contentstack
 
+/**
+ * Initialize sync utilities API requests
+ * @param {Object} contentstack - Contentstack configuration details
+ */
 export const init = (contentstack) => {
   Contentstack = contentstack
   Contentstack.headers = {
@@ -28,6 +30,10 @@ export const init = (contentstack) => {
   Contentstack.syncAPI = `${Contentstack.cdn}${Contentstack.restAPIS.sync}`
 }
 
+/**
+ * Validate API request object
+ * @param {Object} req - Request object to be validated
+ */
 const validate = (req) => {
   if (typeof req !== 'object') {
     const error: any = new Error(`Invalid params passed for request\n${stringify(req)}`)
@@ -36,6 +42,10 @@ const validate = (req) => {
   }
 }
 
+/**
+ * Normalize API request object
+ * @param {Object} req - Request object to be normalized
+ */
 const normalize = (req) => {
   if (typeof req.uri === 'undefined' && typeof req.url === 'undefined') {
     req.uri = Contentstack.syncAPI
@@ -46,6 +56,11 @@ const normalize = (req) => {
   }
 }
 
+/**
+ * Make API requests to Contentstack
+ * @param {Object} req - API request object
+ * @param {Number} RETRY - API request retry counter
+ */
 export const get = (req, RETRY = 1) => {
   return new Promise((resolve, reject) => {
     if (RETRY > MAX_RETRY_LIMIT) {

@@ -4,6 +4,9 @@
 * MIT Licensed
 */
 
+/**
+ * Default application's internal config
+ */
 export const config = {
   'contentstack': {
     MAX_RETRY_LIMIT: 8,
