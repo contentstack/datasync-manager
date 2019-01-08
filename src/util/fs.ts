@@ -33,15 +33,6 @@ export const writeFile = (filePath, data) => {
         return resolve()
       })
     } catch (writeFileError) {
-      if (writeFileError.code === 'ENOENT') {
-        return mkdirp(dirname(filePath), (createDirError) => {
-          if (createDirError) {
-            return reject(createDirError)
-          }
-
-          return writeFile(data, filePath).then(resolve).catch(reject)
-        })
-      }
 
       return reject(writeFileError)
     }

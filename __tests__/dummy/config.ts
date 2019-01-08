@@ -6,8 +6,9 @@ export const config = {
 
   },
   'contentstack': {
-    apiKey: '',
-    token: '',
+    apiKey: 'dummyApiKey',
+    sync_token: 'dummySyncToken',
+    token: 'dummyDeliveryToken',
   },
   'listener': {
 
