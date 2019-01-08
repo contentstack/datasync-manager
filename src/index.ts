@@ -26,35 +26,56 @@ let contentConnector
 let assetConnector
 let listener
 
+/**
+ * @description Register content connector
+ * @param {Object} instance - Content connector instance
+ */
 export const setContentConnector = (instance) => {
   debug('Content connector instance registered successfully')
-  // do something with connector instance
   contentConnector = instance
 }
 
+/**
+ * @description Register asset connector
+ * @param {Object} instance - Asset connector instance
+ */
 export const setAssetConnector = (instance) => {
   debug('Asset connector instance registered successfully')
-  // do something with connector instance
   assetConnector = instance
 }
 
+/**
+ * @description Register listener
+ * @param {Object} instance - Listener instance
+ */
 export const setListener = (instance) => {
   validateListener(instance)
   debug('Listener instance registered successfully')
-  // do something with listener instance
   listener = instance
 }
 
+/**
+ * Set the application's config
+ * @param {Object} config - Application config
+ */
 export const setConfig = (config) => {
   validateConfig(config)
   debug('Config set successfully!')
   appConfig = config
 }
 
+/**
+ * Returns the application's configuration
+ * @returns {Object} - Application config
+ */
 export const getConfig = () => {
   return appConfig
 }
 
+/**
+ * Starts the sync manager utility
+ * @param {Object} config - Optional application config.
+ */
 export const start = (config = {}) => {
   return new Promise((resolve, reject) => {
     try {
@@ -62,19 +83,16 @@ export const start = (config = {}) => {
       appConfig = merge(internalConfig, appConfig, config)
       validateConfig(appConfig)
       appConfig.paths = buildConfigPaths()
-      // console.log(stringify(appConfig.paths))
       debug('App validations passed.')
 
       return assetConnector.start(appConfig).then((assetInstance) => {
-        debug(`Asset connector instance ${assetInstance}`)
+        debug(`Asset connector instance ${JSON.stringify(assetInstance)} returned successfully!`)
         validateAssetConnector(assetInstance)
-        debug('Asset connector initiated successfully')
 
         return contentConnector.start(appConfig, assetInstance)
       }).then((connectorInstance) => {
-        // debug(`Content connector instance ${JSON.stringify(connectorInstance)}`)
+        debug(`Content connector instance ${JSON.stringify(connectorInstance)} returned successfully!`)
         validateContentConnector(connectorInstance)
-        debug('Content connector initiated successfully')
 
         return init(connectorInstance, appConfig)
       }).then(() => {
@@ -86,7 +104,6 @@ export const start = (config = {}) => {
         return resolve({status: 'App started successfully!'})
       }).catch(reject)
     } catch (error) {
-      // do something with error
       return reject(error)
     }
   })
