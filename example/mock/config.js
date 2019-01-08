@@ -1,7 +1,7 @@
 module.exports = {
   contentstack: {
-    apiKey: '',
-    token: ''
+    apiKey: '***REMOVED***',
+    token: '***REMOVED***'
   },
   'content-connector': {
 

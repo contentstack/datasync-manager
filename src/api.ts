@@ -61,7 +61,6 @@ export const get = (req, RETRY = 1) => {
 
       return Request(req, (error, response, body) => {
         if (error) {
-          console.error(error)
 
           return reject(error)
         }
