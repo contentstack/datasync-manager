@@ -8,7 +8,7 @@ import { config } from '../dummy/config'
 const configs: any = cloneDeep(merge({}, internalConfig, config))
 configs.paths = buildConfigPaths()
 
-describe('fs functionalities should work without errors', () => {
+describe('fs utility', () => {
   test('write file should execute without errors', () => {
     const filePath = resolve(join(__dirname, '..', '..', 'file.json'))
     const data = {
@@ -65,7 +65,9 @@ describe('fs functionalities should work without errors', () => {
     const err: any = new Error(str)
     err.code = 'IOORFS'
     // expect(readFileSync(filePath)).toThrowError(err)
-    expect(readFileSync(filePath)).toThrow(str)
+    expect(() => {
+      readFileSync(filePath)
+    }).toThrow(/^Invalid 'read' operation on file. Expected (.*) to be of type 'file'!/)
   })
 
   test('make directory without errors', () => {
