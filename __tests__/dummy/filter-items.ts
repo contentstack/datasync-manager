@@ -28,8 +28,5 @@ export const response = {
       type: 'asset_published',
     },
   ],
-  limit: 100,
-  skip: 0,
-  sync_token: 'publish-token',
-  total_count: 2,
+  pagination_token: 'pagination-token-2',
 }

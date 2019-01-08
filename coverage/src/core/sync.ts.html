@@ -1,0 +1,818 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Code coverage report for src/core/sync.ts</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="../../prettify.css" />
+    <link rel="stylesheet" href="../../base.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style type='text/css'>
+        .coverage-summary .sorter {
+            background-image: url(../../sort-arrow-sprite.png);
+        }
+    </style>
+</head>
+<body>
+<div class='wrapper'>
+  <div class='pad1'>
+    <h1>
+      <a href="../../index.html">All files</a> / <a href="index.html">src/core</a> sync.ts
+    </h1>
+    <div class='clearfix'>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">70.77% </span>
+        <span class="quiet">Statements</span>
+        <span class='fraction'>92/130</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">47.37% </span>
+        <span class="quiet">Branches</span>
+        <span class='fraction'>18/38</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">67.74% </span>
+        <span class="quiet">Functions</span>
+        <span class='fraction'>21/31</span>
+      </div>
+      <div class='fl pad1y space-right2'>
+        <span class="strong">70.77% </span>
+        <span class="quiet">Lines</span>
+        <span class='fraction'>92/130</span>
+      </div>
+    </div>
+  </div>
+  <div class='status-line medium'></div>
+<pre><table class="coverage">
+<tr><td class="line-count quiet">1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49
+50
+51
+52
+53
+54
+55
+56
+57
+58
+59
+60
+61
+62
+63
+64
+65
+66
+67
+68
+69
+70
+71
+72
+73
+74
+75
+76
+77
+78
+79
+80
+81
+82
+83
+84
+85
+86
+87
+88
+89
+90
+91
+92
+93
+94
+95
+96
+97
+98
+99
+100
+101
+102
+103
+104
+105
+106
+107
+108
+109
+110
+111
+112
+113
+114
+115
+116
+117
+118
+119
+120
+121
+122
+123
+124
+125
+126
+127
+128
+129
+130
+131
+132
+133
+134
+135
+136
+137
+138
+139
+140
+141
+142
+143
+144
+145
+146
+147
+148
+149
+150
+151
+152
+153
+154
+155
+156
+157
+158
+159
+160
+161
+162
+163
+164
+165
+166
+167
+168
+169
+170
+171
+172
+173
+174
+175
+176
+177
+178
+179
+180
+181
+182
+183
+184
+185
+186
+187
+188
+189
+190
+191
+192
+193
+194
+195
+196
+197
+198
+199
+200
+201
+202
+203
+204
+205
+206
+207
+208
+209
+210
+211
+212
+213
+214
+215
+216
+217
+218
+219
+220
+221
+222
+223
+224
+225
+226
+227
+228
+229
+230
+231
+232
+233
+234
+235
+236
+237
+238
+239
+240
+241
+242
+243
+244
+245
+246
+247
+248
+249
+250
+251
+252</td><td class="line-coverage quiet"><span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">2x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">5x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">/*!
+* Contentstack Sync Manager
+* Copyright © 2019 Contentstack LLC
+* MIT Licensed
+*/
+&nbsp;
+import Debug from 'debug'
+import { EventEmitter } from 'events'
+import { remove } from 'lodash'
+import { getConfig } from '..'
+import { get } from '../api'
+import { filterItems, formatItems, groupItems, markCheckpoint } from '../util/core-utilities'
+import { existsSync, readFileSync } from '../util/fs'
+import { parse } from '../util/parse'
+import { map } from '../util/promise.map'
+import { stringify } from '../util/stringify'
+import { getTokenByType, saveToken } from './token-management'
+&nbsp;
+interface IToken {
+  name: string
+  token: string
+}
+&nbsp;
+const debug = Debug('sm:core-sync')
+const DEBUG_ERR = Debug('sm:core-error')
+const emitter = new EventEmitter()
+const formattedAssetType = '_assets'
+const formattedContentType = '_content_types'
+const flag = {
+  SQ: false,
+  WQ: false,
+  lockdown: false,
+}
+let config
+let Contentstack
+let Q
+&nbsp;
+export const start = (connector) =&gt; {
+  Q = connector
+  debug('Sync core:start invoked')
+&nbsp;
+  return new Promise((resolve, reject) =&gt; {
+    try {
+      config = getConfig()
+      Contentstack = config.contentstack
+      const paths = config.paths
+      const environment = process.env.SYNC_ENV || Contentstack.environment || 'development'
+      debug(`Environment: ${environment}`)
+      const request: any = {
+        qs: {
+          environment,
+          limit: config['sync-manager'].limit,
+        },
+      }
+      <span class="missing-if-branch" title="else path not taken" >E</span>if (typeof Contentstack.sync_token === 'string' &amp;&amp; Contentstack.sync_token.length !== 0) {
+        request.qs.sync_token = Contentstack.sync_token
+      } else <span class="cstat-no" title="statement not covered" >if (typeof Contentstack.pagination_token === 'string' &amp;&amp; Contentstack.pagination_token.length !== 0) {</span>
+<span class="cstat-no" title="statement not covered" >        request.qs.pagination_token = Contentstack.pagination_token</span>
+      } else <span class="cstat-no" title="statement not covered" >if (existsSync(paths.token.checkpoint)) {</span>
+        const token = <span class="cstat-no" title="statement not covered" >parse(readFileSync(paths.token.checkpoint))</span>
+<span class="cstat-no" title="statement not covered" >        request.qs[token.name] = token.token</span>
+      } else {
+<span class="cstat-no" title="statement not covered" >        request.qs.init = true</span>
+      }
+&nbsp;
+      return fire(request)
+        .then(resolve)
+        .catch(reject)
+    } catch (error) {
+<span class="cstat-no" title="statement not covered" >      return reject(error)</span>
+    }
+  })
+}
+&nbsp;
+export const poke = () =&gt; {
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!flag.lockdown) {
+    flag.WQ = true
+    check()
+  }
+}
+&nbsp;
+const check = () =&gt; {
+  debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`)
+  <span class="missing-if-branch" title="else path not taken" >E</span>if (!flag.SQ &amp;&amp; flag.WQ) {
+    flag.WQ = false
+    flag.SQ = true
+    sync().then(<span class="fstat-no" title="function not covered" >() </span>=&gt; {
+<span class="cstat-no" title="statement not covered" >      debug(`Sync completed and SQ flag updated. Cooloff duration is ${config['sync-manager'].cooloff}`)</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      return setTimeout(<span class="fstat-no" title="function not covered" >() </span>=&gt; {</span>
+<span class="cstat-no" title="statement not covered" >        flag.SQ = false</span>
+<span class="cstat-no" title="statement not covered" >        emitter.emit('check')</span>
+      }, config['sync-manager'].cooloff)
+    }).catch(<span class="fstat-no" title="function not covered" >(e</span>rror) =&gt; {
+<span class="cstat-no" title="statement not covered" >      DEBUG_ERR("Errorred in 're-syncing'")</span>
+<span class="cstat-no" title="statement not covered" >      DEBUG_ERR(stringify(error))</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      return check()</span>
+    })
+  }
+}
+&nbsp;
+const sync = () =&gt; {
+  return new Promise((resolve, reject) =&gt; {
+    return getTokenByType('checkpoint').then(<span class="fstat-no" title="function not covered" >(t</span>okenObject) =&gt; {
+      const token: IToken = <span class="cstat-no" title="statement not covered" >parse(tokenObject)</span>
+      const request: any = <span class="cstat-no" title="statement not covered" >{</span>
+        qs: {
+          environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
+          limit: config['sync-manager'].limit,
+          [token.name]: token.token,
+        },
+      }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      return fire(request)</span>
+        .then(resolve)
+        .catch(reject)
+    })
+  })
+}
+&nbsp;
+export const lock = <span class="fstat-no" title="function not covered" >() </span>=&gt; {
+<span class="cstat-no" title="statement not covered" >  flag.lockdown = true</span>
+}
+&nbsp;
+const fire = (req) =&gt; {
+  debug(`Fire!\n${stringify(req)}`)
+  flag.SQ = true
+&nbsp;
+  return new Promise((resolve, reject) =&gt; {
+    return get(req).then((response) =&gt; {
+      delete req.qs.init
+      delete req.qs.pagination_token
+      debug(`Fired response\n${stringify(response)}`)
+      const syncResponse: any = response
+      <span class="missing-if-branch" title="else path not taken" >E</span>if (syncResponse.items.length) {
+        return filterItems(syncResponse, config).then(() =&gt; {
+          formatItems(syncResponse.items, config)
+          const groupedItems = groupItems(syncResponse.items)
+          markCheckpoint(groupedItems, syncResponse)
+          // send assets data for processing
+          <span class="missing-if-branch" title="else path not taken" >E</span>if (groupedItems[formattedAssetType]) {
+            groupedItems[formattedAssetType].forEach((asset) =&gt; {
+              Q.push(asset)
+            })
+            delete groupedItems[formattedAssetType]
+          } else <span class="cstat-no" title="statement not covered" >if (groupedItems[formattedContentType]) {</span>
+<span class="cstat-no" title="statement not covered" >            groupedItems[formattedContentType].forEach(<span class="fstat-no" title="function not covered" >(c</span>ontentType) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >              Q.push(contentType)</span>
+            })
+<span class="cstat-no" title="statement not covered" >            delete groupedItems[formattedContentType]</span>
+          }
+&nbsp;
+          const contentTypeUids = Object.keys(groupedItems)
+          remove(contentTypeUids, (contentTypeUid) =&gt; {
+            const contentType = groupedItems[contentTypeUid]
+            <span class="missing-if-branch" title="if path not taken" >I</span>if (contentType.length === 1 &amp;&amp; !contentType[0].data.publish_details) {
+<span class="cstat-no" title="statement not covered" >              Q.push(contentType[0])</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >              return true</span>
+            }
+&nbsp;
+            return false
+          })
+&nbsp;
+          return map(contentTypeUids, (uid) =&gt; {
+            return new Promise((mapResolve, mapReject) =&gt; {
+              return get({
+                uri: `${Contentstack.cdn}${Contentstack.restAPIS.contentTypes}${uid}`,
+              }).then((contentTypeSchemaResponse) =&gt; {
+                const schemaResponse: { content_type: any } = (contentTypeSchemaResponse as any)
+                <span class="missing-if-branch" title="else path not taken" >E</span>if (schemaResponse.content_type) {
+                  const items = groupedItems[uid]
+                  items.forEach((entry) =&gt; {
+                    entry.content_type = parse(stringify(schemaResponse.content_type))
+                    Q.push(entry)
+                  })
+&nbsp;
+                  return mapResolve()
+                }
+                const err: any = <span class="cstat-no" title="statement not covered" >new Error('Content type ${uid} schema not found!')</span>
+                // Illegal content type call
+<span class="cstat-no" title="statement not covered" >                err.code = 'ICTC'</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >                return mapReject(err)</span>
+              }).catch(<span class="fstat-no" title="function not covered" >(e</span>rror) =&gt; {
+<span class="cstat-no" title="statement not covered" >                throw error</span>
+              })
+            })
+          }, 2).then(() =&gt; {
+            return postProcess(req, syncResponse)
+              .then(resolve)
+              .catch(reject)
+          }).catch(<span class="fstat-no" title="function not covered" >(e</span>rror) =&gt; {
+            // Errorred while fetching content type schema
+<span class="cstat-no" title="statement not covered" >            DEBUG_ERR("Errorred while running 'map' for fetching content type schemas")</span>
+<span class="cstat-no" title="statement not covered" >            DEBUG_ERR(stringify(error))</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >            return reject(error)</span>
+          })
+        }).catch(<span class="fstat-no" title="function not covered" >(p</span>rocessError) =&gt; {
+<span class="cstat-no" title="statement not covered" >          throw processError</span>
+        })
+      }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      return postProcess(req, syncResponse)</span>
+        .then(resolve)
+        .catch(reject)
+    }).catch((error) =&gt; {
+      // do something
+      DEBUG_ERR("Errorred while fetching 'sync' data")
+      DEBUG_ERR(stringify(error))
+&nbsp;
+      return reject(error)
+    })
+  })
+}
+&nbsp;
+const postProcess = (req, resp) =&gt; {
+&nbsp;
+  return new Promise((resolve, reject) =&gt; {
+    let name
+    <span class="missing-if-branch" title="if path not taken" >I</span>if (resp.pagination_token) {
+<span class="cstat-no" title="statement not covered" >      name = 'pagination_token'</span>
+    } else {
+      name = 'sync_token'
+    }
+&nbsp;
+    return saveToken(name, resp[name], 'current').then(() =&gt; {
+      // re-fire!
+      req.qs[name] = resp[name]
+      <span class="missing-if-branch" title="else path not taken" >E</span>if (name === 'sync_token') {
+        flag.SQ = false
+&nbsp;
+        return resolve()
+      }
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      return fire(req)</span>
+        .then(resolve)
+        .catch(reject)
+    }).catch(<span class="fstat-no" title="function not covered" >(e</span>rror) =&gt; {
+      // error saving token
+<span class="cstat-no" title="statement not covered" >      DEBUG_ERR('Errorred in post processing of tokens')</span>
+<span class="cstat-no" title="statement not covered" >      DEBUG_ERR(stringify(error))</span>
+&nbsp;
+<span class="cstat-no" title="statement not covered" >      return reject(error)</span>
+    })
+  })
+}
+&nbsp;
+emitter.on('check', check)
+&nbsp;</pre></td></tr>
+</table></pre>
+<div class='push'></div><!-- for sticky footer -->
+</div><!-- /wrapper -->
+<div class='footer quiet pad2 space-top1 center small'>
+  Code coverage
+  generated by <a href="https://istanbul.js.org/" target="_blank">istanbul</a> at Tue Jan 08 2019 20:40:57 GMT+0530 (IST)
+</div>
+</div>
+<script src="../../prettify.js"></script>
+<script>
+window.onload = function () {
+        if (typeof prettyPrint === 'function') {
+            prettyPrint();
+        }
+};
+</script>
+<script src="../../sorter.js"></script>
+</body>
+</html>

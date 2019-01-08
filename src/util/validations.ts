@@ -16,7 +16,7 @@ const mandatoryConfigKeys = ['listener', 'asset-connector', 'content-connector',
 export const validateConfig = (config) => {
   mandatoryConfigKeys.forEach((key) => {
     if (config[key] === undefined) {
-      throw new Error(`Config ${key} key cannot be undefined`)
+      throw new Error(`Config '${key}' key cannot be undefined`)
     }
   })
   if (!Array.isArray(config.locales) || config.locales.length === 0) {
@@ -42,7 +42,7 @@ export const validateInstances = (assetConnector, contentConnector, listener) =>
 export const validateContentConnector = (instance) => {
   mandatoryCCMethods.forEach((methodName) => {
     if (!(hasIn(instance, methodName))) {
-      throw new Error(`${instance} content connector does not support ${methodName}`)
+      throw new Error(`${instance} content connector does not support '${methodName}()'`)
     }
   })
 }
@@ -50,7 +50,7 @@ export const validateContentConnector = (instance) => {
 export const validateAssetConnector = (instance) => {
   mandatoryACMethods.forEach((methodName) => {
     if (!(hasIn(instance, methodName))) {
-      throw new Error(`${instance} asset connector does not support ${methodName}`)
+      throw new Error(`${instance} asset connector does not support '${methodName}()'`)
     }
   })
 }
@@ -58,7 +58,7 @@ export const validateAssetConnector = (instance) => {
 export const validateListener = (instance) => {
   mandatoryListenerMethods.forEach((methodName) => {
     if (!(hasIn(instance, methodName))) {
-      throw new Error(`${instance} listener does not support ${methodName}`)
+      throw new Error(`${instance} listener does not support '${methodName}()'`)
     }
   })
 }
