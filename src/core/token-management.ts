@@ -5,6 +5,7 @@
 */
 
 import Debug from 'debug'
+import { find } from 'lodash'
 import { getConfig } from '..'
 import { existsSync, readFile, writeFile } from '../util/fs'
 import { parse } from '../util/parse'
@@ -24,6 +25,10 @@ interface IToken {
   token: string
 }
 
+/**
+ * Returns 'token details' based on 'token type'
+ * @param {String} type - Token type (checkpoint | current)
+ */
 export const getTokenByType = (type) => {
   debug(`Get token invoked with type: ${type}`)
 
@@ -43,10 +48,11 @@ export const getTokenByType = (type) => {
 
       return readFile(path).then((data) => {
         const ledger: ITokenLedger[] = (parse(data) as any)
-        for (let i = 0; i < ledger.length; i++) {
-          if (ledger[i].type === type) {
-            return resolve(ledger[i])
-          }
+        const token: any = find(ledger, (tokenItem) => {
+          return tokenItem.type === type
+        })
+        if (typeof token !== 'undefined') {
+          return resolve(token)
         }
         debug(`Unable to find any details of ${type} token. Returning the first token we find!`)
 
@@ -58,6 +64,12 @@ export const getTokenByType = (type) => {
   })
 }
 
+/**
+ * Saves token details
+ * @param {String} name - Name of the token
+ * @param {String} token - Token value
+ * @param {String} type - Token type
+ */
 export const saveToken = (name, token, type) => {
   debug(`Save token invoked with name: ${name}, token: ${token}, type: ${type}`)
 

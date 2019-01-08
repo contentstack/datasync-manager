@@ -35,8 +35,12 @@ let config
 let Contentstack
 let Q
 
-export const start = (connector) => {
-  Q = connector
+/**
+ * Start sync utility
+ * @param {Object} QInstance - Instance of 'Q' class
+ */
+export const start = (QInstance) => {
+  Q = QInstance
   debug('Sync core:start invoked')
 
   return new Promise((resolve, reject) => {
@@ -72,6 +76,9 @@ export const start = (connector) => {
   })
 }
 
+/**
+ * Notifies the sync manager utility to wake up and start syncing..
+ */
 export const poke = () => {
   if (!flag.lockdown) {
     flag.WQ = true
@@ -79,6 +86,10 @@ export const poke = () => {
   }
 }
 
+/**
+ * Check's if the status of the app when a new incoming notification is fired
+ * Starts processing if the 'SQ: false'
+ */
 const check = () => {
   debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`)
   if (!flag.SQ && flag.WQ) {
@@ -100,6 +111,9 @@ const check = () => {
   }
 }
 
+/**
+ * Gets saved token, builds request object and fires the sync process
+ */
 const sync = () => {
   return new Promise((resolve, reject) => {
     return getTokenByType('checkpoint').then((tokenObject) => {
@@ -119,10 +133,17 @@ const sync = () => {
   })
 }
 
+/**
+ * Used to lockdown the 'sync' process in case of exceptions
+ */
 export const lock = () => {
   flag.lockdown = true
 }
 
+/**
+ * Description required
+ * @param {Object} req - Contentstack sync API request object
+ */
 const fire = (req) => {
   debug(`Fire!\n${stringify(req)}`)
   flag.SQ = true
@@ -216,6 +237,11 @@ const fire = (req) => {
   })
 }
 
+/**
+ * Process data once 'sync' data has been fetched
+ * @param {Object} req - Sync API request object
+ * @param {Object} resp - Sync API response object
+ */
 const postProcess = (req, resp) => {
 
   return new Promise((resolve, reject) => {
