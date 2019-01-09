@@ -6,6 +6,10 @@
 
 import { join, resolve } from 'path'
 
+/**
+ * @description Builds application's config paths where data is stored
+ * @returns {Object} Returns config paths
+ */
 export const buildConfigPaths = () => {
   const baseDir = process.cwd()
   const paths = {

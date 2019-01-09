@@ -15,12 +15,23 @@ import { saveToken } from './token-management'
 const debug = Debug('sm:core-q')
 let instance = null
 
+/**
+ * @summary Manages sync utilitiy's item queue
+ * @description
+ *  Handles/processes 'sync' items one at a time, firing 'before' and 'after' hooks
+ */
 export class Q extends EventEmitter {
   private inProgress: boolean
   private pluginInstances: any
   private connectorInstance: any
   private q: any
 
+  /**
+   * 'Q's constructor
+   * @param {Object} connector - Content connector instance
+   * @param {Object} config - Application config
+   * @returns {Object} Returns 'Q's instance
+   */
   constructor(connector, config) {
     if (!instance && connector && config) {
       super()
@@ -37,17 +48,25 @@ export class Q extends EventEmitter {
     return instance
   }
 
+  /**
+   * @description Enter item into 'Q's queue
+   * @param {Object} data - Formatted item from 'sync api's response
+   */
   public push(data) {
     this.q.push(data)
     debug(`Content type '${data.content_type_uid}' received for '${data.action}'`)
     this.next()
   }
 
+  /**
+   * @description Handles errors in 'Q'
+   * @param {Object} obj - Errorred item
+   */
   public errorHandler(obj) {
     debug(`Error handler called with ${stringify(obj)}`)
     if (obj.data.checkpoint) {
-      return saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
-        return saveFailedItems(obj).then(this.next).catch((error) => {
+      saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
+        saveFailedItems(obj).then(this.next).catch((error) => {
           debug(`Save failed items failed after saving token!\n${stringify(error)}`)
           // fatal error
           this.next()
@@ -59,13 +78,16 @@ export class Q extends EventEmitter {
       })
     }
 
-    return saveFailedItems(obj).then(this.next).catch((error) => {
+    saveFailedItems(obj).then(this.next).catch((error) => {
       debug(`Save failed items failed!\n${stringify(error)}`)
       // fatal error
       this.next()
     })
   }
 
+  /**
+   * @description Calls next item in the queue
+   */
   private next() {
     debug(`Calling 'next'. In progress status is ${this.inProgress} and Q length is ${this.q.length}`)
     if (!this.inProgress && this.q.length) {
@@ -85,6 +107,10 @@ export class Q extends EventEmitter {
     }
   }
 
+  /**
+   * @description Passes and calls the appropriate methods and hooks for item execution
+   * @param {Object} data - Current processing item
+   */
   private process(data) {
     debug(`Process called on '${data.action}'`)
     switch (data.action) {
@@ -103,6 +129,14 @@ export class Q extends EventEmitter {
     }
   }
 
+  /**
+   * @description Execute and manager current processing item. Calling 'before' and 'after' hooks appropriately
+   * @param {Object} data - Current processing item
+   * @param {String} action - Action to be performed on the item (publish | unpublish | delete)
+   * @param {String} beforeAction - Name of the hook to execute before the action is performed
+   * @param {String} afterAction - Name of the hook to execute after the action has been performed
+   * @returns {Promise} Returns promise
+   */
   private exec(data, action, beforeAction, afterAction) {
     try {
       debug(`Exec called. Action is ${action}`)
@@ -130,8 +164,10 @@ export class Q extends EventEmitter {
         this.inProgress = false
         this.emit('next', data)
       }).catch((error) => {
-        // do something on publish error
-        throw error
+        this.emit('error', {
+          data,
+          error,
+        })
       })
     } catch (error) {
       this.emit('error', {

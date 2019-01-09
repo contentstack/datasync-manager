@@ -13,7 +13,7 @@ let MAX_RETRY_LIMIT = 5
 let Contentstack
 
 /**
- * Initialize sync utilities API requests
+ * @description Initialize sync utilities API requests
  * @param {Object} contentstack - Contentstack configuration details
  */
 export const init = (contentstack) => {
@@ -31,7 +31,7 @@ export const init = (contentstack) => {
 }
 
 /**
- * Validate API request object
+ * @description Validate API request object
  * @param {Object} req - Request object to be validated
  */
 const validate = (req) => {
@@ -43,7 +43,7 @@ const validate = (req) => {
 }
 
 /**
- * Normalize API request object
+ * @description Normalize API request object
  * @param {Object} req - Request object to be normalized
  */
 const normalize = (req) => {
@@ -57,7 +57,7 @@ const normalize = (req) => {
 }
 
 /**
- * Make API requests to Contentstack
+ * @description Make API requests to Contentstack
  * @param {Object} req - API request object
  * @param {Number} RETRY - API request retry counter
  */

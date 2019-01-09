@@ -4,6 +4,10 @@
 * MIT Licensed
 */
 
+/**
+ * @description Wrapper around JS's 'JSON.stringify' to safely stringify contents
+ * @param {Any} data - Data that's to be stringified
+ */
 export const stringify = (input) => {
   if (typeof input === 'object') {
     if (input.message) {
