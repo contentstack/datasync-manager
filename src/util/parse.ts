@@ -4,12 +4,18 @@
 * MIT Licensed
 */
 
+/**
+ * @description Wrapper around JS's 'JSON.parse' to safely parse contents
+ * @param {Any} data - Data that's to be parsed
+ */
 export const parse = (data) => {
   try {
+    if (typeof data === 'object') {
+      return data
+    }
+
     return JSON.parse(data)
   } catch (error) {
-    // data could not be parsed
-    // corrupted data?
     return data
   }
 }

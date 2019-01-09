@@ -14,6 +14,11 @@ const pluginMethods = ['beforePublish', 'beforeUnpublish', 'afterPublish', 'afte
   'afterDelete',
 ]
 
+/**
+ * @description Load registered plugins
+ * @param {Object} config - Application config
+ * @returns {Object} pluginInstance - An instance of plugins, with valid registered methods
+ */
 export const load = (config) => {
   debug('Plugins load called')
   const pluginInstances = {}

@@ -5,7 +5,7 @@
 */
 
 /**
- * Default application's internal config
+ * @description Default application's internal config
  */
 export const config = {
   'contentstack': {

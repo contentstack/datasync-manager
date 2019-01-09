@@ -13,6 +13,12 @@ const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
 const assetType = 'sys_assets'
 
+/**
+ * @description Utility that filters items based on 'locale'.
+ * @param {Object} response - SYNC API's response
+ * @param {Object} config - Application config
+ * @returns {Promise} Returns a promise
+ */
 export const filterItems = async (response, config) => {
   return new Promise((resolve, reject) => {
     try {
@@ -45,6 +51,11 @@ export const filterItems = async (response, config) => {
   })
 }
 
+/**
+ * @description Groups items based on their content type
+ * @param {Array} items - An array of SYNC API's item
+ * @returns {Object} Returns an 'object' who's keys are content type uids
+ */
 export const groupItems = (items) => {
   const bucket = {}
   items.forEach((item) => {
@@ -61,6 +72,11 @@ export const groupItems = (items) => {
   return bucket
 }
 
+/**
+ * @description Formats SYNC API's items into defined standard
+ * @param {Array} items - SYNC API's items
+ * @param {Object} config - Application config
+ */
 export const formatItems = (items, config) => {
   const deletedContentTypes = []
   items.forEach((item) => {
@@ -120,6 +136,11 @@ export const formatItems = (items, config) => {
   items.concat(deletedContentTypes)
 }
 
+/**
+ * @description Add's checkpoint data on the last item found on the 'SYNC API items' collection
+ * @param {Object} groupedItems - Grouped items { groupItems(items) - see above } referred by their content type
+ * @param {Object} syncResponse - SYNC API's response
+ */
 export const markCheckpoint = (groupedItems, syncResponse) => {
   const tokenName = (syncResponse.pagination_token) ? 'pagination_token' : 'sync_token'
   const tokenValue = syncResponse[tokenName]
@@ -131,8 +152,6 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
       name: tokenName,
       token: tokenValue,
     }
-
-    return
   } else if (contentTypeUids.length === 1 && contentTypeUids[0] === '_content_types') {
     const items = groupedItems[contentTypeUids[0]]
     // find the last item, add checkpoint to it
@@ -140,8 +159,6 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
       name: tokenName,
       token: tokenValue,
     }
-
-    return
   } else if (contentTypeUids.length === 2 && (contentTypeUids.indexOf('_assets') !== -1 && contentTypeUids.indexOf(
       '_content_types'))) {
         const items = groupedItems[contentTypeUids[1]]
@@ -150,16 +167,12 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
           name: tokenName,
           token: tokenValue,
         }
-
-        return
+  } else {
+    const lastContentTypeUid = contentTypeUids[contentTypeUids.length - 1]
+    const entries = groupedItems[lastContentTypeUid]
+    entries[entries.length - 1].checkpoint = {
+      name: tokenName,
+      token: tokenValue,
+    }
   }
-
-  const lastContentTypeUid = contentTypeUids[contentTypeUids.length - 1]
-  const entries = groupedItems[lastContentTypeUid]
-  entries[entries.length - 1].checkpoint = {
-    name: tokenName,
-    token: tokenValue,
-  }
-
-  return
 }

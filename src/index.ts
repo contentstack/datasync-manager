@@ -10,6 +10,7 @@ import { init } from './core'
 import { poke } from './core/sync'
 import { config as internalConfig } from './defaults'
 import { buildConfigPaths } from './util/build-paths'
+import { createLogger } from './util/logger'
 
 import {
   validateAssetConnector,
@@ -55,7 +56,7 @@ export const setListener = (instance) => {
 }
 
 /**
- * Set the application's config
+ * @description Set the application's config
  * @param {Object} config - Application config
  */
 export const setConfig = (config) => {
@@ -65,7 +66,7 @@ export const setConfig = (config) => {
 }
 
 /**
- * Returns the application's configuration
+ * @description Returns the application's configuration
  * @returns {Object} - Application config
  */
 export const getConfig = () => {
@@ -73,7 +74,18 @@ export const getConfig = () => {
 }
 
 /**
- * Starts the sync manager utility
+ * @description Set custom logger for logging
+ * @param {Object} instance - Custom logger instance
+ */
+export const setCustomLogger = (instance) => {
+  createLogger(instance)
+}
+
+/**
+ * @summary Starts the sync manager utility
+ * @description
+ *  Registers, validates asset, content connectors and listener instances.
+ *  Once done, builds the app's config and logger
  * @param {Object} config - Optional application config.
  */
 export const start = (config = {}) => {
@@ -83,6 +95,8 @@ export const start = (config = {}) => {
       appConfig = merge(internalConfig, appConfig, config)
       validateConfig(appConfig)
       appConfig.paths = buildConfigPaths()
+      // since logger is singleton, if previously set, it'll return that isnstance!
+      createLogger()
       debug('App validations passed.')
 
       return assetConnector.start(appConfig).then((assetInstance) => {

@@ -9,7 +9,7 @@ import { Q } from './q'
 import { start } from './sync'
 
 /**
- * Core's primary. This is where it starts..
+ * @description Core's primary. This is where it starts..
  * @param {Object} connector - Content connector instance
  * @param {Object} config - Application config
  */
