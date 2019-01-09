@@ -8,4 +8,5 @@ export declare const validateInstances: (assetConnector: any, contentConnector: 
 export declare const validateContentConnector: (instance: any) => void;
 export declare const validateAssetConnector: (instance: any) => void;
 export declare const validateListener: (instance: any) => void;
+export declare const validateLogger: (instance: any) => boolean;
 //# sourceMappingURL=validations.d.ts.map

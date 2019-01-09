@@ -56,7 +56,6 @@ exports.get = (req, RETRY = 1) => {
             let timeDelay;
             return request_1.default(req, (error, response, body) => {
                 if (error) {
-                    console.error(error);
                     return reject(error);
                 }
                 debug(`API response received. \nStatus code: ${response.statusCode}.`);

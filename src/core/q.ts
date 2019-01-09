@@ -7,6 +7,7 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { saveFailedItems } from '../util/log/failedItems'
+import { logger } from '../util/logger'
 import { parse } from '../util/parse'
 import { stringify } from '../util/stringify'
 import { load } from './plugins'
@@ -63,6 +64,7 @@ export class Q extends EventEmitter {
    * @param {Object} obj - Errorred item
    */
   public errorHandler(obj) {
+    logger.error(obj)
     debug(`Error handler called with ${stringify(obj)}`)
     if (obj.data.checkpoint) {
       saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
@@ -72,15 +74,15 @@ export class Q extends EventEmitter {
           this.next()
         })
       }).catch((error) => {
-        debug(`Save token failed!\n${stringify(error)}`)
-        // error saving token
+        logger.error('Errorred while saving token')
+        logger.error(error)
         this.next()
       })
     }
 
     saveFailedItems(obj).then(this.next).catch((error) => {
-      debug(`Save failed items failed!\n${stringify(error)}`)
-      // fatal error
+      logger.error('Errorred while saving failed items')
+      logger.error(error)
       this.next()
     })
   }
@@ -93,13 +95,12 @@ export class Q extends EventEmitter {
     if (!this.inProgress && this.q.length) {
       this.inProgress = true
       const item = this.q.shift()
-      // debug(`Sending ${stringify(item)} for processing`)
       if (item.checkpoint) {
         saveToken(item.checkpoint.name, item.checkpoint.token, 'checkpoint').then(() => {
           this.process(item)
         }).catch((error) => {
-          debug(`Save token failed to save a checkpoint!\n${stringify(error)}`)
-          // error saving token
+          logger.error('Save token failed to save a checkpoint!')
+          logger.error(error)
           this.process(item)
         })
       }
@@ -112,7 +113,7 @@ export class Q extends EventEmitter {
    * @param {Object} data - Current processing item
    */
   private process(data) {
-    debug(`Process called on '${data.action}'`)
+    logger.log(`Processing item\n${JSON.stringify(data, null, 2)}`)
     switch (data.action) {
     case 'publish':
       this.exec(data, data.action, 'beforePublish', 'afterPublish')

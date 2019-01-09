@@ -10,7 +10,7 @@ import { init } from './core'
 import { poke } from './core/sync'
 import { config as internalConfig } from './defaults'
 import { buildConfigPaths } from './util/build-paths'
-import { createLogger } from './util/logger'
+import { createLogger, logger } from './util/logger'
 
 import {
   validateAssetConnector,
@@ -115,7 +115,9 @@ export const start = (config = {}) => {
 
         return listener.start(appConfig)
       }).then(() => {
-        return resolve({status: 'App started successfully!'})
+        logger.info('Contentstack sync utility started successfully!')
+
+        return resolve()
       }).catch(reject)
     } catch (error) {
       return reject(error)

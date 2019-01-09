@@ -32,14 +32,6 @@ exports.writeFile = (filePath, data) => {
             });
         }
         catch (writeFileError) {
-            if (writeFileError.code === 'ENOENT') {
-                return mkdirp_1.default(path_1.dirname(filePath), (createDirError) => {
-                    if (createDirError) {
-                        return reject(createDirError);
-                    }
-                    return exports.writeFile(data, filePath).then(resolve).catch(reject);
-                });
-            }
             return reject(writeFileError);
         }
     });
@@ -53,7 +45,7 @@ exports.readFile = (filePath) => {
                     return reject(error);
                 }
                 else if (stats.isFile) {
-                    return fs_1.readFile(filePath, (rfError, data) => {
+                    return fs_1.readFile(filePath, { encoding: 'utf-8' }, (rfError, data) => {
                         if (rfError) {
                             return reject(rfError);
                         }
@@ -73,7 +65,7 @@ exports.readFile = (filePath) => {
 exports.readFileSync = (filePath) => {
     debug(`Read file sync called on ${filePath}`);
     if (fs_1.existsSync(filePath)) {
-        return fs_1.readFileSync(filePath);
+        return fs_1.readFileSync(filePath, { encoding: 'utf-8' });
     }
     const err = new Error(`Invalid 'read' operation on file. Expected ${filePath} to be of type 'file'!`);
     err.code = 'IOORFS';

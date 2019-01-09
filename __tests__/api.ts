@@ -2,6 +2,7 @@ import { cloneDeep, merge } from 'lodash'
 import nock from 'nock'
 import { get, init } from '../src/api'
 import { config as internalConfig } from '../src/defaults'
+import { createLogger } from '../src/util/logger'
 import { response as publishResponse } from './dummy/api-responses/publish'
 import { config } from './dummy/config'
 
@@ -43,6 +44,10 @@ beforeEach(() => {
 })
 
 describe('test api - get()', () => {
+  beforeAll(() => {
+    createLogger()
+  })
+
   test('status 200: without errors', () => {
     const request = {
       headers: {

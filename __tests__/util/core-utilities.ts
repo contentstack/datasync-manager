@@ -3,14 +3,19 @@ import { setConfig } from '../../src'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { filterItems, formatItems } from '../../src/util/core-utilities'
+import { createLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
 import { response } from '../dummy/filter-items'
 
 const formattedAssetType = '_assets'
 const conf: any = cloneDeep(merge({}, internalConfig, config))
-conf.paths = buildConfigPaths()
 
 describe('core-utilities', () => {
+  beforeAll(() => {
+    createLogger()
+    conf.paths = buildConfigPaths()
+  })
+
   describe('format items', () => {
     test('asset publish should work without errors', () => {
       const items = [

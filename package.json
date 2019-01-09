@@ -38,7 +38,7 @@
     "prepare": "npm run compile",
     "start": "dist",
     "tslint": "npx tslint -c tslint.json 'src/**/*.ts' --fix",
-    "test": "rm -rf .tokens logs && jest --colors --coverage --verbose"
+    "test": "rm -rf .tokens logs && PLUGIN_PATH=./__tests__/dummy jest --colors --coverage --verbose"
   },
   "engines": {
     "node": ">=6"

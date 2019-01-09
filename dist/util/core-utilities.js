@@ -130,7 +130,6 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
             name: tokenName,
             token: tokenValue,
         };
-        return;
     }
     else if (contentTypeUids.length === 1 && contentTypeUids[0] === '_content_types') {
         const items = groupedItems[contentTypeUids[0]];
@@ -138,7 +137,6 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
             name: tokenName,
             token: tokenValue,
         };
-        return;
     }
     else if (contentTypeUids.length === 2 && (contentTypeUids.indexOf('_assets') !== -1 && contentTypeUids.indexOf('_content_types'))) {
         const items = groupedItems[contentTypeUids[1]];
@@ -146,14 +144,14 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
             name: tokenName,
             token: tokenValue,
         };
-        return;
     }
-    const lastContentTypeUid = contentTypeUids[contentTypeUids.length - 1];
-    const entries = groupedItems[lastContentTypeUid];
-    entries[entries.length - 1].checkpoint = {
-        name: tokenName,
-        token: tokenValue,
-    };
-    return;
+    else {
+        const lastContentTypeUid = contentTypeUids[contentTypeUids.length - 1];
+        const entries = groupedItems[lastContentTypeUid];
+        entries[entries.length - 1].checkpoint = {
+            name: tokenName,
+            token: tokenValue,
+        };
+    }
 };
 //# sourceMappingURL=core-utilities.js.map
