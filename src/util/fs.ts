@@ -59,7 +59,7 @@ export const readFile = (filePath) => {
         if (error) {
           return reject(error)
         } else if (stats.isFile) {
-          return rf(filePath, (rfError, data) => {
+          return rf(filePath, { encoding: 'utf-8' }, (rfError, data) => {
             if (rfError) {
               return reject(rfError)
             }
@@ -86,7 +86,7 @@ export const readFile = (filePath) => {
 export const readFileSync = (filePath) => {
   debug(`Read file sync called on ${filePath}`)
   if (existsSync(filePath)) {
-    return rFS(filePath)
+    return rFS(filePath, {encoding: 'utf-8'})
   }
   const err: any = new Error(`Invalid 'read' operation on file. Expected ${filePath} to be of type 'file'!`)
   err.code = 'IOORFS'

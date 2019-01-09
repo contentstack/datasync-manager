@@ -5,10 +5,12 @@
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+const logger_1 = require("../util/logger");
 const sync_1 = require("./sync");
-const handleExit = () => {
+const handleExit = (signal) => {
     sync_1.lock();
     const killDuration = (process.env.KILLDURATION) ? softKill() : 15000;
+    logger_1.logger.info(`Received ${signal}. This will shut down the process in ${killDuration}ms..`);
     setInterval(abort, killDuration);
 };
 const softKill = () => {

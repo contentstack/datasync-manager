@@ -14,6 +14,7 @@ const core_1 = require("./core");
 const sync_1 = require("./core/sync");
 const defaults_1 = require("./defaults");
 const build_paths_1 = require("./util/build-paths");
+const logger_1 = require("./util/logger");
 const validations_1 = require("./util/validations");
 const debug = debug_1.default('registration');
 let appConfig = {};
@@ -41,6 +42,9 @@ exports.setConfig = (config) => {
 exports.getConfig = () => {
     return appConfig;
 };
+exports.setCustomLogger = (instance) => {
+    logger_1.createLogger(instance);
+};
 exports.start = (config = {}) => {
     return new Promise((resolve, reject) => {
         try {
@@ -48,22 +52,23 @@ exports.start = (config = {}) => {
             appConfig = lodash_1.merge(defaults_1.config, appConfig, config);
             validations_1.validateConfig(appConfig);
             appConfig.paths = build_paths_1.buildConfigPaths();
+            logger_1.createLogger();
             debug('App validations passed.');
             return assetConnector.start(appConfig).then((assetInstance) => {
-                debug(`Asset connector instance ${assetInstance}`);
+                debug(`Asset connector instance ${JSON.stringify(assetInstance)} returned successfully!`);
                 validations_1.validateAssetConnector(assetInstance);
-                debug('Asset connector initiated successfully');
                 return contentConnector.start(appConfig, assetInstance);
             }).then((connectorInstance) => {
+                debug(`Content connector instance ${JSON.stringify(connectorInstance)} returned successfully!`);
                 validations_1.validateContentConnector(connectorInstance);
-                debug('Content connector initiated successfully');
                 return core_1.init(connectorInstance, appConfig);
             }).then(() => {
                 debug('Sync Manager initiated successfully!');
                 listener.register(sync_1.poke);
                 return listener.start(appConfig);
             }).then(() => {
-                return resolve({ status: 'App started successfully!' });
+                logger_1.logger.info('Contentstack sync utility started successfully!');
+                return resolve();
             }).catch(reject);
         }
         catch (error) {

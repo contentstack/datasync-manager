@@ -15,21 +15,17 @@ export const response = {
       type: 'entry_published',
     },
     {
-      content_type_uid: 'sys_assets',
+      content_type_uid: 'authors',
       data: {
-        publish_details: {
-          locale: 'es-es',
-          time: '2019-01-02T13:42:58.721Z',
-        },
-        title: 'medium.png',
-        uid: 'blt2a94dd7005d1229c',
+        locale: 'es-es',
+        uid: 'blt1e5bcf16685e2505',
       },
-      event_at: '2019-01-04T20:37:11.052Z',
-      type: 'asset_published',
+      event_at: '2019-01-07T13:42:00.625Z',
+      type: 'entry_unpublished',
     },
   ],
   limit: 100,
-  pagination_token: 'publish-token',
   skip: 0,
+  sync_token: 'entries-token',
   total_count: 2,
 }

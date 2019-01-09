@@ -12,7 +12,7 @@ export declare class Q extends EventEmitter {
     private q;
     constructor(connector: any, config: any);
     push(data: any): void;
-    errorHandler(obj: any): Promise<void>;
+    errorHandler(obj: any): void;
     private next;
     private process;
     private exec;

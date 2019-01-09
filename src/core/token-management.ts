@@ -42,7 +42,6 @@ export const getTokenByType = (type) => {
     try {
       const config = getConfig()
       const path = config.paths.token.ledger
-      // let token
       if (!existsSync(path)) {
         debug(`Token details do not exist! ${path} not found`)
         const err: any = new Error(`Token path ${path} does not exist`)
@@ -55,6 +54,7 @@ export const getTokenByType = (type) => {
       return readFile(path).then((data) => {
         const ledger: ITokenLedger[] = (parse(data) as any)
         const token: any = find(ledger, (tokenItem) => {
+
           return tokenItem.type === type
         })
         if (typeof token !== 'undefined') {
@@ -115,7 +115,6 @@ export const saveToken = (name, token, type) => {
           .catch(reject)
       }).catch(reject)
     }).catch((error) => {
-      // do something if token cannot be saved
       return reject(error)
     })
   })

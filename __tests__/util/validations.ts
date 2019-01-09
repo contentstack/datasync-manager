@@ -1,6 +1,8 @@
 import { cloneDeep, merge } from 'lodash'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
+import { createLogger } from '../../src/util/logger'
+
 import {
   validateAssetConnector,
   validateConfig,
@@ -12,6 +14,9 @@ import { config } from '../dummy/config'
 import { assetConnector, contentConnector, listener } from '../dummy/connector-listener-instances'
 
 describe('validations', () => {
+  beforeAll(() => {
+    createLogger()
+  })
   describe('validate config for errors', () => {
     test('contentstack config key is undefined', () => {
       const configs: any = cloneDeep(merge({}, internalConfig, config))
