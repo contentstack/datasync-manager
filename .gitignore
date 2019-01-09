@@ -8,7 +8,7 @@
 node_modules
 
 # Coverage directories
-# coverage
+coverage
 
 # Data logs
 logs
