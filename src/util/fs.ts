@@ -14,6 +14,12 @@ import { stringify } from './stringify'
 export { existsSync }
 const debug = Debug('sm:util-fs')
 
+/**
+ * @description A wrapper around nodejs fs module's 'writeFile()'
+ * @param {String} filePath - Path where the data is to be written
+ * @param {Object} data - Data that's to be written
+ * @returns {Promise} Returns a promise
+ */
 export const writeFile = (filePath, data) => {
   debug(`Write file called on ${filePath}`)
 
@@ -39,6 +45,11 @@ export const writeFile = (filePath, data) => {
   })
 }
 
+/**
+ * @description A wrapper around nodejs fs module's 'readFile()'
+ * @param {String} filePath - Path from where data is to be read
+ * @returns {Promise} Returns a promise
+ */
 export const readFile = (filePath) => {
   debug(`Read file called on ${filePath}`)
 
@@ -67,6 +78,11 @@ export const readFile = (filePath) => {
   })
 }
 
+/**
+ * @description A wrapper around nodejs fs module's 'readFileSync()'
+ * @param filePath - Path from where data is to be read
+ * @returns {String} Returns the data that's been read
+ */
 export const readFileSync = (filePath) => {
   debug(`Read file sync called on ${filePath}`)
   if (existsSync(filePath)) {
@@ -77,6 +93,11 @@ export const readFileSync = (filePath) => {
   throw err
 }
 
+/**
+ * @description Safely creats a directory at the specified 'path'
+ * @param filePath - Path from where directory is to be created
+ * @returns {String} Returns a promise
+ */
 export const mkdir = (path) => {
   debug(`mkdir called on ${path}`)
 

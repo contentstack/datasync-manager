@@ -36,7 +36,7 @@ let Contentstack
 let Q
 
 /**
- * Start sync utility
+ * @description Start sync utility
  * @param {Object} QInstance - Instance of 'Q' class
  */
 export const start = (QInstance) => {
@@ -77,7 +77,7 @@ export const start = (QInstance) => {
 }
 
 /**
- * Notifies the sync manager utility to wake up and start syncing..
+ * @description Notifies the sync manager utility to wake up and start syncing..
  */
 export const poke = () => {
   if (!flag.lockdown) {
@@ -87,8 +87,8 @@ export const poke = () => {
 }
 
 /**
- * Check's if the status of the app when a new incoming notification is fired
- * Starts processing if the 'SQ: false'
+ * @description Check's if the status of the app when a new incoming notification is fired
+ * @description Starts processing if the 'SQ: false'
  */
 const check = () => {
   debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`)
@@ -112,7 +112,7 @@ const check = () => {
 }
 
 /**
- * Gets saved token, builds request object and fires the sync process
+ * @description Gets saved token, builds request object and fires the sync process
  */
 const sync = () => {
   return new Promise((resolve, reject) => {
@@ -134,14 +134,14 @@ const sync = () => {
 }
 
 /**
- * Used to lockdown the 'sync' process in case of exceptions
+ * @description Used to lockdown the 'sync' process in case of exceptions
  */
 export const lock = () => {
   flag.lockdown = true
 }
 
 /**
- * Description required
+ * @description Description required
  * @param {Object} req - Contentstack sync API request object
  */
 const fire = (req) => {
@@ -205,7 +205,7 @@ const fire = (req) => {
 
                 return mapReject(err)
               }).catch((error) => {
-                throw error
+                return mapReject(error)
               })
             })
           }, 2).then(() => {
@@ -220,7 +220,7 @@ const fire = (req) => {
             return reject(error)
           })
         }).catch((processError) => {
-          throw processError
+          return reject(processError)
         })
       }
 
@@ -238,7 +238,7 @@ const fire = (req) => {
 }
 
 /**
- * Process data once 'sync' data has been fetched
+ * @description Process data once 'sync' data has been fetched
  * @param {Object} req - Sync API request object
  * @param {Object} resp - Sync API response object
  */

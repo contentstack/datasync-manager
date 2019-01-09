@@ -13,6 +13,9 @@ import { stringify } from '../util/stringify'
 
 const debug = Debug('sm:token-management')
 
+/**
+ * @interface ledger interface
+ */
 interface ITokenLedger {
   name: string
   type: string
@@ -20,13 +23,16 @@ interface ITokenLedger {
   token: string
 }
 
+/**
+ * @interface token interface
+ */
 interface IToken {
   name: string
   token: string
 }
 
 /**
- * Returns 'token details' based on 'token type'
+ * @description Returns 'token details' based on 'token type'
  * @param {String} type - Token type (checkpoint | current)
  */
 export const getTokenByType = (type) => {
@@ -65,7 +71,7 @@ export const getTokenByType = (type) => {
 }
 
 /**
- * Saves token details
+ * @description Saves token details
  * @param {String} name - Name of the token
  * @param {String} token - Token value
  * @param {String} type - Token type
@@ -97,10 +103,7 @@ export const saveToken = (name, token, type) => {
       if (!existsSync(config.paths.token.ledger)) {
         return writeFile(config.paths.token.ledger, stringify([obj]))
         .then(resolve)
-        .catch((error) => {
-          // unable to update token ledger
-          throw error
-        })
+        .catch(reject)
       }
 
       return readFile(config.paths.token.ledger).then((ledger) => {
@@ -109,14 +112,8 @@ export const saveToken = (name, token, type) => {
 
         return writeFile(config.paths.token.ledger, stringify(ledgerDetails))
           .then(resolve)
-          .catch((error) => {
-            // unable to update token ledger
-            throw error
-          })
-      }).catch((error) => {
-        // unable to read token ledger
-        throw error
-      })
+          .catch(reject)
+      }).catch(reject)
     }).catch((error) => {
       // do something if token cannot be saved
       return reject(error)

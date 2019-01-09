@@ -6,15 +6,15 @@
 
 import { hasIn } from 'lodash'
 
-const mandatoryCCMethods = ['publish', 'unpublish', 'delete', 'find', 'findOne']
-const mandatoryACMethods = ['delete', 'download', 'unpublish']
-const mandatoryListenerMethods = ['register', 'start']
-const mandatoryConfigKeys = ['listener', 'asset-connector', 'content-connector', 'sync-manager', 'contentstack',
-  'locales',
-]
-
+/**
+ * @description Check's if the application's config is enough to start the app without errors
+ * @param {Object} config - Application config
+ */
 export const validateConfig = (config) => {
-  mandatoryConfigKeys.forEach((key) => {
+  const keys = ['listener', 'asset-connector', 'content-connector', 'sync-manager', 'contentstack',
+    'locales',
+  ]
+  keys.forEach((key) => {
     if (config[key] === undefined) {
       throw new Error(`Config '${key}' key cannot be undefined`)
     }
@@ -27,6 +27,12 @@ export const validateConfig = (config) => {
   }
 }
 
+/**
+ * @description Validates registered instances
+ * @param {Object} assetConnector - Asset connector instance
+ * @param {Object} contentConnector - Content connector instance
+ * @param {Object} listener - Listener instance
+ */
 export const validateInstances = (assetConnector, contentConnector, listener) => {
   if (typeof assetConnector === 'undefined') {
     throw new Error('Call \'setAssetConnector()\' before calling sync-manager start!')
@@ -39,26 +45,61 @@ export const validateInstances = (assetConnector, contentConnector, listener) =>
   }
 }
 
+/**
+ * @description Validates if the registered content connector supports required methods
+ * @param {Object} instance - Content connector instance
+ */
 export const validateContentConnector = (instance) => {
-  mandatoryCCMethods.forEach((methodName) => {
-    if (!(hasIn(instance, methodName))) {
-      throw new Error(`${instance} content connector does not support '${methodName}()'`)
+  const fns = ['start', 'publish', 'unpublish', 'delete', 'find', 'findOne']
+  fns.forEach((fn) => {
+    if (!(hasIn(instance, fn))) {
+      throw new Error(`${instance} content connector does not support '${fn}()'`)
     }
   })
 }
 
+/**
+ * @description Validates if the registered asset connector supports required methods
+ * @param {Object} instance - Asset connector instance
+ */
 export const validateAssetConnector = (instance) => {
-  mandatoryACMethods.forEach((methodName) => {
-    if (!(hasIn(instance, methodName))) {
-      throw new Error(`${instance} asset connector does not support '${methodName}()'`)
+  const fns = ['start', 'delete', 'download', 'unpublish']
+  fns.forEach((fn) => {
+    if (!(hasIn(instance, fn))) {
+      throw new Error(`${instance} asset connector does not support '${fn}()'`)
     }
   })
 }
 
+/**
+ * @description Validates if the registered listener supports required methods
+ * @param {Object} instance - Listener instance
+ */
 export const validateListener = (instance) => {
-  mandatoryListenerMethods.forEach((methodName) => {
-    if (!(hasIn(instance, methodName))) {
-      throw new Error(`${instance} listener does not support '${methodName}()'`)
+  const fns = ['register', 'start']
+  fns.forEach((fn) => {
+    if (!(hasIn(instance, fn))) {
+      throw new Error(`${instance} listener does not support '${fn}()'`)
     }
   })
+}
+
+/**
+ * @description Validates if the custom logger set supports required methods
+ * @param {Object} instance - Custom logger instance
+ */
+export const validateLogger = (instance) => {
+  let flag = false
+  if (!instance) {
+    return flag
+  }
+  const requiredFn = ['info', 'warn', 'log', 'error', 'debug']
+  requiredFn.forEach((name) => {
+    if (typeof instance[name] !== 'function') {
+      console.warn(`Unable to register custom logger since '${name}()' does not exist on ${instance}!`)
+      flag = true
+    }
+  })
+
+  return !flag
 }
