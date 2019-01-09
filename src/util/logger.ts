@@ -1,4 +1,3 @@
-import { Console } from 'console'
 import { validateLogger } from './validations'
 
 /**
@@ -11,7 +10,7 @@ export const createLogger = (customLogger?) => {
   if (logger) {
     return logger
   } else if (!validateLogger(customLogger) && !customLogger) {
-    logger = new Console({stdout: process.stdout, stderr: process.stderr, colorMode: true})
+    logger = console
     logger.info('Standard logger created')
   } else {
     logger = customLogger

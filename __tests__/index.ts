@@ -2,14 +2,20 @@ import { cloneDeep, merge } from 'lodash'
 import nock from 'nock'
 import { setAssetConnector, setConfig, setContentConnector, setListener, start } from '../src'
 import { config as internalConfig } from '../src/defaults'
+import { createLogger } from '../src/util/logger'
 import { contentType as contentTypeSchema } from './dummy/api-responses/content-type'
 import { response as deleteResponse } from './dummy/api-responses/delete'
+import { response as mixedUnpublishResponse } from './dummy/api-responses/entries'
 import { response as publishResponse } from './dummy/api-responses/publish'
-import { response as unpublishResponse } from './dummy/api-responses/unpublish'
+// import { response as unpublishResponse } from './dummy/api-responses/unpublish'
 import { config } from './dummy/config'
 import { assetConnector, contentConnector, listener } from './dummy/connector-listener-instances'
 
 describe('core', () => {
+  beforeAll(() => {
+    createLogger()
+  })
+
   beforeEach(() => {
     nock('https://api.localhost.io', { reqheaders: {
       'accept': 'application/json',
@@ -22,6 +28,7 @@ describe('core', () => {
       .query({sync_token: 'dummySyncToken', environment: 'development', limit: 100})
       .reply(200, publishResponse)
   })
+
   beforeEach(() => {
     nock('https://api.localhost.io', { reqheaders: {
         'accept': 'application/json',
@@ -32,7 +39,7 @@ describe('core', () => {
       }})
         .get('/stacks/sync/unpublish-success')
         .query({sync_token: 'dummySyncToken', environment: 'development', limit: 100})
-        .reply(200, unpublishResponse)
+        .reply(200, mixedUnpublishResponse)
 
   })
 
@@ -96,9 +103,6 @@ describe('core', () => {
   })
 
   test('process mixed data without errors', () => {
-    const result = {
-      status: 'App started successfully!',
-    }
     const configs = cloneDeep(merge({}, config, internalConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
@@ -108,14 +112,13 @@ describe('core', () => {
     setListener(listener)
 
     return start(configs).then((status) => {
-      expect(status).toEqual(result)
+      expect(status).toBeUndefined()
+    }).catch((error) => {
+      expect(error).toBeNull()
     })
   })
 
   test('process publish data without errors', () => {
-    const result = {
-      status: 'App started successfully!',
-    }
     const configs = cloneDeep(merge({}, config, internalConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
@@ -126,16 +129,13 @@ describe('core', () => {
     setListener(listener)
 
     return start(configs).then((status) => {
-      expect(status).toEqual(result)
+      expect(status).toBeUndefined()
     }).catch((error) => {
       console.error(error)
     })
   })
 
   test('process unpublish data without errors', () => {
-    const result = {
-      status: 'App started successfully!',
-    }
     const configs = cloneDeep(merge({}, config, internalConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
@@ -146,17 +146,15 @@ describe('core', () => {
     setListener(listener)
 
     return start(configs).then((status) => {
-      expect(status).toEqual(result)
+      expect(status).toBeUndefined()
     }).catch((error) => {
       console.error(error)
     })
   })
 
   test('process deleted data without errors', () => {
-    const result = {
-      status: 'App started successfully!',
-    }
     const configs = cloneDeep(merge({}, config, internalConfig))
+    delete configs.plugins
     const contentstack: any = configs.contentstack
     contentstack.pagination_token = 'dummyPaginationToken'
     contentstack.cdn = 'https://api.localhost.io'
@@ -165,9 +163,10 @@ describe('core', () => {
     setAssetConnector(assetConnector)
     setListener(listener)
     delete contentstack.sync_token
+    setConfig(configs)
 
-    return start(configs).then((status) => {
-      expect(status).toEqual(result)
+    return start().then((status) => {
+      expect(status).toBeUndefined()
     }).catch((error) => {
       console.error(error)
     })

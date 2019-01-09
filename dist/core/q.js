@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const failedItems_1 = require("../util/log/failedItems");
+const logger_1 = require("../util/logger");
 const parse_1 = require("../util/parse");
 const stringify_1 = require("../util/stringify");
 const plugins_1 = require("./plugins");
@@ -38,20 +39,23 @@ class Q extends events_1.EventEmitter {
         this.next();
     }
     errorHandler(obj) {
+        logger_1.logger.error(obj);
         debug(`Error handler called with ${stringify_1.stringify(obj)}`);
         if (obj.data.checkpoint) {
-            return token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
-                return failedItems_1.saveFailedItems(obj).then(this.next).catch((error) => {
+            token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
+                failedItems_1.saveFailedItems(obj).then(this.next).catch((error) => {
                     debug(`Save failed items failed after saving token!\n${stringify_1.stringify(error)}`);
                     this.next();
                 });
             }).catch((error) => {
-                debug(`Save token failed!\n${stringify_1.stringify(error)}`);
+                logger_1.logger.error('Errorred while saving token');
+                logger_1.logger.error(error);
                 this.next();
             });
         }
-        return failedItems_1.saveFailedItems(obj).then(this.next).catch((error) => {
-            debug(`Save failed items failed!\n${stringify_1.stringify(error)}`);
+        failedItems_1.saveFailedItems(obj).then(this.next).catch((error) => {
+            logger_1.logger.error('Errorred while saving failed items');
+            logger_1.logger.error(error);
             this.next();
         });
     }
@@ -64,7 +68,8 @@ class Q extends events_1.EventEmitter {
                 token_management_1.saveToken(item.checkpoint.name, item.checkpoint.token, 'checkpoint').then(() => {
                     this.process(item);
                 }).catch((error) => {
-                    debug(`Save token failed to save a checkpoint!\n${stringify_1.stringify(error)}`);
+                    logger_1.logger.error('Save token failed to save a checkpoint!');
+                    logger_1.logger.error(error);
                     this.process(item);
                 });
             }
@@ -72,7 +77,7 @@ class Q extends events_1.EventEmitter {
         }
     }
     process(data) {
-        debug(`Process called on '${data.action}'`);
+        logger_1.logger.log(`Processing item\n${JSON.stringify(data, null, 2)}`);
         switch (data.action) {
             case 'publish':
                 this.exec(data, data.action, 'beforePublish', 'afterPublish');
@@ -111,7 +116,10 @@ class Q extends events_1.EventEmitter {
                 this.inProgress = false;
                 this.emit('next', data);
             }).catch((error) => {
-                throw error;
+                this.emit('error', {
+                    data,
+                    error,
+                });
             });
         }
         catch (error) {

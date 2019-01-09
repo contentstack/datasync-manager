@@ -3,12 +3,17 @@ import { join, resolve } from 'path'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { mkdir, readFile, readFileSync, writeFile } from '../../src/util/fs'
+import { createLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
 
 const configs: any = cloneDeep(merge({}, internalConfig, config))
-configs.paths = buildConfigPaths()
 
 describe('fs utility', () => {
+  beforeAll(() => {
+    createLogger()
+    configs.paths = buildConfigPaths()
+  })
+
   test('write file should execute without errors', () => {
     const filePath = resolve(join(__dirname, '..', '..', 'file.json'))
     const data = {

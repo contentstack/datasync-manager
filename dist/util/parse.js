@@ -7,6 +7,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.parse = (data) => {
     try {
+        if (typeof data === 'object') {
+            return data;
+        }
         return JSON.parse(data);
     }
     catch (error) {

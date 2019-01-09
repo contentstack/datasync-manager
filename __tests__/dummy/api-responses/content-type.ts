@@ -2,26 +2,26 @@ export const contentType = {
   content_type: {
     _version: 1,
     schema: [{
+        data_type: 'text',
         display_name: 'Title',
-        uid: 'title',
-        data_type: 'text',
-        field_metadata: {
-          _default: true
-        },
-        unique: true,
-        mandatory: true,
-        multiple: false,
-      },
-      {
-        display_name: 'URL',
-        uid: 'url',
-        data_type: 'text',
         field_metadata: {
           _default: true,
         },
-        unique: false,
-        mandatory: false,
+        mandatory: true,
         multiple: false,
+        uid: 'title',
+        unique: true,
+      },
+      {
+        data_type: 'text',
+        display_name: 'URL',
+        field_metadata: {
+          _default: true,
+        },
+        mandatory: true,
+        multiple: false,
+        uid: 'url',
+        unique: true,
       },
     ],
     title: 'Authors',

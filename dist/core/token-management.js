@@ -9,6 +9,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
+const lodash_1 = require("lodash");
 const __1 = require("..");
 const fs_1 = require("../util/fs");
 const parse_1 = require("../util/parse");
@@ -28,10 +29,11 @@ exports.getTokenByType = (type) => {
             }
             return fs_1.readFile(path).then((data) => {
                 const ledger = parse_1.parse(data);
-                for (let i = 0; i < ledger.length; i++) {
-                    if (ledger[i].type === type) {
-                        return resolve(ledger[i]);
-                    }
+                const token = lodash_1.find(ledger, (tokenItem) => {
+                    return tokenItem.type === type;
+                });
+                if (typeof token !== 'undefined') {
+                    return resolve(token);
                 }
                 debug(`Unable to find any details of ${type} token. Returning the first token we find!`);
                 return resolve(ledger[0]);
@@ -67,21 +69,15 @@ exports.saveToken = (name, token, type) => {
             if (!fs_1.existsSync(config.paths.token.ledger)) {
                 return fs_1.writeFile(config.paths.token.ledger, stringify_1.stringify([obj]))
                     .then(resolve)
-                    .catch((error) => {
-                    throw error;
-                });
+                    .catch(reject);
             }
             return fs_1.readFile(config.paths.token.ledger).then((ledger) => {
                 const ledgerDetails = parse_1.parse(ledger);
                 ledgerDetails.splice(0, 0, obj);
                 return fs_1.writeFile(config.paths.token.ledger, stringify_1.stringify(ledgerDetails))
                     .then(resolve)
-                    .catch((error) => {
-                    throw error;
-                });
-            }).catch((error) => {
-                throw error;
-            });
+                    .catch(reject);
+            }).catch(reject);
         }).catch((error) => {
             return reject(error);
         });

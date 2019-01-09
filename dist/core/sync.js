@@ -15,12 +15,12 @@ const __1 = require("..");
 const api_1 = require("../api");
 const core_utilities_1 = require("../util/core-utilities");
 const fs_1 = require("../util/fs");
+const logger_1 = require("../util/logger");
 const parse_1 = require("../util/parse");
 const promise_map_1 = require("../util/promise.map");
 const stringify_1 = require("../util/stringify");
 const token_management_1 = require("./token-management");
 const debug = debug_1.default('sm:core-sync');
-const DEBUG_ERR = debug_1.default('sm:core-error');
 const emitter = new events_1.EventEmitter();
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
@@ -32,8 +32,8 @@ const flag = {
 let config;
 let Contentstack;
 let Q;
-exports.start = (connector) => {
-    Q = connector;
+exports.start = (QInstance) => {
+    Q = QInstance;
     debug('Sync core:start invoked');
     return new Promise((resolve, reject) => {
         try {
@@ -71,6 +71,7 @@ exports.start = (connector) => {
     });
 };
 exports.poke = () => {
+    logger_1.logger.info('Received \'contentstack sync\' notification');
     if (!flag.lockdown) {
         flag.WQ = true;
         check();
@@ -88,8 +89,7 @@ const check = () => {
                 emitter.emit('check');
             }, config['sync-manager'].cooloff);
         }).catch((error) => {
-            DEBUG_ERR("Errorred in 're-syncing'");
-            DEBUG_ERR(stringify_1.stringify(error));
+            logger_1.logger.error(error);
             return check();
         });
     }
@@ -112,6 +112,7 @@ const sync = () => {
     });
 };
 exports.lock = () => {
+    logger_1.logger.info('Contentstack sync locked..');
     flag.lockdown = true;
 };
 const fire = (req) => {
@@ -150,6 +151,7 @@ const fire = (req) => {
                         return false;
                     });
                     return promise_map_1.map(contentTypeUids, (uid) => {
+                        logger_1.logger.info(`Fetching '${uid}' content type's schema`);
                         return new Promise((mapResolve, mapReject) => {
                             return api_1.get({
                                 uri: `${Contentstack.cdn}${Contentstack.restAPIS.contentTypes}${uid}`,
@@ -167,7 +169,7 @@ const fire = (req) => {
                                 err.code = 'ICTC';
                                 return mapReject(err);
                             }).catch((error) => {
-                                throw error;
+                                return mapReject(error);
                             });
                         });
                     }, 2).then(() => {
@@ -175,20 +177,16 @@ const fire = (req) => {
                             .then(resolve)
                             .catch(reject);
                     }).catch((error) => {
-                        DEBUG_ERR("Errorred while running 'map' for fetching content type schemas");
-                        DEBUG_ERR(stringify_1.stringify(error));
                         return reject(error);
                     });
                 }).catch((processError) => {
-                    throw processError;
+                    return reject(processError);
                 });
             }
             return postProcess(req, syncResponse)
                 .then(resolve)
                 .catch(reject);
         }).catch((error) => {
-            DEBUG_ERR("Errorred while fetching 'sync' data");
-            DEBUG_ERR(stringify_1.stringify(error));
             return reject(error);
         });
     });
@@ -212,8 +210,6 @@ const postProcess = (req, resp) => {
                 .then(resolve)
                 .catch(reject);
         }).catch((error) => {
-            DEBUG_ERR('Errorred in post processing of tokens');
-            DEBUG_ERR(stringify_1.stringify(error));
             return reject(error);
         });
     });

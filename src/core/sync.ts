@@ -11,6 +11,7 @@ import { getConfig } from '..'
 import { get } from '../api'
 import { filterItems, formatItems, groupItems, markCheckpoint } from '../util/core-utilities'
 import { existsSync, readFileSync } from '../util/fs'
+import { logger } from '../util/logger'
 import { parse } from '../util/parse'
 import { map } from '../util/promise.map'
 import { stringify } from '../util/stringify'
@@ -22,7 +23,6 @@ interface IToken {
 }
 
 const debug = Debug('sm:core-sync')
-const DEBUG_ERR = Debug('sm:core-error')
 const emitter = new EventEmitter()
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
@@ -80,6 +80,7 @@ export const start = (QInstance) => {
  * @description Notifies the sync manager utility to wake up and start syncing..
  */
 export const poke = () => {
+  logger.info('Received \'contentstack sync\' notification')
   if (!flag.lockdown) {
     flag.WQ = true
     check()
@@ -103,8 +104,7 @@ const check = () => {
         emitter.emit('check')
       }, config['sync-manager'].cooloff)
     }).catch((error) => {
-      DEBUG_ERR("Errorred in 're-syncing'")
-      DEBUG_ERR(stringify(error))
+      logger.error(error)
 
       return check()
     })
@@ -137,6 +137,7 @@ const sync = () => {
  * @description Used to lockdown the 'sync' process in case of exceptions
  */
 export const lock = () => {
+  logger.info('Contentstack sync locked..')
   flag.lockdown = true
 }
 
@@ -185,6 +186,8 @@ const fire = (req) => {
           })
 
           return map(contentTypeUids, (uid) => {
+            logger.info(`Fetching '${uid}' content type's schema`)
+
             return new Promise((mapResolve, mapReject) => {
               return get({
                 uri: `${Contentstack.cdn}${Contentstack.restAPIS.contentTypes}${uid}`,
@@ -214,8 +217,6 @@ const fire = (req) => {
               .catch(reject)
           }).catch((error) => {
             // Errorred while fetching content type schema
-            DEBUG_ERR("Errorred while running 'map' for fetching content type schemas")
-            DEBUG_ERR(stringify(error))
 
             return reject(error)
           })
@@ -229,8 +230,6 @@ const fire = (req) => {
         .catch(reject)
     }).catch((error) => {
       // do something
-      DEBUG_ERR("Errorred while fetching 'sync' data")
-      DEBUG_ERR(stringify(error))
 
       return reject(error)
     })
@@ -266,8 +265,6 @@ const postProcess = (req, resp) => {
         .catch(reject)
     }).catch((error) => {
       // error saving token
-      DEBUG_ERR('Errorred in post processing of tokens')
-      DEBUG_ERR(stringify(error))
 
       return reject(error)
     })

@@ -6,16 +6,13 @@
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_1 = require("lodash");
-const mandatoryCCMethods = ['publish', 'unpublish', 'delete', 'find', 'findOne'];
-const mandatoryACMethods = ['delete', 'download', 'unpublish'];
-const mandatoryListenerMethods = ['register', 'start'];
-const mandatoryConfigKeys = ['listener', 'asset-connector', 'content-connector', 'sync-manager', 'contentstack',
-    'locales',
-];
 exports.validateConfig = (config) => {
-    mandatoryConfigKeys.forEach((key) => {
+    const keys = ['listener', 'asset-connector', 'content-connector', 'sync-manager', 'contentstack',
+        'locales',
+    ];
+    keys.forEach((key) => {
         if (config[key] === undefined) {
-            throw new Error(`Config ${key} key cannot be undefined`);
+            throw new Error(`Config '${key}' key cannot be undefined`);
         }
     });
     if (!Array.isArray(config.locales) || config.locales.length === 0) {
@@ -40,24 +37,41 @@ exports.validateInstances = (assetConnector, contentConnector, listener) => {
     }
 };
 exports.validateContentConnector = (instance) => {
-    mandatoryCCMethods.forEach((methodName) => {
-        if (!(lodash_1.hasIn(instance, methodName))) {
-            throw new Error(`${instance} content connector does not support ${methodName}`);
+    const fns = ['start', 'publish', 'unpublish', 'delete', 'find', 'findOne'];
+    fns.forEach((fn) => {
+        if (!(lodash_1.hasIn(instance, fn))) {
+            throw new Error(`${instance} content connector does not support '${fn}()'`);
         }
     });
 };
 exports.validateAssetConnector = (instance) => {
-    mandatoryACMethods.forEach((methodName) => {
-        if (!(lodash_1.hasIn(instance, methodName))) {
-            throw new Error(`${instance} asset connector does not support ${methodName}`);
+    const fns = ['start', 'delete', 'download', 'unpublish'];
+    fns.forEach((fn) => {
+        if (!(lodash_1.hasIn(instance, fn))) {
+            throw new Error(`${instance} asset connector does not support '${fn}()'`);
         }
     });
 };
 exports.validateListener = (instance) => {
-    mandatoryListenerMethods.forEach((methodName) => {
-        if (!(lodash_1.hasIn(instance, methodName))) {
-            throw new Error(`${instance} listener does not support ${methodName}`);
+    const fns = ['register', 'start'];
+    fns.forEach((fn) => {
+        if (!(lodash_1.hasIn(instance, fn))) {
+            throw new Error(`${instance} listener does not support '${fn}()'`);
         }
     });
+};
+exports.validateLogger = (instance) => {
+    let flag = false;
+    if (!instance) {
+        return flag;
+    }
+    const requiredFn = ['info', 'warn', 'log', 'error', 'debug'];
+    requiredFn.forEach((name) => {
+        if (typeof instance[name] !== 'function') {
+            console.warn(`Unable to register custom logger since '${name}()' does not exist on ${instance}!`);
+            flag = true;
+        }
+    });
+    return !flag;
 };
 //# sourceMappingURL=validations.js.map
