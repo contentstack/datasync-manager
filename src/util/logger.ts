@@ -1,3 +1,9 @@
+/*!
+* Contentstack Sync Manager
+* Copyright © 2019 Contentstack LLC
+* MIT Licensed
+*/
+
 import { validateLogger } from './validations'
 
 /**

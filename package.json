@@ -31,14 +31,14 @@
     "typescript": "^3.2.2"
   },
   "scripts": {
-    "clean": "rimraf dist typings coverage .tokens logs",
+    "clean": "rimraf dist typings coverage",
     "build-ts": "npm run clean && tsc",
     "watch-ts": "npm run clean && tsc -w",
     "compile": "tsc",
     "prepare": "npm run compile",
     "start": "dist",
     "tslint": "npx tslint -c tslint.json 'src/**/*.ts' --fix",
-    "test": "rm -rf .tokens logs && PLUGIN_PATH=./__tests__/dummy jest --colors --coverage --verbose"
+    "test": "jest --colors --coverage --verbose"
   },
   "engines": {
     "node": ">=6"
