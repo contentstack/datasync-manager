@@ -6,8 +6,6 @@
 
 import { map, remove } from 'lodash'
 import { saveFilteredItems } from './log/filteredItems'
-import { parse } from './parse'
-import { stringify } from './stringify'
 
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
@@ -78,7 +76,6 @@ export const groupItems = (items) => {
  * @param {Object} config - Application config
  */
 export const formatItems = (items, config) => {
-  const deletedContentTypes = []
   items.forEach((item) => {
     switch (item.type) {
       case 'asset_published':
@@ -115,25 +112,14 @@ export const formatItems = (items, config) => {
         item.uid = item.data.uid
         break
       case 'content_type_deleted':
-        const locales = map(config.locales, 'code')
-        locales.forEach((locale) => {
-          const clonedItem = parse(stringify(item))
-          clonedItem.action = config.contentstack.actions.delete
-          clonedItem.locale = locale
-          clonedItem.uid = clonedItem.content_type_uid
-          clonedItem.content_type_uid = formattedContentType
-          deletedContentTypes.push(clonedItem)
-        })
+        item.action = config.contentstack.actions.delete
+        item.uid = item.content_type_uid
+        item.content_type_uid = formattedContentType
         break
       default:
         break
     }
   })
-  // remove deleted content types
-  remove(items, (item: any) => {
-    return item.type === 'content_type_deleted'
-  })
-  items.concat(deletedContentTypes)
 }
 
 /**
