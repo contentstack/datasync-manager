@@ -142,6 +142,15 @@ export const lock = () => {
 }
 
 /**
+ * @description Used to unlock the 'sync' process in case of errors/exceptions
+ */
+export const unlock = () => {
+  logger.info('Contentstack sync unlocked..')
+  flag.lockdown = false
+  check()
+}
+
+/**
  * @description Description required
  * @param {Object} req - Contentstack sync API request object
  */
