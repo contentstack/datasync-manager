@@ -4,4 +4,3 @@
 * MIT Licensed
 */
 export declare const saveFailedItems: (obj: any) => Promise<{}>;
-//# sourceMappingURL=failedItems.d.ts.map

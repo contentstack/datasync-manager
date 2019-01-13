@@ -6,4 +6,4 @@
 export declare const start: (QInstance: any) => Promise<{}>;
 export declare const poke: () => void;
 export declare const lock: () => void;
-//# sourceMappingURL=sync.d.ts.map
+export declare const unlock: () => void;

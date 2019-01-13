@@ -9,7 +9,6 @@ import { existsSync, readFile as rf, readFileSync as rFS, stat } from 'fs'
 import mkdirp from 'mkdirp'
 import { dirname } from 'path'
 import writeFileAtomic from 'write-file-atomic'
-import { stringify } from './stringify'
 
 export { existsSync }
 const debug = Debug('sm:util-fs')
@@ -31,7 +30,7 @@ export const writeFile = (filePath, data) => {
         mkdirp.sync(fileDirectory)
       }
 
-      return writeFileAtomic(filePath, (typeof data === 'object') ? stringify(data) : data, (wfError) => {
+      return writeFileAtomic(filePath, (typeof data === 'object') ? JSON.stringify(data) : data, (wfError) => {
         if (wfError) {
           return reject(wfError)
         }

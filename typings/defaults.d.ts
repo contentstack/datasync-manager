@@ -11,19 +11,15 @@ export declare const config: {
             publish: string;
             unpublish: string;
         };
-        cdn: string;
-        host: string;
-        methods: {
-            delete: string;
-            get: string;
-            patch: string;
-            post: string;
-        };
-        restAPIS: {
-            assets: string;
-            contentTypes: string;
-            entries: string;
+        apis: {
+            content_types: string;
             sync: string;
+        };
+        host: string;
+        port: number;
+        protocol: string;
+        verbs: {
+            get: string;
         };
     };
     'sync-manager': {
@@ -31,4 +27,3 @@ export declare const config: {
         limit: number;
     };
 };
-//# sourceMappingURL=defaults.d.ts.map

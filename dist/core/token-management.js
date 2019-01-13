@@ -12,8 +12,6 @@ const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const __1 = require("..");
 const fs_1 = require("../util/fs");
-const parse_1 = require("../util/parse");
-const stringify_1 = require("../util/stringify");
 const debug = debug_1.default('sm:token-management');
 exports.getTokenByType = (type) => {
     debug(`Get token invoked with type: ${type}`);
@@ -28,7 +26,7 @@ exports.getTokenByType = (type) => {
                 return reject(err);
             }
             return fs_1.readFile(path).then((data) => {
-                const ledger = parse_1.parse(data);
+                const ledger = (JSON.parse(data));
                 const token = lodash_1.find(ledger, (tokenItem) => {
                     return tokenItem.type === type;
                 });
@@ -57,9 +55,10 @@ exports.saveToken = (name, token, type) => {
         }
         const data = {
             name,
+            timestamp: new Date().toISOString(),
             token,
         };
-        return fs_1.writeFile(path, stringify_1.stringify(data)).then(() => {
+        return fs_1.writeFile(path, JSON.stringify(data)).then(() => {
             const obj = {
                 name,
                 timestamp: new Date().toISOString(),
@@ -67,14 +66,14 @@ exports.saveToken = (name, token, type) => {
                 type,
             };
             if (!fs_1.existsSync(config.paths.token.ledger)) {
-                return fs_1.writeFile(config.paths.token.ledger, stringify_1.stringify([obj]))
+                return fs_1.writeFile(config.paths.token.ledger, JSON.stringify([obj]))
                     .then(resolve)
                     .catch(reject);
             }
             return fs_1.readFile(config.paths.token.ledger).then((ledger) => {
-                const ledgerDetails = parse_1.parse(ledger);
+                const ledgerDetails = JSON.parse(ledger);
                 ledgerDetails.splice(0, 0, obj);
-                return fs_1.writeFile(config.paths.token.ledger, stringify_1.stringify(ledgerDetails))
+                return fs_1.writeFile(config.paths.token.ledger, JSON.stringify(ledgerDetails))
                     .then(resolve)
                     .catch(reject);
             }).catch(reject);

@@ -6,15 +6,13 @@
 
 import Debug from 'debug'
 import { EventEmitter } from 'events'
-import { remove } from 'lodash'
+import { cloneDeep, remove } from 'lodash'
 import { getConfig } from '..'
 import { get } from '../api'
 import { filterItems, formatItems, groupItems, markCheckpoint } from '../util/core-utilities'
 import { existsSync, readFileSync } from '../util/fs'
 import { logger } from '../util/logger'
-import { parse } from '../util/parse'
 import { map } from '../util/promise.map'
-import { stringify } from '../util/stringify'
 import { getTokenByType, saveToken } from './token-management'
 
 interface IToken {
@@ -61,7 +59,7 @@ export const start = (QInstance) => {
       } else if (typeof Contentstack.pagination_token === 'string' && Contentstack.pagination_token.length !== 0) {
         request.qs.pagination_token = Contentstack.pagination_token
       } else if (existsSync(paths.token.checkpoint)) {
-        const token = parse(readFileSync(paths.token.checkpoint))
+        const token = JSON.parse(readFileSync(paths.token.checkpoint))
         request.qs[token.name] = token.token
       } else {
         request.qs.init = true
@@ -117,7 +115,7 @@ const check = () => {
 const sync = () => {
   return new Promise((resolve, reject) => {
     return getTokenByType('checkpoint').then((tokenObject) => {
-      const token: IToken = parse(tokenObject)
+      const token: IToken = (tokenObject as IToken)
       const request: any = {
         qs: {
           environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
@@ -155,14 +153,14 @@ export const unlock = () => {
  * @param {Object} req - Contentstack sync API request object
  */
 const fire = (req) => {
-  debug(`Fire!\n${stringify(req)}`)
+  debug(`Fire!\n${JSON.stringify(req)}`)
   flag.SQ = true
 
   return new Promise((resolve, reject) => {
     return get(req).then((response) => {
       delete req.qs.init
       delete req.qs.pagination_token
-      debug(`Fired response\n${stringify(response)}`)
+      debug(`Fired response\n${JSON.stringify(response)}`)
       const syncResponse: any = response
       if (syncResponse.items.length) {
         return filterItems(syncResponse, config).then(() => {
@@ -198,14 +196,14 @@ const fire = (req) => {
             logger.info(`Fetching '${uid}' content type's schema`)
 
             return new Promise((mapResolve, mapReject) => {
-              return get({
-                uri: `${Contentstack.cdn}${Contentstack.restAPIS.contentTypes}${uid}`,
+              return get({ 
+                path: `${Contentstack.apis.content_types}${uid}`,
               }).then((contentTypeSchemaResponse) => {
                 const schemaResponse: { content_type: any } = (contentTypeSchemaResponse as any)
                 if (schemaResponse.content_type) {
                   const items = groupedItems[uid]
                   items.forEach((entry) => {
-                    entry.content_type = parse(stringify(schemaResponse.content_type))
+                    entry.content_type = cloneDeep(schemaResponse.content_type)
                     Q.push(entry)
                   })
 

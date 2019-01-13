@@ -6,10 +6,9 @@
 
 import Debug from 'debug'
 import { EventEmitter } from 'events'
+import { cloneDeep } from 'lodash'
 import { saveFailedItems } from '../util/log/failedItems'
 import { logger } from '../util/logger'
-import { parse } from '../util/parse'
-import { stringify } from '../util/stringify'
 import { load } from './plugins'
 import { saveToken } from './token-management'
 
@@ -65,11 +64,11 @@ export class Q extends EventEmitter {
    */
   public errorHandler(obj) {
     logger.error(obj)
-    debug(`Error handler called with ${stringify(obj)}`)
+    debug(`Error handler called with ${JSON.stringify(obj)}`)
     if (obj.data.checkpoint) {
       saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
         saveFailedItems(obj).then(this.next).catch((error) => {
-          debug(`Save failed items failed after saving token!\n${stringify(error)}`)
+          debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`)
           // fatal error
           this.next()
         })
@@ -142,7 +141,7 @@ export class Q extends EventEmitter {
     try {
       debug(`Exec called. Action is ${action}`)
       const promisifiedBucket = []
-      const clonedData = parse(stringify(data))
+      const clonedData = cloneDeep(data)
       this.pluginInstances[beforeAction].forEach((action1) => {
         promisifiedBucket.push(action1(data))
       })

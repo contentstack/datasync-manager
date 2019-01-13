@@ -4,4 +4,3 @@
 * MIT Licensed
 */
 export declare const saveFilteredItems: (items: any, name: any, token: any, paths: any) => Promise<{}>;
-//# sourceMappingURL=filteredItems.d.ts.map
