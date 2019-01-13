@@ -37,7 +37,7 @@ exports.validateInstances = (assetConnector, contentConnector, listener) => {
     }
 };
 exports.validateContentConnector = (instance) => {
-    const fns = ['start', 'publish', 'unpublish', 'delete', 'find', 'findOne'];
+    const fns = ['publish', 'unpublish', 'delete', 'find', 'findOne'];
     fns.forEach((fn) => {
         if (!(lodash_1.hasIn(instance, fn))) {
             throw new Error(`${instance} content connector does not support '${fn}()'`);
@@ -45,7 +45,7 @@ exports.validateContentConnector = (instance) => {
     });
 };
 exports.validateAssetConnector = (instance) => {
-    const fns = ['start', 'delete', 'download', 'unpublish'];
+    const fns = ['delete', 'download', 'unpublish'];
     fns.forEach((fn) => {
         if (!(lodash_1.hasIn(instance, fn))) {
             throw new Error(`${instance} asset connector does not support '${fn}()'`);
@@ -53,7 +53,7 @@ exports.validateAssetConnector = (instance) => {
     });
 };
 exports.validateListener = (instance) => {
-    const fns = ['register', 'start'];
+    const fns = ['register'];
     fns.forEach((fn) => {
         if (!(lodash_1.hasIn(instance, fn))) {
             throw new Error(`${instance} listener does not support '${fn}()'`);

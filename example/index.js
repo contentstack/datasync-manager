@@ -11,6 +11,6 @@ syncManager.setContentConnector(contentConnector)
 syncManager.setListener(listener)
 syncManager.setConfig(config)
 
-syncManager.start().then(messages => {
-  console.log(messages.status)
+syncManager.start().then(() => {
+  console.log('Sync utility started successfully!')
 }).catch(console.error)

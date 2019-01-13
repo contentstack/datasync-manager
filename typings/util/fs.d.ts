@@ -9,4 +9,3 @@ export declare const writeFile: (filePath: any, data: any) => Promise<{}>;
 export declare const readFile: (filePath: any) => Promise<{}>;
 export declare const readFileSync: (filePath: any) => string;
 export declare const mkdir: (path: any) => Promise<{}>;
-//# sourceMappingURL=fs.d.ts.map

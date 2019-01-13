@@ -14,7 +14,6 @@ exports.existsSync = fs_1.existsSync;
 const mkdirp_1 = __importDefault(require("mkdirp"));
 const path_1 = require("path");
 const write_file_atomic_1 = __importDefault(require("write-file-atomic"));
-const stringify_1 = require("./stringify");
 const debug = Debug('sm:util-fs');
 exports.writeFile = (filePath, data) => {
     debug(`Write file called on ${filePath}`);
@@ -24,7 +23,7 @@ exports.writeFile = (filePath, data) => {
             if (!fs_1.existsSync(fileDirectory)) {
                 mkdirp_1.default.sync(fileDirectory);
             }
-            return write_file_atomic_1.default(filePath, (typeof data === 'object') ? stringify_1.stringify(data) : data, (wfError) => {
+            return write_file_atomic_1.default(filePath, (typeof data === 'object') ? JSON.stringify(data) : data, (wfError) => {
                 if (wfError) {
                     return reject(wfError);
                 }

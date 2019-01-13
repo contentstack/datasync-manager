@@ -5,4 +5,3 @@
 */
 export declare const init: (contentstack: any) => void;
 export declare const get: (req: any, RETRY?: number) => Promise<{}>;
-//# sourceMappingURL=api.d.ts.map

@@ -16,9 +16,7 @@ const api_1 = require("../api");
 const core_utilities_1 = require("../util/core-utilities");
 const fs_1 = require("../util/fs");
 const logger_1 = require("../util/logger");
-const parse_1 = require("../util/parse");
 const promise_map_1 = require("../util/promise.map");
-const stringify_1 = require("../util/stringify");
 const token_management_1 = require("./token-management");
 const debug = debug_1.default('sm:core-sync');
 const emitter = new events_1.EventEmitter();
@@ -55,7 +53,7 @@ exports.start = (QInstance) => {
                 request.qs.pagination_token = Contentstack.pagination_token;
             }
             else if (fs_1.existsSync(paths.token.checkpoint)) {
-                const token = parse_1.parse(fs_1.readFileSync(paths.token.checkpoint));
+                const token = JSON.parse(fs_1.readFileSync(paths.token.checkpoint));
                 request.qs[token.name] = token.token;
             }
             else {
@@ -97,7 +95,7 @@ const check = () => {
 const sync = () => {
     return new Promise((resolve, reject) => {
         return token_management_1.getTokenByType('checkpoint').then((tokenObject) => {
-            const token = parse_1.parse(tokenObject);
+            const token = tokenObject;
             const request = {
                 qs: {
                     environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
@@ -115,14 +113,19 @@ exports.lock = () => {
     logger_1.logger.info('Contentstack sync locked..');
     flag.lockdown = true;
 };
+exports.unlock = () => {
+    logger_1.logger.info('Contentstack sync unlocked..');
+    flag.lockdown = false;
+    check();
+};
 const fire = (req) => {
-    debug(`Fire!\n${stringify_1.stringify(req)}`);
+    debug(`Fire!\n${JSON.stringify(req)}`);
     flag.SQ = true;
     return new Promise((resolve, reject) => {
         return api_1.get(req).then((response) => {
             delete req.qs.init;
             delete req.qs.pagination_token;
-            debug(`Fired response\n${stringify_1.stringify(response)}`);
+            debug(`Fired response\n${JSON.stringify(response)}`);
             const syncResponse = response;
             if (syncResponse.items.length) {
                 return core_utilities_1.filterItems(syncResponse, config).then(() => {
@@ -154,13 +157,13 @@ const fire = (req) => {
                         logger_1.logger.info(`Fetching '${uid}' content type's schema`);
                         return new Promise((mapResolve, mapReject) => {
                             return api_1.get({
-                                uri: `${Contentstack.cdn}${Contentstack.restAPIS.contentTypes}${uid}`,
+                                path: `${Contentstack.apis.content_types}${uid}`,
                             }).then((contentTypeSchemaResponse) => {
                                 const schemaResponse = contentTypeSchemaResponse;
                                 if (schemaResponse.content_type) {
                                     const items = groupedItems[uid];
                                     items.forEach((entry) => {
-                                        entry.content_type = parse_1.parse(stringify_1.stringify(schemaResponse.content_type));
+                                        entry.content_type = lodash_1.cloneDeep(schemaResponse.content_type);
                                         Q.push(entry);
                                     });
                                     return mapResolve();

@@ -4,4 +4,3 @@
 * MIT Licensed
 */
 export declare const load: (config: any) => {};
-//# sourceMappingURL=plugins.d.ts.map

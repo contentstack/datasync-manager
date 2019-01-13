@@ -6,8 +6,6 @@
 
 import { existsSync, readFile, writeFile } from '../fs'
 import { logger } from '../logger'
-import { parse } from '../parse'
-import { stringify } from '../stringify'
 
 interface IFailedItems {
   items: any[]
@@ -27,12 +25,12 @@ export const saveFilteredItems = (items, name, token, paths) => {
     }
     if (existsSync(path)) {
       return readFile(path).then((data) => {
-        const loggedItems: IFailedItems[] = parse(data)
+        const loggedItems: IFailedItems[] = JSON.parse(<any>data)
         loggedItems.push(objDetails)
 
-        return writeFile(path, stringify(loggedItems)).then(resolve).catch((error) => {
+        return writeFile(path, JSON.stringify(loggedItems)).then(resolve).catch((error) => {
           // failed to log failed items
-          logger.error(`Failed to write ${stringify(loggedItems)} at ${path}`)
+          logger.error(`Failed to write ${JSON.stringify(loggedItems)} at ${path}`)
           logger.error(error)
 
           return resolve()
@@ -45,8 +43,8 @@ export const saveFilteredItems = (items, name, token, paths) => {
       })
     }
 
-    return writeFile(path, stringify([objDetails])).then(resolve).catch((error) => {
-      logger.error(`Failed while writing ${stringify(objDetails)} at ${path}`)
+    return writeFile(path, JSON.stringify([objDetails])).then(resolve).catch((error) => {
+      logger.error(`Failed while writing ${JSON.stringify(objDetails)} at ${path}`)
       logger.error(error)
 
       return resolve()

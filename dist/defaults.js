@@ -7,25 +7,21 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = {
     'contentstack': {
-        MAX_RETRY_LIMIT: 8,
+        MAX_RETRY_LIMIT: 6,
         actions: {
             delete: 'delete',
             publish: 'publish',
             unpublish: 'unpublish',
         },
-        cdn: 'https://cdn.contentstack.io/v3',
-        host: 'https://api.contentstack.io/v3',
-        methods: {
-            delete: 'DELETE',
-            get: 'GET',
-            patch: 'PATCH',
-            post: 'POST',
+        apis: {
+            content_types: '/v3/content_types/',
+            sync: '/v3/stacks/sync',
         },
-        restAPIS: {
-            assets: '/assets/',
-            contentTypes: '/content_types/',
-            entries: '/entries/',
-            sync: '/stacks/sync',
+        host: 'cdn.contentstack.io',
+        port: 443,
+        protocol: 'https:',
+        verbs: {
+            get: 'GET',
         },
     },
     'sync-manager': {

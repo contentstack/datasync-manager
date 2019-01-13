@@ -8,8 +8,6 @@ import Debug from 'debug'
 import { find } from 'lodash'
 import { getConfig } from '..'
 import { existsSync, readFile, writeFile } from '../util/fs'
-import { parse } from '../util/parse'
-import { stringify } from '../util/stringify'
 
 const debug = Debug('sm:token-management')
 
@@ -17,18 +15,19 @@ const debug = Debug('sm:token-management')
  * @interface ledger interface
  */
 interface ITokenLedger {
-  name: string
-  type: string
-  timestamp: string
-  token: string
+  name: string,
+  type: string,
+  timestamp: string,
+  token: string,
 }
 
 /**
  * @interface token interface
  */
 interface IToken {
-  name: string
-  token: string
+  name: string,
+  timestamp: string,
+  token: string,
 }
 
 /**
@@ -52,7 +51,7 @@ export const getTokenByType = (type) => {
       }
 
       return readFile(path).then((data) => {
-        const ledger: ITokenLedger[] = (parse(data) as any)
+        const ledger: ITokenLedger[] = (JSON.parse(data as any))
         const token: any = find(ledger, (tokenItem) => {
 
           return tokenItem.type === type
@@ -89,10 +88,11 @@ export const saveToken = (name, token, type) => {
     }
     const data: IToken = {
       name,
+      timestamp: new Date().toISOString(),
       token,
     }
 
-    return writeFile(path, stringify(data)).then(() => {
+    return writeFile(path, JSON.stringify(data)).then(() => {
       const obj: ITokenLedger = {
         name,
         timestamp: new Date().toISOString(),
@@ -101,16 +101,16 @@ export const saveToken = (name, token, type) => {
       }
 
       if (!existsSync(config.paths.token.ledger)) {
-        return writeFile(config.paths.token.ledger, stringify([obj]))
+        return writeFile(config.paths.token.ledger, JSON.stringify([obj]))
         .then(resolve)
         .catch(reject)
       }
 
       return readFile(config.paths.token.ledger).then((ledger) => {
-        const ledgerDetails: ITokenLedger[] = parse(ledger)
+        const ledgerDetails: ITokenLedger[] = JSON.parse(ledger as any)
         ledgerDetails.splice(0, 0, obj)
 
-        return writeFile(config.paths.token.ledger, stringify(ledgerDetails))
+        return writeFile(config.paths.token.ledger, JSON.stringify(ledgerDetails))
           .then(resolve)
           .catch(reject)
       }).catch(reject)

@@ -14,4 +14,3 @@ export declare const buildConfigPaths: () => {
         ledger: string;
     };
 };
-//# sourceMappingURL=build-paths.d.ts.map

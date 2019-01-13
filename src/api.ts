@@ -5,11 +5,13 @@
 */
 
 import Debug from 'debug'
-import Request from 'request'
-import { stringify } from './util/stringify'
+import { request } from 'https'
+import { join } from 'path'
+import { stringify } from 'querystring'
+import { readFileSync } from './util/fs'
 
 const debug = Debug('api:get-requests')
-let MAX_RETRY_LIMIT = 5
+let MAX_RETRY_LIMIT
 let Contentstack
 
 /**
@@ -17,42 +19,20 @@ let Contentstack
  * @param {Object} contentstack - Contentstack configuration details
  */
 export const init = (contentstack) => {
+  const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json')))
   Contentstack = contentstack
   Contentstack.headers = {
-    'X-User-Agent': 'contentstack-sync-manager',
+    'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
     'access_token': Contentstack.token,
     'api_key': Contentstack.apiKey,
   }
+
+  // if (Contentstack.keepAlive) {
+
+  // }
+
   if (Contentstack.MAX_RETRY_LIMIT) {
     MAX_RETRY_LIMIT = Contentstack.MAX_RETRY_LIMIT
-  }
-  // rebuild sync API
-  Contentstack.syncAPI = `${Contentstack.cdn}${Contentstack.restAPIS.sync}`
-}
-
-/**
- * @description Validate API request object
- * @param {Object} req - Request object to be validated
- */
-const validate = (req) => {
-  if (typeof req !== 'object') {
-    const error: any = new Error(`Invalid params passed for request\n${stringify(req)}`)
-    error.code = 'VE'
-    throw error
-  }
-}
-
-/**
- * @description Normalize API request object
- * @param {Object} req - Request object to be normalized
- */
-const normalize = (req) => {
-  if (typeof req.uri === 'undefined' && typeof req.url === 'undefined') {
-    req.uri = Contentstack.syncAPI
-  }
-  if (typeof req.headers === 'undefined') {
-    debug(`${req.uri || req.url} had no headers`)
-    req.headers = Contentstack.headers
   }
 }
 
@@ -66,46 +46,65 @@ export const get = (req, RETRY = 1) => {
     if (RETRY > MAX_RETRY_LIMIT) {
       return reject(new Error('Max retry limit exceeded!'))
     }
-    req.method = Contentstack.methods.get
-    req.json = true
-    validate(req)
-    normalize(req)
+    req.method = Contentstack.verbs.get
+    req.path = req.path || Contentstack.apis.sync
+
+    if (req.qs) {
+      req.path += `?${stringify(req.qs)}`
+    }
+
+    const options = {
+      headers: Contentstack.headers,
+      hostname: Contentstack.host,
+      method: Contentstack.verbs.get,
+      path: req.path,
+      port: Contentstack.port,
+      protocol: Contentstack.protocol,
+    }
+
     try {
-      debug(`${req.method.toUpperCase()}: ${req.uri || req.url}`)
+      debug(`${options.method.toUpperCase()}: ${options.path}`)
       let timeDelay
+      let body = ''
+      request(options, (response) => {
 
-      return Request(req, (error, response, body) => {
-        if (error) {
-
-          return reject(error)
-        }
-        debug(`API response received. \nStatus code: ${response.statusCode}.`)
-        if (response.statusCode >= 200 && response.statusCode <= 399) {
-
-          return resolve(body)
-        } else if (response.statusCode === 429) {
-          timeDelay = Math.pow(Math.SQRT2, RETRY) * 200
-          debug(`API rate limit exceeded. Retrying ${req.uri || req.url} with ${timeDelay} sec delay`)
-
-          return setTimeout(() => {
-            return get(req, RETRY).then(resolve).catch(reject)
-          }, timeDelay)
-        } else if (response.statusCode >= 500) {
-          // retry, with delay
-          timeDelay = Math.pow(Math.SQRT2, RETRY) * 200
-          debug(`Retrying ${req.uri || req.url} with ${timeDelay} sec delay`)
-          RETRY++
-
-          return setTimeout(() => {
-            return get(req, RETRY).then(resolve).catch(reject)
-          }, timeDelay)
-        } else {
-          debug(`Request failed\n${stringify(req)}`)
-          debug(`Response received\n${stringify(body)}`)
-
-          return reject(body)
-        }
+        response
+          .setEncoding('utf-8')
+          .on('data', (chunk) => body += chunk)
+          .on('end', () => {
+            debug(`status: ${response.statusCode}.`)
+            if (response.statusCode >= 200 && response.statusCode <= 399) {
+    
+              return resolve(JSON.parse(body))
+            } else if (response.statusCode === 429) {
+              timeDelay = Math.pow(Math.SQRT2, RETRY) * 200
+              debug(`API rate limit exceeded. Retrying ${options.path} with ${timeDelay} sec delay`)
+    
+              return setTimeout(() => {
+                return get(req, RETRY)
+                  .then(resolve)
+                  .catch(reject)
+              }, timeDelay)
+            } else if (response.statusCode >= 500) {
+              // retry, with delay
+              timeDelay = Math.pow(Math.SQRT2, RETRY) * 200
+              debug(`Retrying ${options.path} with ${timeDelay} sec delay`)
+              RETRY++
+    
+              return setTimeout(() => {
+                return get(req, RETRY)
+                  .then(resolve)
+                  .catch(reject)
+              }, timeDelay)
+            } else {
+              debug(`Request failed\n${JSON.stringify(req)}`)
+    
+              return reject(JSON.parse(body))
+            }
+          })
       })
+      .on('error', reject)
+      .end()    
     } catch (error) {
       return reject(error)
     }

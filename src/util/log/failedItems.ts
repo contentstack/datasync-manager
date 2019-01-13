@@ -4,8 +4,6 @@
 * MIT Licensed
 */
 
-// import { getConfig } from '../../../'
-
 /**
  * Decision pending
  * This method logs all failed items.
