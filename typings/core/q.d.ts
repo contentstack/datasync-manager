@@ -17,4 +17,3 @@ export declare class Q extends EventEmitter {
     private process;
     private exec;
 }
-//# sourceMappingURL=q.d.ts.map

@@ -5,4 +5,3 @@
 */
 export declare const getTokenByType: (type: any) => Promise<{}>;
 export declare const saveToken: (name: any, token: any, type: any) => Promise<{}>;
-//# sourceMappingURL=token-management.d.ts.map

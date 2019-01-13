@@ -10,10 +10,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
+const lodash_1 = require("lodash");
 const failedItems_1 = require("../util/log/failedItems");
 const logger_1 = require("../util/logger");
-const parse_1 = require("../util/parse");
-const stringify_1 = require("../util/stringify");
 const plugins_1 = require("./plugins");
 const token_management_1 = require("./token-management");
 const debug = debug_1.default('sm:core-q');
@@ -40,11 +39,11 @@ class Q extends events_1.EventEmitter {
     }
     errorHandler(obj) {
         logger_1.logger.error(obj);
-        debug(`Error handler called with ${stringify_1.stringify(obj)}`);
+        debug(`Error handler called with ${JSON.stringify(obj)}`);
         if (obj.data.checkpoint) {
             token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
                 failedItems_1.saveFailedItems(obj).then(this.next).catch((error) => {
-                    debug(`Save failed items failed after saving token!\n${stringify_1.stringify(error)}`);
+                    debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`);
                     this.next();
                 });
             }).catch((error) => {
@@ -96,7 +95,7 @@ class Q extends events_1.EventEmitter {
         try {
             debug(`Exec called. Action is ${action}`);
             const promisifiedBucket = [];
-            const clonedData = parse_1.parse(stringify_1.stringify(data));
+            const clonedData = lodash_1.cloneDeep(data);
             this.pluginInstances[beforeAction].forEach((action1) => {
                 promisifiedBucket.push(action1(data));
             });

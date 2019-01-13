@@ -55,11 +55,11 @@ exports.start = (config = {}) => {
             logger_1.createLogger();
             debug('App validations passed.');
             return assetConnector.start(appConfig).then((assetInstance) => {
-                debug(`Asset connector instance ${JSON.stringify(assetInstance)} returned successfully!`);
+                debug(`Asset connector instance has returned successfully!`);
                 validations_1.validateAssetConnector(assetInstance);
                 return contentConnector.start(appConfig, assetInstance);
             }).then((connectorInstance) => {
-                debug(`Content connector instance ${JSON.stringify(connectorInstance)} returned successfully!`);
+                debug(`Content connector instance has returned successfully!`);
                 validations_1.validateContentConnector(connectorInstance);
                 return core_1.init(connectorInstance, appConfig);
             }).then(() => {

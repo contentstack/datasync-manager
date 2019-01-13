@@ -15,8 +15,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_1 = require("lodash");
 const filteredItems_1 = require("./log/filteredItems");
-const parse_1 = require("./parse");
-const stringify_1 = require("./stringify");
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
 const assetType = 'sys_assets';
@@ -64,7 +62,6 @@ exports.groupItems = (items) => {
     return bucket;
 };
 exports.formatItems = (items, config) => {
-    const deletedContentTypes = [];
     items.forEach((item) => {
         switch (item.type) {
             case 'asset_published':
@@ -101,24 +98,14 @@ exports.formatItems = (items, config) => {
                 item.uid = item.data.uid;
                 break;
             case 'content_type_deleted':
-                const locales = lodash_1.map(config.locales, 'code');
-                locales.forEach((locale) => {
-                    const clonedItem = parse_1.parse(stringify_1.stringify(item));
-                    clonedItem.action = config.contentstack.actions.delete;
-                    clonedItem.locale = locale;
-                    clonedItem.uid = clonedItem.content_type_uid;
-                    clonedItem.content_type_uid = formattedContentType;
-                    deletedContentTypes.push(clonedItem);
-                });
+                item.action = config.contentstack.actions.delete;
+                item.uid = item.content_type_uid;
+                item.content_type_uid = formattedContentType;
                 break;
             default:
                 break;
         }
     });
-    lodash_1.remove(items, (item) => {
-        return item.type === 'content_type_deleted';
-    });
-    items.concat(deletedContentTypes);
 };
 exports.markCheckpoint = (groupedItems, syncResponse) => {
     const tokenName = (syncResponse.pagination_token) ? 'pagination_token' : 'sync_token';

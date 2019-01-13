@@ -50,7 +50,7 @@ export const validateInstances = (assetConnector, contentConnector, listener) =>
  * @param {Object} instance - Content connector instance
  */
 export const validateContentConnector = (instance) => {
-  const fns = ['start', 'publish', 'unpublish', 'delete', 'find', 'findOne']
+  const fns = ['publish', 'unpublish', 'delete', 'find', 'findOne']
   fns.forEach((fn) => {
     if (!(hasIn(instance, fn))) {
       throw new Error(`${instance} content connector does not support '${fn}()'`)
@@ -63,7 +63,7 @@ export const validateContentConnector = (instance) => {
  * @param {Object} instance - Asset connector instance
  */
 export const validateAssetConnector = (instance) => {
-  const fns = ['start', 'delete', 'download', 'unpublish']
+  const fns = ['delete', 'download', 'unpublish']
   fns.forEach((fn) => {
     if (!(hasIn(instance, fn))) {
       throw new Error(`${instance} asset connector does not support '${fn}()'`)
@@ -76,7 +76,7 @@ export const validateAssetConnector = (instance) => {
  * @param {Object} instance - Listener instance
  */
 export const validateListener = (instance) => {
-  const fns = ['register', 'start']
+  const fns = ['register']
   fns.forEach((fn) => {
     if (!(hasIn(instance, fn))) {
       throw new Error(`${instance} listener does not support '${fn}()'`)

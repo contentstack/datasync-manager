@@ -1,4 +1,9 @@
 "use strict";
+/*!
+* Contentstack Sync Manager
+* Copyright © 2019 Contentstack LLC
+* MIT Licensed
+*/
 Object.defineProperty(exports, "__esModule", { value: true });
 const validations_1 = require("./validations");
 exports.createLogger = (customLogger) => {
