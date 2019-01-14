@@ -6,7 +6,7 @@
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = {
-    'contentstack': {
+    contentstack: {
         MAX_RETRY_LIMIT: 6,
         actions: {
             delete: 'delete',
@@ -24,6 +24,7 @@ exports.config = {
             get: 'GET',
         },
     },
+    locales: [],
     'sync-manager': {
         cooloff: 3000,
         limit: 100,
