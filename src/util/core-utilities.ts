@@ -22,8 +22,12 @@ export const filterItems = async (response, config) => {
     try {
       const locales = map(config.locales, 'code')
       const filteredObjects = remove(response.items, (item) => {
+        // for published items
         if ((item as any).data.publish_details) {
-          return locales.indexOf((item as any).data.publish_details.locale) === -1
+          return locales.indexOf((item as any).data.publish_details.locale) !== -1
+        // for unpublished items || deleted items
+        } else if ((item as any).data.locale) {
+          return locales.indexOf((item as any).data.locale) !== -1
         }
 
         return false

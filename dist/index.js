@@ -43,7 +43,7 @@ exports.getConfig = () => {
     return appConfig;
 };
 exports.setCustomLogger = (instance) => {
-    logger_1.createLogger(instance);
+    logger_1.setLogger(instance);
 };
 exports.start = (config = {}) => {
     return new Promise((resolve, reject) => {
@@ -52,7 +52,9 @@ exports.start = (config = {}) => {
             appConfig = lodash_1.merge(defaults_1.config, appConfig, config);
             validations_1.validateConfig(appConfig);
             appConfig.paths = build_paths_1.buildConfigPaths();
-            logger_1.createLogger();
+            logger_1.setLogger();
+            assetConnector.setLogger(logger_1.logger);
+            contentConnector.setLogger(logger_1.logger);
             debug('App validations passed.');
             return assetConnector.start(appConfig).then((assetInstance) => {
                 debug(`Asset connector instance has returned successfully!`);

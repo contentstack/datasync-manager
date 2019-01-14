@@ -15,9 +15,6 @@ exports.validateConfig = (config) => {
             throw new Error(`Config '${key}' key cannot be undefined`);
         }
     });
-    if (!Array.isArray(config.locales) || config.locales.length === 0) {
-        throw new Error('Config \'locales\' should be an array and not empty!');
-    }
     if (typeof config.contentstack !== 'object' || !config.contentstack.apiKey || !config.contentstack.token) {
         throw new Error('Config \'contentstack\' should be of type object and have \'apiKey\' and \'token\'');
     }
@@ -33,6 +30,17 @@ exports.validateInstances = (assetConnector, contentConnector, listener) => {
         throw new Error('Call \'setListener()\' before calling sync-manager start!');
     }
     else if (!assetConnector.start || !contentConnector.start || !listener.start) {
+        throw new Error('Connector and listener instances should have \'start()\' method');
+    }
+    else if (typeof assetConnector.start !== 'function' || contentConnector.start !== 'function' || listener.start !==
+        'function') {
+        throw new Error('Connector and listener instances should have \'start()\' method');
+    }
+    else if (!assetConnector.setLogger || !contentConnector.setLogger || !listener.setLogger) {
+        throw new Error('Connector and listener instances should have \'setLogger()\' method');
+    }
+    else if (typeof assetConnector.setLogger !== 'function' || contentConnector.setLogger !== 'function' ||
+        listener.setLogger !== 'function') {
         throw new Error('Connector and listener instances should have \'start()\' method');
     }
 };

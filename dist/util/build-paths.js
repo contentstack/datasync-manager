@@ -10,8 +10,8 @@ exports.buildConfigPaths = () => {
     const baseDir = process.cwd();
     const paths = {
         cwd: baseDir,
-        failedItems: path_1.resolve(path_1.join(baseDir, 'logs', 'failedItems.json')),
-        filteredItems: path_1.resolve(path_1.join(baseDir, 'logs', 'filteredItems.json')),
+        failedItems: path_1.resolve(path_1.join(baseDir, 'unprocessible', 'failed.json')),
+        filteredItems: path_1.resolve(path_1.join(baseDir, 'unprocessible', 'filtered.json')),
         plugin: path_1.resolve(path_1.join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
         token: {
             checkpoint: path_1.resolve(path_1.join(baseDir, '.tokens', 'checkpoint')),
