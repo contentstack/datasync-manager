@@ -4,7 +4,7 @@
 * MIT Licensed
 */
 export declare const config: {
-    'contentstack': {
+    contentstack: {
         MAX_RETRY_LIMIT: number;
         actions: {
             delete: string;
@@ -22,6 +22,7 @@ export declare const config: {
             get: string;
         };
     };
+    locales: any[];
     'sync-manager': {
         cooloff: number;
         limit: number;
