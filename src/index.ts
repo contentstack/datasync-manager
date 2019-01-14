@@ -10,7 +10,7 @@ import { init } from './core'
 import { poke } from './core/sync'
 import { config as internalConfig } from './defaults'
 import { buildConfigPaths } from './util/build-paths'
-import { createLogger, logger } from './util/logger'
+import { logger, setLogger } from './util/logger'
 
 import {
   validateAssetConnector,
@@ -78,7 +78,7 @@ export const getConfig = () => {
  * @param {Object} instance - Custom logger instance
  */
 export const setCustomLogger = (instance) => {
-  createLogger(instance)
+  setLogger(instance)
 }
 
 /**
@@ -96,7 +96,9 @@ export const start = (config = {}) => {
       validateConfig(appConfig)
       appConfig.paths = buildConfigPaths()
       // since logger is singleton, if previously set, it'll return that isnstance!
-      createLogger()
+      setLogger()
+      assetConnector.setLogger(logger)
+      contentConnector.setLogger(logger)
       debug('App validations passed.')
 
       return assetConnector.start(appConfig).then((assetInstance) => {

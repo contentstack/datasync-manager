@@ -24,7 +24,10 @@ exports.filterItems = (response, config) => __awaiter(this, void 0, void 0, func
             const locales = lodash_1.map(config.locales, 'code');
             const filteredObjects = lodash_1.remove(response.items, (item) => {
                 if (item.data.publish_details) {
-                    return locales.indexOf(item.data.publish_details.locale) === -1;
+                    return locales.indexOf(item.data.publish_details.locale) !== -1;
+                }
+                else if (item.data.locale) {
+                    return locales.indexOf(item.data.locale) !== -1;
                 }
                 return false;
             });

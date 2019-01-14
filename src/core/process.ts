@@ -26,7 +26,7 @@ const handleExit = (signal) => {
 /**
  * https://www.joyent.com/node-js/production/design/errors
  * https://stackoverflow.com/questions/7310521/node-js-best-practice-exception-handling/23368579
- * 
+ *
  * @description Manage unhandled errors
  * @param {Object} error - Unhandled error object
  */
@@ -61,3 +61,4 @@ const abort = () => {
 process.on('SIGTERM', handleExit)
 process.on('SIGINT', handleExit)
 process.on('uncaughtException', unhandledErrors)
+process.on('unhandledRejection', unhandledErrors)
