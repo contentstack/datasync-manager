@@ -1,7 +1,7 @@
 module.exports = {
   contentstack: {
-    apiKey: '***REMOVED***',
-    token: '***REMOVED***'
+    apiKey: '',
+    token: ''
   },
   'content-connector': {
 
@@ -10,22 +10,6 @@ module.exports = {
 
   },
   locales: [
-    {
-      code: 'en-us',
-      relative_url_prefix: '/'
-    },
-    {
-      code: 'fr-fr',
-      relative_url_prefix: '/fr/'
-    },
-    {
-      code: 'en-gb',
-      relative_url_prefix: '/gb/'
-    },
-    {
-      code: 'es-es',
-      relative_url_prefix: '/es/'
-    }
   ],
   listener: {
 

@@ -10,5 +10,5 @@ node_modules
 # Coverage directories
 coverage
 
-# Data logs
-logs
+# Data filters
+unprocessible
