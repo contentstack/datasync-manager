@@ -15,9 +15,6 @@ exports.validateConfig = (config) => {
             throw new Error(`Config '${key}' key cannot be undefined`);
         }
     });
-    if (!Array.isArray(config.locales) || config.locales.length === 0) {
-        throw new Error('Config \'locales\' should be an array and not empty!');
-    }
     if (typeof config.contentstack !== 'object' || !config.contentstack.apiKey || !config.contentstack.token) {
         throw new Error('Config \'contentstack\' should be of type object and have \'apiKey\' and \'token\'');
     }

@@ -8,7 +8,7 @@
  * @description Default application's internal config
  */
 export const config = {
-  'contentstack': {
+  contentstack: {
     MAX_RETRY_LIMIT: 6,
     actions: {
       delete: 'delete',
@@ -26,6 +26,7 @@ export const config = {
       get: 'GET',
     },
   },
+  locales: [],
   'sync-manager': {
     cooloff: 3000,
     limit: 100,
