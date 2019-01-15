@@ -14,6 +14,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_1 = require("lodash");
+const __1 = require("..");
+const fs_1 = require("./fs");
 const unprocessible_1 = require("./unprocessible");
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
@@ -146,5 +148,58 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
         };
     }
     return groupedItems;
+};
+exports.getFile = (file, rotate) => {
+    return new Promise((resolve, reject) => {
+        const config = __1.getConfig();
+        if (fs_1.existsSync(file)) {
+            return fs_1.stat(file, (statError, stats) => {
+                if (statError) {
+                    return reject(statError);
+                }
+                else if (stats.isFile()) {
+                    if (stats.size > config['sync-manager'].maxsize) {
+                        file = rotate();
+                    }
+                    return resolve(file);
+                }
+                else {
+                    return reject(new Error(`${file} is not of type file`));
+                }
+            });
+        }
+        else {
+            fs_1.mkdirpSync(config.paths.unprocessibleDir);
+            return resolve(file);
+        }
+    });
+};
+exports.buildAssetReference = (entry) => {
+    if (typeof entry === 'object' && !(Array.isArray(entry))) {
+        if (entry.filename && entry.url && entry.size && entry.uid) {
+            const _keys = Object.keys(entry);
+            _keys.forEach((k) => {
+                if (k !== 'uid') {
+                    delete entry[k];
+                }
+                entry._content_type_uid = '_assets';
+            });
+        }
+        const keys = Object.keys(entry);
+        keys.forEach((key) => {
+            const obj = entry[key];
+            if (typeof obj === 'object') {
+                exports.buildAssetReference(obj);
+            }
+        });
+    }
+    else if (typeof entry === 'object' && Array.isArray(entry)) {
+        entry.forEach((_obj) => {
+            if (typeof _obj === 'object') {
+                exports.buildAssetReference(_obj);
+            }
+        });
+    }
+    return entry;
 };
 //# sourceMappingURL=core-utilities.js.map

@@ -8,5 +8,5 @@ export declare const setAssetConnector: (instance: any) => void;
 export declare const setListener: (instance: any) => void;
 export declare const setConfig: (config: any) => void;
 export declare const getConfig: () => any;
-export declare const setCustomLogger: (instance: any) => void;
+export { setLogger } from './util/logger';
 export declare const start: (config?: {}) => Promise<{}>;

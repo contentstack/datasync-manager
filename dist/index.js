@@ -41,9 +41,8 @@ exports.setConfig = (config) => {
 exports.getConfig = () => {
     return appConfig;
 };
-exports.setCustomLogger = (instance) => {
-    logger_1.setLogger(instance);
-};
+var logger_2 = require("./util/logger");
+exports.setLogger = logger_2.setLogger;
 exports.start = (config = {}) => {
     return new Promise((resolve, reject) => {
         try {
@@ -52,8 +51,8 @@ exports.start = (config = {}) => {
             validations_1.validateConfig(appConfig);
             appConfig.paths = build_paths_1.buildConfigPaths();
             logger_1.setLogger();
-            assetConnector.setCustomLogger(logger_1.logger);
-            contentConnector.setCustomLogger(logger_1.logger);
+            assetConnector.setLogger(logger_1.logger);
+            contentConnector.setLogger(logger_1.logger);
             return assetConnector.start(appConfig).then((assetInstance) => {
                 debug('Asset connector instance has returned successfully!');
                 validations_1.validateAssetConnector(assetInstance);
