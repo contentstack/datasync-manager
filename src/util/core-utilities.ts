@@ -204,3 +204,32 @@ export const getFile = (file, rotate) => {
     }
   })
 }
+
+export const buildAssetReference = (entry) => {
+  if (typeof entry === 'object' && !(Array.isArray(entry))) {
+    if (entry.filename && entry.url && entry.size && entry.uid) {
+      const assetkeys = Object.keys(entry)
+      assetkeys.forEach((k) => {
+        if (k !== 'uid') {
+          delete entry[k]
+        }
+        entry._content_type_uid = '_assets'
+      })
+    }
+    const keys = Object.keys(entry)
+    keys.forEach((key) => {
+      const obj = entry[key]
+      if (typeof obj === 'object') {
+        buildAssetReference(obj)
+      }
+    })
+  } else if (typeof entry === 'object' && Array.isArray(entry)) {
+    entry.forEach((subObj) => {
+      if (typeof subObj === 'object') {
+        buildAssetReference(subObj)
+      }
+    })
+  }
+
+  return entry
+}

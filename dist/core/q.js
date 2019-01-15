@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
+const core_utilities_1 = require("../util/core-utilities");
 const logger_1 = require("../util/logger");
 const unprocessible_1 = require("../util/unprocessible");
 const plugins_1 = require("./plugins");
@@ -79,6 +80,9 @@ class Q extends events_1.EventEmitter {
         logger_1.logger.log(`Processing item\n${JSON.stringify(data, null, 2)}`);
         switch (data.action) {
             case 'publish':
+                if (['_assets', '_content_types'].indexOf(data.content_type_uid) === -1) {
+                    core_utilities_1.buildAssetReference(data.data);
+                }
                 this.exec(data, data.action, 'beforePublish', 'afterPublish');
                 break;
             case 'unpublish':
