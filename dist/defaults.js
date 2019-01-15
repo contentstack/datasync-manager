@@ -1,12 +1,12 @@
 "use strict";
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = {
-    contentstack: {
+    'contentstack': {
         MAX_RETRY_LIMIT: 6,
         actions: {
             delete: 'delete',
@@ -24,10 +24,13 @@ exports.config = {
             get: 'GET',
         },
     },
-    locales: [],
+    'locales': [],
     'sync-manager': {
         cooloff: 3000,
         limit: 100,
+        maxsize: 2097152,
+        saveFailedItems: true,
+        saveFilteredItems: true,
     },
 };
 //# sourceMappingURL=defaults.js.map

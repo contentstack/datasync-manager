@@ -1,6 +1,6 @@
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 
@@ -68,43 +68,43 @@ export const get = (req, RETRY = 1) => {
       let body = ''
       request(options, (response) => {
 
-        response
-          .setEncoding('utf-8')
-          .on('data', (chunk) => body += chunk)
-          .on('end', () => {
-            debug(`status: ${response.statusCode}.`)
-            if (response.statusCode >= 200 && response.statusCode <= 399) {
-    
-              return resolve(JSON.parse(body))
-            } else if (response.statusCode === 429) {
-              timeDelay = Math.pow(Math.SQRT2, RETRY) * 200
-              debug(`API rate limit exceeded. Retrying ${options.path} with ${timeDelay} sec delay`)
-    
-              return setTimeout(() => {
-                return get(req, RETRY)
-                  .then(resolve)
-                  .catch(reject)
-              }, timeDelay)
-            } else if (response.statusCode >= 500) {
-              // retry, with delay
-              timeDelay = Math.pow(Math.SQRT2, RETRY) * 200
-              debug(`Retrying ${options.path} with ${timeDelay} sec delay`)
-              RETRY++
-    
-              return setTimeout(() => {
-                return get(req, RETRY)
-                  .then(resolve)
-                  .catch(reject)
-              }, timeDelay)
-            } else {
-              debug(`Request failed\n${JSON.stringify(req)}`)
-    
-              return reject(JSON.parse(body))
-            }
-          })
-      })
-      .on('error', reject)
-      .end()    
+          response
+            .setEncoding('utf-8')
+            .on('data', (chunk) => body += chunk)
+            .on('end', () => {
+              debug(`status: ${response.statusCode}.`)
+              if (response.statusCode >= 200 && response.statusCode <= 399) {
+
+                return resolve(JSON.parse(body))
+              } else if (response.statusCode === 429) {
+                timeDelay = Math.pow(Math.SQRT2, RETRY) * 200
+                debug(`API rate limit exceeded. Retrying ${options.path} with ${timeDelay} sec delay`)
+
+                return setTimeout(() => {
+                  return get(req, RETRY)
+                    .then(resolve)
+                    .catch(reject)
+                }, timeDelay)
+              } else if (response.statusCode >= 500) {
+                // retry, with delay
+                timeDelay = Math.pow(Math.SQRT2, RETRY) * 200
+                debug(`Retrying ${options.path} with ${timeDelay} sec delay`)
+                RETRY++
+
+                return setTimeout(() => {
+                  return get(req, RETRY)
+                    .then(resolve)
+                    .catch(reject)
+                }, timeDelay)
+              } else {
+                debug(`Request failed\n${JSON.stringify(req)}`)
+
+                return reject(JSON.parse(body))
+              }
+            })
+        })
+        .on('error', reject)
+        .end()
     } catch (error) {
       return reject(error)
     }

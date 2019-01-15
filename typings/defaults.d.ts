@@ -1,10 +1,10 @@
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 export declare const config: {
-    contentstack: {
+    'contentstack': {
         MAX_RETRY_LIMIT: number;
         actions: {
             delete: string;
@@ -22,9 +22,12 @@ export declare const config: {
             get: string;
         };
     };
-    locales: any[];
+    'locales': any[];
     'sync-manager': {
         cooloff: number;
         limit: number;
+        maxsize: number;
+        saveFailedItems: boolean;
+        saveFilteredItems: boolean;
     };
 };

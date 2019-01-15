@@ -1,6 +1,6 @@
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 
@@ -10,7 +10,7 @@
  */
 
 import { logger } from '../util/logger'
-import { lock, unlock } from './sync'
+import { lock, unlock } from './'
 
 /**
  * @description Handles process exit. Stops the current application and manages a graceful shutdown

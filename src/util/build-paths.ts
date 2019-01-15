@@ -1,6 +1,6 @@
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 
@@ -14,14 +14,15 @@ export const buildConfigPaths = () => {
   const baseDir = process.cwd()
   const paths = {
     cwd: baseDir,
-    failedItems: resolve(join(baseDir, 'unprocessible', 'failed.json')),
-    filteredItems: resolve(join(baseDir, 'unprocessible', 'filtered.json')),
+    failed: resolve(join(baseDir, 'unprocessible', 'failed')),
+    filtered: resolve(join(baseDir, 'unprocessible', 'filtered')),
     plugin: resolve(join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
     token: {
       checkpoint: resolve(join(baseDir, '.tokens', 'checkpoint')),
       current: resolve(join(baseDir, '.tokens', 'current')),
       ledger: resolve(join(baseDir, '.tokens', 'ledger')),
     },
+    unprocessibleDir: resolve(join(baseDir, 'unprocessible')),
   }
 
   return paths

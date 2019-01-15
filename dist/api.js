@@ -1,7 +1,7 @@
 "use strict";
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 var __importDefault = (this && this.__importDefault) || function (mod) {
