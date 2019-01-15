@@ -1,7 +1,7 @@
 "use strict";
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 var __importDefault = (this && this.__importDefault) || function (mod) {
@@ -86,4 +86,8 @@ exports.mkdir = (path) => {
         }
     });
 };
+var fs_2 = require("fs");
+exports.stat = fs_2.stat;
+var mkdirp_2 = require("mkdirp");
+exports.mkdirpSync = mkdirp_2.sync;
 //# sourceMappingURL=fs.js.map

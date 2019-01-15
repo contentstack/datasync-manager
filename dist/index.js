@@ -1,7 +1,7 @@
 "use strict";
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 var __importDefault = (this && this.__importDefault) || function (mod) {
@@ -11,7 +11,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const core_1 = require("./core");
-const sync_1 = require("./core/sync");
 const defaults_1 = require("./defaults");
 const build_paths_1 = require("./util/build-paths");
 const logger_1 = require("./util/logger");
@@ -49,24 +48,23 @@ exports.start = (config = {}) => {
     return new Promise((resolve, reject) => {
         try {
             validations_1.validateInstances(assetConnector, contentConnector, listener);
-            appConfig = lodash_1.merge(defaults_1.config, appConfig, config);
+            appConfig = lodash_1.merge({}, defaults_1.config, appConfig, config);
             validations_1.validateConfig(appConfig);
             appConfig.paths = build_paths_1.buildConfigPaths();
             logger_1.setLogger();
-            assetConnector.setLogger(logger_1.logger);
-            contentConnector.setLogger(logger_1.logger);
-            debug('App validations passed.');
+            assetConnector.setCustomLogger(logger_1.logger);
+            contentConnector.setCustomLogger(logger_1.logger);
             return assetConnector.start(appConfig).then((assetInstance) => {
-                debug(`Asset connector instance has returned successfully!`);
+                debug('Asset connector instance has returned successfully!');
                 validations_1.validateAssetConnector(assetInstance);
-                return contentConnector.start(appConfig, assetInstance);
+                return contentConnector.start(assetInstance, appConfig);
             }).then((connectorInstance) => {
-                debug(`Content connector instance has returned successfully!`);
+                debug('Content connector instance has returned successfully!');
                 validations_1.validateContentConnector(connectorInstance);
-                return core_1.init(connectorInstance, appConfig);
+                return core_1.init(connectorInstance);
             }).then(() => {
                 debug('Sync Manager initiated successfully!');
-                listener.register(sync_1.poke);
+                listener.register(core_1.poke);
                 return listener.start(appConfig);
             }).then(() => {
                 logger_1.logger.info('Contentstack sync utility started successfully!');

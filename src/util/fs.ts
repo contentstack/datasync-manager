@@ -1,6 +1,6 @@
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 
@@ -114,3 +114,13 @@ export const mkdir = (path) => {
     }
   })
 }
+
+/**
+ * @description exports fs.stat
+ */
+export { stat } from 'fs'
+
+/**
+ * @description synchnonous way of creating nested folder directory structure
+ */
+export { sync as mkdirpSync } from 'mkdirp'

@@ -1,6 +1,6 @@
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 
@@ -44,8 +44,8 @@ export const validateInstances = (assetConnector, contentConnector, listener) =>
     throw new Error('Connector and listener instances should have \'start()\' method')
   } else if (!assetConnector.setLogger || !contentConnector.setLogger || !listener.setLogger) {
     throw new Error('Connector and listener instances should have \'setLogger()\' method')
-  } else if (typeof assetConnector.setLogger !== 'function' || contentConnector.setLogger !== 'function' || 
-    listener.setLogger !== 'function') {
+  } else if (typeof assetConnector.setLogger !== 'function' || contentConnector.setLogger !== 'function' ||
+     listener.setLogger !== 'function') {
     throw new Error('Connector and listener instances should have \'start()\' method')
   }
 }
