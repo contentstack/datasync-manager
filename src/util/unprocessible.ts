@@ -6,7 +6,8 @@
 */
 
 import { getConfig } from '../'
-import { existsSync, mkdirpSync, readFile, stat, writeFile } from './fs'
+import { getFile } from './core-utilities'
+import { existsSync, readFile, writeFile } from './fs'
 import { logger } from './logger'
 
 const counter = {
@@ -62,7 +63,11 @@ export const saveFilteredItems = (items, name, token) => {
       } else {
         filename = `${config.paths.filtered}-${counter.filtered}.json`
       }
-      const file: string = await (getFile(filename, 'filtered') as any)
+      const file: string = await (getFile(filename, () => {
+        counter.filtered++
+
+        return `${config.paths.filtered}-${counter.filtered}.json`
+      }) as any)
 
       if (existsSync(file)) {
         return readFile(file).then((data) => {
@@ -92,34 +97,6 @@ export const saveFilteredItems = (items, name, token) => {
       })
     } catch (error) {
       return reject(error)
-    }
-  })
-}
-
-const getFile = (file, type) => {
-  return new Promise((resolve, reject) => {
-    const config = getConfig()
-    if (existsSync(file)) {
-      return stat(file, (statError, stats) => {
-        if (statError) {
-          return reject(statError)
-        } else if (stats.isFile()) {
-          if (stats.size > config['sync-manager'].maxsize) {
-            counter[type]++
-            const filename = `${config.paths[type]}-${counter[type]}.json`
-
-            return resolve(filename)
-          }
-
-          return resolve(file)
-        } else {
-          return reject(new Error(`${file} is not of type file`))
-        }
-      })
-    } else {
-      mkdirpSync(config.paths.unprocessibleDir)
-
-      return resolve(file)
     }
   })
 }

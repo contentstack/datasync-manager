@@ -39,13 +39,13 @@ export const validateInstances = (assetConnector, contentConnector, listener) =>
     throw new Error('Call \'setListener()\' before calling sync-manager start!')
   } else if (!assetConnector.start || !contentConnector.start || !listener.start) {
     throw new Error('Connector and listener instances should have \'start()\' method')
-  } else if (typeof assetConnector.start !== 'function' || contentConnector.start !== 'function' || listener.start !==
-    'function') {
+  } else if (typeof assetConnector.start !== 'function' || typeof contentConnector.start !== 'function' ||
+   typeof listener.start !== 'function') {
     throw new Error('Connector and listener instances should have \'start()\' method')
-  } else if (!assetConnector.setLogger || !contentConnector.setLogger || !listener.setLogger) {
+  } else if (!assetConnector.setCustomLogger || !contentConnector.setCustomLogger || !listener.setCustomLogger) {
     throw new Error('Connector and listener instances should have \'setLogger()\' method')
-  } else if (typeof assetConnector.setLogger !== 'function' || contentConnector.setLogger !== 'function' ||
-     listener.setLogger !== 'function') {
+  } else if (typeof assetConnector.setCustomLogger !== 'function' ||
+   typeof contentConnector.setCustomLogger !== 'function' || typeof listener.setCustomLogger !== 'function') {
     throw new Error('Connector and listener instances should have \'start()\' method')
   }
 }

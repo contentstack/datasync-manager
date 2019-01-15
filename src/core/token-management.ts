@@ -7,9 +7,11 @@
 import Debug from 'debug'
 import { find } from 'lodash'
 import { getConfig } from '..'
+import { getFile } from '../util/core-utilities'
 import { existsSync, readFile, writeFile } from '../util/fs'
 
 const debug = Debug('sm:token-management')
+let counter = 0
 
 /**
  * @interface ledger interface
@@ -92,7 +94,7 @@ export const saveToken = (name, token, type) => {
       token,
     }
 
-    return writeFile(path, JSON.stringify(data)).then(() => {
+    return writeFile(path, JSON.stringify(data)).then(async () => {
       const obj: ITokenLedger = {
         name,
         timestamp: new Date().toISOString(),
@@ -100,17 +102,29 @@ export const saveToken = (name, token, type) => {
         type,
       }
 
-      if (!existsSync(config.paths.token.ledger)) {
-        return writeFile(config.paths.token.ledger, JSON.stringify([obj]))
+      let filename
+      if (counter === 0) {
+        filename = config.paths.token.ledger
+      } else {
+        filename = `${config.paths.token.ledger}.${counter}`
+      }
+      const file: string = await (getFile(filename, () => {
+        counter++
+
+        return `${config.paths.token.ledger}-${counter}`
+      }) as any)
+
+      if (!existsSync(file)) {
+        return writeFile(file, JSON.stringify([obj]))
         .then(resolve)
         .catch(reject)
       }
 
-      return readFile(config.paths.token.ledger).then((ledger) => {
+      return readFile(file).then((ledger) => {
         const ledgerDetails: ITokenLedger[] = JSON.parse(ledger as any)
         ledgerDetails.splice(0, 0, obj)
 
-        return writeFile(config.paths.token.ledger, JSON.stringify(ledgerDetails))
+        return writeFile(file, JSON.stringify(ledgerDetails))
           .then(resolve)
           .catch(reject)
       }).catch(reject)
