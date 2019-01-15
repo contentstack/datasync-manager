@@ -1,13 +1,12 @@
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 
 import Debug from 'debug'
 import { merge } from 'lodash'
-import { init } from './core'
-import { poke } from './core/sync'
+import { init, poke } from './core'
 import { config as internalConfig } from './defaults'
 import { buildConfigPaths } from './util/build-paths'
 import { logger, setLogger } from './util/logger'
@@ -82,7 +81,8 @@ export const setCustomLogger = (instance) => {
 }
 
 /**
- * @summary Starts the sync manager utility
+ * @summary
+ *  Starts the sync manager utility
  * @description
  *  Registers, validates asset, content connectors and listener instances.
  *  Once done, builds the app's config and logger
@@ -92,25 +92,24 @@ export const start = (config = {}) => {
   return new Promise((resolve, reject) => {
     try {
       validateInstances(assetConnector, contentConnector, listener)
-      appConfig = merge(internalConfig, appConfig, config)
+      appConfig = merge({}, internalConfig, appConfig, config)
       validateConfig(appConfig)
       appConfig.paths = buildConfigPaths()
       // since logger is singleton, if previously set, it'll return that isnstance!
       setLogger()
-      assetConnector.setLogger(logger)
-      contentConnector.setLogger(logger)
-      debug('App validations passed.')
+      assetConnector.setCustomLogger(logger)
+      contentConnector.setCustomLogger(logger)
 
       return assetConnector.start(appConfig).then((assetInstance) => {
-        debug(`Asset connector instance has returned successfully!`)
+        debug('Asset connector instance has returned successfully!')
         validateAssetConnector(assetInstance)
 
-        return contentConnector.start(appConfig, assetInstance)
+        return contentConnector.start(assetInstance, appConfig)
       }).then((connectorInstance) => {
-        debug(`Content connector instance has returned successfully!`)
+        debug('Content connector instance has returned successfully!')
         validateContentConnector(connectorInstance)
 
-        return init(connectorInstance, appConfig)
+        return init(connectorInstance)
       }).then(() => {
         debug('Sync Manager initiated successfully!')
         listener.register(poke)

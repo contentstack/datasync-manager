@@ -1,6 +1,6 @@
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 
@@ -8,7 +8,7 @@
  * @description Default application's internal config
  */
 export const config = {
-  contentstack: {
+  'contentstack': {
     MAX_RETRY_LIMIT: 6,
     actions: {
       delete: 'delete',
@@ -26,9 +26,13 @@ export const config = {
       get: 'GET',
     },
   },
-  locales: [],
+  'locales': [],
   'sync-manager': {
     cooloff: 3000,
     limit: 100,
+    // max file sizes in bytes
+    maxsize: 2097152,
+    saveFailedItems: true,
+    saveFilteredItems: true,
   },
 }

@@ -1,7 +1,7 @@
 "use strict";
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
@@ -14,7 +14,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_1 = require("lodash");
-const filteredItems_1 = require("./log/filteredItems");
+const unprocessible_1 = require("./unprocessible");
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
 const assetType = 'sys_assets';
@@ -41,8 +41,9 @@ exports.filterItems = (response, config) => __awaiter(this, void 0, void 0, func
             else {
                 name = 'sync_token';
             }
-            return filteredItems_1.saveFilteredItems(filteredObjects, name, response[name], config.paths)
-                .then(resolve).catch(reject);
+            return unprocessible_1.saveFilteredItems(filteredObjects, name, response[name])
+                .then(resolve)
+                .catch(reject);
         }
         catch (error) {
             return reject(error);
@@ -109,6 +110,7 @@ exports.formatItems = (items, config) => {
                 break;
         }
     });
+    return items;
 };
 exports.markCheckpoint = (groupedItems, syncResponse) => {
     const tokenName = (syncResponse.pagination_token) ? 'pagination_token' : 'sync_token';
@@ -143,5 +145,6 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
             token: tokenValue,
         };
     }
+    return groupedItems;
 };
 //# sourceMappingURL=core-utilities.js.map

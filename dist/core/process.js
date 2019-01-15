@@ -1,14 +1,14 @@
 "use strict";
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const logger_1 = require("../util/logger");
-const sync_1 = require("./sync");
+const _1 = require("./");
 const handleExit = (signal) => {
-    sync_1.lock();
+    _1.lock();
     const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : 15000;
     logger_1.logger.info(`Received ${signal}. This will shut down the process in ${killDuration}ms..`);
     setInterval(abort, killDuration);
@@ -16,9 +16,9 @@ const handleExit = (signal) => {
 const unhandledErrors = (error) => {
     logger_1.logger.error('Unhandled exception caught. Locking down process for 10s to recover..');
     logger_1.logger.error(error);
-    sync_1.lock();
+    _1.lock();
     setInterval(() => {
-        sync_1.unlock();
+        _1.unlock();
     }, 10000);
 };
 const calculateKillDuration = () => {

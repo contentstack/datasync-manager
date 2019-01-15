@@ -1,11 +1,11 @@
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 
 import { map, remove } from 'lodash'
-import { saveFilteredItems } from './log/filteredItems'
+import { saveFilteredItems } from './unprocessible'
 
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
@@ -45,8 +45,9 @@ export const filterItems = async (response, config) => {
         name = 'sync_token'
       }
 
-      return saveFilteredItems(filteredObjects, name, response[name], config.paths)
-        .then(resolve).catch(reject)
+      return saveFilteredItems(filteredObjects, name, response[name])
+        .then(resolve)
+        .catch(reject)
     } catch (error) {
       return reject(error)
     }
@@ -124,6 +125,8 @@ export const formatItems = (items, config) => {
         break
     }
   })
+
+  return items
 }
 
 /**
@@ -165,4 +168,6 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
       token: tokenValue,
     }
   }
+
+  return groupedItems
 }

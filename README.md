@@ -24,69 +24,87 @@ Once the sync-manager fetches the updated details from Contentstack - it needs t
 ### Usage
 
 ```js
-const assetConnector = require('contentstack-asset-connector')
-const contentConnector = require('contentstack-mongodb-content-connector')
-const listener = require('contentstack-webhook-listener')
+  const assetConnector = require('contentstack-asset-connector')
+  const contentConnector = require('contentstack-mongodb-content-connector')
+  const listener = require('contentstack-webhook-listener')
 
-const config = require('./config')
-const syncManager = require('./dist')
+  const config = require('./config')
+  const syncManager = require('./dist')
 
-syncManager.setAssetConnector(assetConnector)
-syncManager.setContentConnector(contentConnector)
-syncManager.setListener(listener)
-syncManager.setConfig(config)
+  syncManager.setAssetConnector(assetConnector)
+  syncManager.setContentConnector(contentConnector)
+  syncManager.setListener(listener)
+  syncManager.setConfig(config)
 
-syncManager.start().then((messages) => {
-  console.log(messages.status)
-}).catch((error) => {
-  console.error(error)
-})
+  syncManager.start().then((messages) => {
+    console.log(messages.status)
+  }).catch((error) => {
+    console.error(error)
+  })
 ```
 
 ### Config
 
-1. **contentstack.apiKey**
+By default, sync manager uses the following config to get started
 
-Is a mandatory key, that defines the stack to sync from.
-
-2. **contentstack.token**
-
-If a token is provided, the sync-manager will start content sync from there
-
-3. **locales**
-
-The locales define the languages that need to be 'synced'. Any locale found other than the ones defined, will automatically be filtered out
-
-4. **sync-manager.cooloff**
-
-Defines the 'cooloff' duration (in milliseconds) to wait for after a 'sync api' call has been attempted by the app. If no value is provided, it will default to '3000 ms'
-
-5. **sync-manager.limit**
-
-The no. of items that's fetched at a time while using contentstack sync-api
-
-
-Here's a sample config to help you get started!
-```json
-{
-  "contentstack": {
-    "apiKey": "",
-    "token": ""
+```js
+<!-- snippet -->
+  contentstack: {
+    // stack api key
+    apiKey: '', // (required)
+    // stack delivery token
+    token: '', // (required)
+    // sync token from where data is to synced when app starts
+    sync_token: '',
+    // pagination token from where data is to be synced when app starts
+    pagination_token: '',s
+    // no of times REST API calls are retried before rejecting
+    MAX_RETRY_LIMIT: 6,
+    // default request host
+    host: 'cdn.contentstack.io',
   },
-  "locales": [
+  // locales added here will be filtered out
+  locales: [
     {
-      "code": "en-us",
-      "relative_url_prefix": "/"
+      code: 'hi-in'
     }
   ],
-  "plugins": {
-    "myplugin": {
-      "greetings": ["Hello there!", "Ola amigo!"]
-    }
+  sync-manager: {
+    // milliseconds to wait before firing SYNC API
+    cooloff: 3000,
+    // no of items to be fetched at a time
+    limit: 100,
+    // max file sizes in bytes
+    maxsize: 2097152,
+    // if true, filtered and failed item objects will be saved locally under 'unprocessible' folder
+    saveFailedItems: true,
+    saveFilteredItems: true,
   },
-  "sync-manager": {
-    "cooloff": 3000,
-    "limit": 100,
+```
+(Note: All the above config can be overridden!)
+
+Here's a sample config to help you get started!
+
+```json
+  {
+    "contentstack": {
+      "apiKey": "",
+      "token": ""
+    },
+    "locales": [
+      {
+        "code": "en-us",
+        "relative_url_prefix": "/"
+      }
+    ],
+    "plugins": {
+      "myplugin": {
+        "greetings": ["Hello there!", "Ola amigo!"]
+      }
+    },
+    "sync-manager": {
+      "cooloff": 3000,
+      "limit": 100,
+    }
   }
-}
 ```

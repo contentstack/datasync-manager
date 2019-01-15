@@ -1,7 +1,7 @@
 "use strict";
 /*!
 * Contentstack Sync Manager
-* Copyright © 2019 Contentstack LLC
+* Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
 var __importDefault = (this && this.__importDefault) || function (mod) {
@@ -11,8 +11,8 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
-const failedItems_1 = require("../util/log/failedItems");
 const logger_1 = require("../util/logger");
+const unprocessible_1 = require("../util/unprocessible");
 const plugins_1 = require("./plugins");
 const token_management_1 = require("./token-management");
 const debug = debug_1.default('sm:core-q');
@@ -42,7 +42,7 @@ class Q extends events_1.EventEmitter {
         debug(`Error handler called with ${JSON.stringify(obj)}`);
         if (obj.data.checkpoint) {
             token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
-                failedItems_1.saveFailedItems(obj).then(this.next).catch((error) => {
+                unprocessible_1.saveFailedItems(obj).then(this.next).catch((error) => {
                     debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`);
                     this.next();
                 });
@@ -52,7 +52,7 @@ class Q extends events_1.EventEmitter {
                 this.next();
             });
         }
-        failedItems_1.saveFailedItems(obj).then(this.next).catch((error) => {
+        unprocessible_1.saveFailedItems(obj).then(this.next).catch((error) => {
             logger_1.logger.error('Errorred while saving failed items');
             logger_1.logger.error(error);
             this.next();
