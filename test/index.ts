@@ -2,7 +2,7 @@ import { cloneDeep, merge } from 'lodash'
 import nock from 'nock'
 import { setAssetConnector, setConfig, setContentConnector, setListener, start } from '../src'
 import { config as internalConfig } from '../src/defaults'
-import { createLogger } from '../src/util/logger'
+import { setLogger } from '../src/util/logger'
 import { contentType as contentTypeSchema } from './dummy/api-responses/content-type'
 import { response as deleteResponse } from './dummy/api-responses/delete'
 import { response as mixedUnpublishResponse } from './dummy/api-responses/entries'
@@ -13,31 +13,27 @@ import { assetConnector, contentConnector, listener } from './dummy/connector-li
 
 describe('core', () => {
   beforeAll(() => {
-    createLogger()
+    setLogger()
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io', { reqheaders: {
-      'accept': 'application/json',
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
-      'host': 'api.localhost.io',
-      'x-user-agent': 'contentstack-sync-manager',
+      'x-user-agent': 'contentstack-sync-manager/v1.0.0',
     }})
-      .get('/stacks/sync/publish-success')
+      .get('/v3/stacks/sync/publish-success')
       .query({sync_token: 'dummySyncToken', environment: 'development', limit: 100})
       .reply(200, publishResponse)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io', { reqheaders: {
-        'accept': 'application/json',
         'access_token': 'dummyDeliveryToken',
         'api_key': 'dummyApiKey',
-        'host': 'api.localhost.io',
-        'x-user-agent': 'contentstack-sync-manager',
+        'x-user-agent': 'contentstack-sync-manager/v1.0.0',
       }})
-        .get('/stacks/sync/unpublish-success')
+        .get('/v3/stacks/sync/unpublish-success')
         .query({sync_token: 'dummySyncToken', environment: 'development', limit: 100})
         .reply(200, mixedUnpublishResponse)
 
@@ -49,35 +45,33 @@ describe('core', () => {
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
       'host': 'api.localhost.io',
-      'x-user-agent': 'contentstack-sync-manager',
+      'x-user-agent': 'contentstack-sync-manager/v1.0.0',
     }})
-      .get('/stacks/sync/delete-success')
+      .get('/v3/stacks/sync/delete-success')
       .query({pagination_token: 'dummyPaginationToken', environment: 'development', limit: 100})
       .reply(200, deleteResponse)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io', { reqheaders: {
-      'accept': 'application/json',
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
-      'host': 'api.localhost.io',
-      'x-user-agent': 'contentstack-sync-manager',
+      'x-user-agent': 'contentstack-sync-manager/v1.0.0',
     }})
-      .get('/stacks/sync')
+      .get('/v3/stacks/sync')
       .query({sync_token: 'dummySyncToken', environment: 'development', limit: 100})
       .reply(200, deleteResponse)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io')
-      .get('/content_types/authors')
+      .get('/v3/content_types/authors')
       .reply(200, contentTypeSchema)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io')
-      .get('/stacks/sync/unpublish-success')
+      .get('/v3/stacks/sync/unpublish-success')
       .reply(200, publishResponse)
   })
 
@@ -106,7 +100,7 @@ describe('core', () => {
     const configs = cloneDeep(merge({}, config, internalConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
-    contentstack.cdn = 'https://api.localhost.io'
+    contentstack.host = 'api.localhost.io'
     setContentConnector(contentConnector)
     setAssetConnector(assetConnector)
     setListener(listener)
@@ -122,8 +116,8 @@ describe('core', () => {
     const configs = cloneDeep(merge({}, config, internalConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
-    contentstack.cdn = 'https://api.localhost.io'
-    contentstack.restAPIS.sync += '/publish-success'
+    contentstack.host = 'api.localhost.io'
+    contentstack.apis.sync += '/publish-success'
     setContentConnector(contentConnector)
     setAssetConnector(assetConnector)
     setListener(listener)
@@ -139,8 +133,8 @@ describe('core', () => {
     const configs = cloneDeep(merge({}, config, internalConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
-    contentstack.cdn = 'https://api.localhost.io'
-    contentstack.restAPIS.sync += '/unpublish-success'
+    contentstack.host = 'api.localhost.io'
+    contentstack.apis.sync += '/unpublish-success'
     setContentConnector(contentConnector)
     setAssetConnector(assetConnector)
     setListener(listener)

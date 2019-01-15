@@ -6,13 +6,12 @@ import { sync as rimraf } from 'rimraf'
 import { setConfig } from '../../src'
 import { getTokenByType } from '../../src/core/token-management'
 import { buildConfigPaths } from '../../src/util/build-paths'
-import { createLogger } from '../../src/util/logger'
-import { stringify } from '../../src/util/stringify'
+import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
 
 describe('token management', () => {
   beforeAll(() => {
-    createLogger()
+    setLogger()
   })
 
   test('get token by type should work without errors', () => {
@@ -35,10 +34,9 @@ describe('token management', () => {
     rimraf(tokenDirectory)
     // throw new Error('hey')
     mkdirp(tokenDirectory)
-    writeFileSync(ledgerPath, stringify(tokenData))
+    writeFileSync(ledgerPath, JSON.stringify(tokenData))
 
     return getTokenByType('checkpoint').then((tokenDetails) => {
-      console.log(JSON.stringify(tokenDetails))
       expect(tokenDetails).toMatchObject(tokenData[0])
       // expect(tokenDetails).toBeUndefined()
     }).catch((error) => {

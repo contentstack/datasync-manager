@@ -43,7 +43,7 @@ export const validateInstances = (assetConnector, contentConnector, listener) =>
    typeof listener.start !== 'function') {
     throw new Error('Connector and listener instances should have \'start()\' method')
   } else if (!assetConnector.setLogger || !contentConnector.setLogger || !listener.setLogger) {
-    throw new Error('Connector and listener instances should have \'setLogger()\' method')
+    throw new Error('Connector and listener instances should have \'setLogger\' method')
   } else if (typeof assetConnector.setLogger !== 'function' ||
    typeof contentConnector.setLogger !== 'function' || typeof listener.setLogger !== 'function') {
     throw new Error('Connector and listener instances should have \'start()\' method')

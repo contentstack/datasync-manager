@@ -3,7 +3,7 @@ import { setConfig } from '../../src'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { filterItems, formatItems } from '../../src/util/core-utilities'
-import { createLogger } from '../../src/util/logger'
+import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
 import { response } from '../dummy/filter-items'
 
@@ -12,7 +12,7 @@ const conf: any = cloneDeep(merge({}, internalConfig, config))
 
 describe('core-utilities', () => {
   beforeAll(() => {
-    createLogger()
+    setLogger()
     conf.paths = buildConfigPaths()
   })
 

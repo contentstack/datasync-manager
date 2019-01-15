@@ -7,30 +7,14 @@ export const config = {
   },
   'contentstack': {
     apiKey: 'dummyApiKey',
+    host: 'api.localhost.io',
     sync_token: 'dummySyncToken',
     token: 'dummyDeliveryToken',
   },
   'listener': {
 
   },
-  'locales': [
-    {
-      code: 'en-us',
-      relative_url_prefix: '/',
-    },
-    {
-      code: 'fr-fr',
-      relative_url_prefix: '/fr/',
-    },
-    {
-      code: 'en-gb',
-      relative_url_prefix: '/gb/',
-    },
-    {
-      code: 'es-es',
-      relative_url_prefix: '/es/',
-    },
-  ],
+  'locales': [],
   'plugins': {
     myplugin: {
       name: 'Jane Doe',

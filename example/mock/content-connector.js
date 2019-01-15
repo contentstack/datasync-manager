@@ -22,6 +22,9 @@ module.exports = {
     console.log('Content connector unpublish called')
     return Promise.resolve()
   },
+  setLogger: () => {
+
+  },
   start: function () {
     console.log('Content connector started')
     return Promise.resolve(this)
