@@ -5,6 +5,8 @@
 */
 
 import { map, remove } from 'lodash'
+import { getConfig } from '..'
+import { existsSync, mkdirpSync, stat } from './fs'
 import { saveFilteredItems } from './unprocessible'
 
 const formattedAssetType = '_assets'
@@ -170,4 +172,35 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
   }
 
   return groupedItems
+}
+
+/**
+ * @description Calcuates filename for ledger and unprocessible files
+ * @param {String} file - File to be calculated on
+ * @param {Function} rotate - File rotation logic (should return a string)
+ * @returns {String} Returns path to a file
+ */
+export const getFile = (file, rotate) => {
+  return new Promise((resolve, reject) => {
+    const config = getConfig()
+    if (existsSync(file)) {
+      return stat(file, (statError, stats) => {
+        if (statError) {
+          return reject(statError)
+        } else if (stats.isFile()) {
+          if (stats.size > config['sync-manager'].maxsize) {
+            file = rotate()
+          }
+
+          return resolve(file)
+        } else {
+          return reject(new Error(`${file} is not of type file`))
+        }
+      })
+    } else {
+      mkdirpSync(config.paths.unprocessibleDir)
+
+      return resolve(file)
+    }
+  })
 }
