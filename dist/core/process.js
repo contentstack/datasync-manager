@@ -11,13 +11,13 @@ const handleExit = (signal) => {
     _1.lock();
     const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : 15000;
     logger_1.logger.info(`Received ${signal}. This will shut down the process in ${killDuration}ms..`);
-    setInterval(abort, killDuration);
+    setTimeout(abort, killDuration);
 };
 const unhandledErrors = (error) => {
     logger_1.logger.error('Unhandled exception caught. Locking down process for 10s to recover..');
     logger_1.logger.error(error);
     _1.lock();
-    setInterval(() => {
+    setTimeout(() => {
         _1.unlock();
     }, 10000);
 };

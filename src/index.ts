@@ -76,9 +76,7 @@ export const getConfig = () => {
  * @description Set custom logger for logging
  * @param {Object} instance - Custom logger instance
  */
-export const setCustomLogger = (instance) => {
-  setLogger(instance)
-}
+export { setLogger } from './util/logger'
 
 /**
  * @summary
@@ -97,8 +95,8 @@ export const start = (config = {}) => {
       appConfig.paths = buildConfigPaths()
       // since logger is singleton, if previously set, it'll return that isnstance!
       setLogger()
-      assetConnector.setCustomLogger(logger)
-      contentConnector.setCustomLogger(logger)
+      assetConnector.setLogger(logger)
+      contentConnector.setLogger(logger)
 
       return assetConnector.start(appConfig).then((assetInstance) => {
         debug('Asset connector instance has returned successfully!')

@@ -8,6 +8,9 @@ export const assetConnector = {
   download: () => {
     return Promise.resolve()
   },
+  setLogger: () => {
+    return
+  },
   start: () => {
     return Promise.resolve(assetConnector)
   },
@@ -30,6 +33,9 @@ export const contentConnector = {
   publish: () => {
     return Promise.resolve()
   },
+  setLogger: () => {
+    return
+  },
   start: () => {
     return Promise.resolve(contentConnector)
   },
@@ -48,8 +54,11 @@ export const listener = {
 
     return
   },
+  setLogger: () => {
+    return
+  },
   start: () => {
-    // simply fire events every 20 seconds
+    // simply fire events every 10 seconds
     setInterval(consumer, 10 * 1000)
 
     return Promise.resolve()

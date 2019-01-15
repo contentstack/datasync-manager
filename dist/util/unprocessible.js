@@ -15,6 +15,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const __1 = require("../");
+const core_utilities_1 = require("./core-utilities");
 const fs_1 = require("./fs");
 const logger_1 = require("./logger");
 const counter = {
@@ -46,7 +47,10 @@ exports.saveFilteredItems = (items, name, token) => {
             else {
                 filename = `${config.paths.filtered}-${counter.filtered}.json`;
             }
-            const file = yield getFile(filename, 'filtered');
+            const file = yield core_utilities_1.getFile(filename, () => {
+                counter.filtered++;
+                return `${config.paths.filtered}-${counter.filtered}.json`;
+            });
             if (fs_1.existsSync(file)) {
                 return fs_1.readFile(file).then((data) => {
                     const loggedItems = JSON.parse(data);
@@ -72,32 +76,5 @@ exports.saveFilteredItems = (items, name, token) => {
             return reject(error);
         }
     }));
-};
-const getFile = (file, type) => {
-    return new Promise((resolve, reject) => {
-        const config = __1.getConfig();
-        if (fs_1.existsSync(file)) {
-            return fs_1.stat(file, (statError, stats) => {
-                if (statError) {
-                    return reject(statError);
-                }
-                else if (stats.isFile()) {
-                    if (stats.size > config['sync-manager'].maxsize) {
-                        counter[type]++;
-                        const filename = `${config.paths[type]}-${counter[type]}.json`;
-                        return resolve(filename);
-                    }
-                    return resolve(file);
-                }
-                else {
-                    return reject(new Error(`${file} is not of type file`));
-                }
-            });
-        }
-        else {
-            fs_1.mkdirpSync(config.paths.unprocessibleDir);
-            return resolve(file);
-        }
-    });
 };
 //# sourceMappingURL=unprocessible.js.map

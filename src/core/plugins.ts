@@ -26,6 +26,10 @@ export const load = (config) => {
   pluginMethods.forEach((pluginMethod) => {
     pluginInstances[pluginMethod] = pluginInstances[pluginMethod] || []
   })
+
+  // load internal plugins
+
+  // external plugins
   for (const pluginName of Object.keys(plugins)) {
     const pluginPath = resolve(join(config.paths.plugin, pluginName, 'index.js'))
     if (existsSync(pluginPath)) {

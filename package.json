@@ -50,6 +50,7 @@
     "type": "git",
     "url": "git+https://github.com/contentstack/contentstack-sync.git"
   },
+  "types": "./typings",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/contentstack/contentstack-sync/issues"

@@ -17,10 +17,8 @@ export const setLogger = (customLogger?) => {
     return logger
   } else if (!validateLogger(customLogger) && !customLogger) {
     logger = console
-    logger.info('Standard logger created')
   } else {
     logger = customLogger
-    logger.info('Customized logger registered successfully!')
   }
 
   return logger
