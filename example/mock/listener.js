@@ -11,6 +11,9 @@ module.exports = {
     console.log(`${fn} has been registered with the listener`)
     return
   },
+  setLogger: () => {
+
+  },
   start: () => {
     console.log('Listener started')
     // simply fire events every 20 seconds

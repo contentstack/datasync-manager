@@ -17,13 +17,19 @@ const debug = debug_1.default('api:get-requests');
 let MAX_RETRY_LIMIT;
 let Contentstack;
 exports.init = (contentstack) => {
-    const packageInfo = JSON.parse(fs_1.readFileSync(path_1.join(__dirname, '..', 'package.json')));
-    Contentstack = contentstack;
-    Contentstack.headers = {
-        'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
-        'access_token': Contentstack.token,
-        'api_key': Contentstack.apiKey,
-    };
+    try {
+        console.log(path_1.join(__dirname, '..', 'package.json'));
+        const packageInfo = JSON.parse(fs_1.readFileSync(path_1.join(__dirname, '..', 'package.json')));
+        Contentstack = contentstack;
+        Contentstack.headers = {
+            'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
+            'access_token': Contentstack.token,
+            'api_key': Contentstack.apiKey,
+        };
+    }
+    catch (error) {
+        console.error(error);
+    }
     if (Contentstack.MAX_RETRY_LIMIT) {
         MAX_RETRY_LIMIT = Contentstack.MAX_RETRY_LIMIT;
     }
@@ -80,11 +86,14 @@ exports.get = (req, RETRY = 1) => {
                     }
                     else {
                         debug(`Request failed\n${JSON.stringify(req)}`);
-                        return reject(JSON.parse(body));
+                        return reject(body);
                     }
                 });
             })
-                .on('error', reject)
+                .on('error', (error) => {
+                console.error(error);
+                return reject(error);
+            })
                 .end();
         }
         catch (error) {

@@ -206,7 +206,7 @@ export const getFile = (file, rotate) => {
 }
 
 export const buildAssetReference = (entry) => {
-  if (typeof entry === 'object' && !(Array.isArray(entry))) {
+  if (entry && typeof entry === 'object' && !(Array.isArray(entry))) {
     if (entry.filename && entry.url && entry.size && entry.uid) {
       const assetkeys = Object.keys(entry)
       assetkeys.forEach((k) => {
@@ -223,7 +223,7 @@ export const buildAssetReference = (entry) => {
         buildAssetReference(obj)
       }
     })
-  } else if (typeof entry === 'object' && Array.isArray(entry)) {
+  } else if (entry && typeof entry === 'object' && Array.isArray(entry)) {
     entry.forEach((subObj) => {
       if (typeof subObj === 'object') {
         buildAssetReference(subObj)

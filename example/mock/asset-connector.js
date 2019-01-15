@@ -10,6 +10,9 @@ module.exports = {
   unpublish: function () {
     return Promise.resolve()
   },
+  setLogger: () => {
+
+  },
   start: function () {
     return Promise.resolve(this)
   }

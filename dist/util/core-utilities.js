@@ -175,10 +175,10 @@ exports.getFile = (file, rotate) => {
     });
 };
 exports.buildAssetReference = (entry) => {
-    if (typeof entry === 'object' && !(Array.isArray(entry))) {
+    if (entry && typeof entry === 'object' && !(Array.isArray(entry))) {
         if (entry.filename && entry.url && entry.size && entry.uid) {
-            const _keys = Object.keys(entry);
-            _keys.forEach((k) => {
+            const assetkeys = Object.keys(entry);
+            assetkeys.forEach((k) => {
                 if (k !== 'uid') {
                     delete entry[k];
                 }
@@ -193,10 +193,10 @@ exports.buildAssetReference = (entry) => {
             }
         });
     }
-    else if (typeof entry === 'object' && Array.isArray(entry)) {
-        entry.forEach((_obj) => {
-            if (typeof _obj === 'object') {
-                exports.buildAssetReference(_obj);
+    else if (entry && typeof entry === 'object' && Array.isArray(entry)) {
+        entry.forEach((subObj) => {
+            if (typeof subObj === 'object') {
+                exports.buildAssetReference(subObj);
             }
         });
     }

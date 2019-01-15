@@ -1,7 +1,7 @@
 import { cloneDeep, merge } from 'lodash'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
-import { createLogger } from '../../src/util/logger'
+import { setLogger } from '../../src/util/logger'
 
 import {
   validateAssetConnector,
@@ -15,7 +15,7 @@ import { assetConnector, contentConnector, listener } from '../dummy/connector-l
 
 describe('validations', () => {
   beforeAll(() => {
-    createLogger()
+    setLogger()
   })
   describe('validate config for errors', () => {
     test('contentstack config key is undefined', () => {
@@ -25,24 +25,6 @@ describe('validations', () => {
       expect(() => {
         validateConfig(configs)
       }).toThrowError(/^Config 'contentstack' key cannot be undefined$/)
-    })
-
-    test('config locales is not an array', () => {
-      const configs: any = cloneDeep(merge({}, internalConfig, config))
-      configs.paths = buildConfigPaths()
-      configs.locales = {}
-      expect(() => {
-        validateConfig(configs)
-      }).toThrowError(/^Config 'locales' should be an array and not empty!$/)
-    })
-
-    test('config locales length is 0', () => {
-      const configs: any = cloneDeep(merge({}, internalConfig, config))
-      configs.paths = buildConfigPaths()
-      configs.locales = []
-      expect(() => {
-        validateConfig(configs)
-      }).toThrowError(/^Config 'locales' should be an array and not empty!$/)
     })
 
     test('config contentstack does not have required - apiKey', () => {

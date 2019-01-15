@@ -1,8 +1,8 @@
-import { poke } from '../../src/core/sync'
-import { createLogger } from '../../src/util/logger'
+import { poke } from '../../src/core'
+import { setLogger } from '../../src/util/logger'
 
 beforeAll(() => {
-  createLogger()
+  setLogger()
 })
 
 test('Poke should work without errors', () => {
