@@ -19,12 +19,17 @@ let Contentstack
  * @param {Object} contentstack - Contentstack configuration details
  */
 export const init = (contentstack) => {
-  const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json')))
-  Contentstack = contentstack
-  Contentstack.headers = {
-    'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
-    'access_token': Contentstack.token,
-    'api_key': Contentstack.apiKey,
+  try {
+    console.log(join(__dirname, '..', 'package.json'))
+    const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json')))
+    Contentstack = contentstack
+    Contentstack.headers = {
+      'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
+      'access_token': Contentstack.token,
+      'api_key': Contentstack.apiKey,
+    }
+  } catch (error) {
+    console.error(error)
   }
 
   // if (Contentstack.keepAlive) {
@@ -99,11 +104,15 @@ export const get = (req, RETRY = 1) => {
               } else {
                 debug(`Request failed\n${JSON.stringify(req)}`)
 
-                return reject(JSON.parse(body))
+                return reject(body)
               }
             })
         })
-        .on('error', reject)
+        .on('error', (error) => {
+          console.error(error)
+
+          return reject(error)
+        })
         .end()
     } catch (error) {
       return reject(error)

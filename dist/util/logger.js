@@ -12,11 +12,9 @@ exports.setLogger = (customLogger) => {
     }
     else if (!validations_1.validateLogger(customLogger) && !customLogger) {
         exports.logger = console;
-        exports.logger.info('Standard logger created');
     }
     else {
         exports.logger = customLogger;
-        exports.logger.info('Customized logger registered successfully!');
     }
     return exports.logger;
 };

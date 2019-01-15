@@ -3,15 +3,16 @@ import { cloneDeep, merge } from 'lodash'
 import { sync as mkdirpSync } from 'mkdirp'
 import { join, resolve } from 'path'
 import { sync as rimrafSync } from 'rimraf'
+
 import { setConfig } from '../../src'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
-import { saveFilteredItems } from '../../src/util/log/filteredItems'
-import { createLogger } from '../../src/util/logger'
+import { setLogger } from '../../src/util/logger'
+import { saveFilteredItems } from '../../src/util/unprocessible'
 import { config } from '../dummy/config'
 
 const configs: any = cloneDeep(merge({}, internalConfig, config))
-createLogger()
+setLogger()
 configs.paths = buildConfigPaths()
 
 describe('save filtered items', () => {
@@ -32,7 +33,7 @@ describe('save filtered items', () => {
     mkdirpSync(filterItemDir)
     writeFileSync(filterItemPath, JSON.stringify(filteredData))
 
-    return saveFilteredItems(filteredData, 'mocked-name', 'mocked-token', configs.paths).then((output) => {
+    return saveFilteredItems(filteredData, 'mocked-name', 'mocked-token').then((output) => {
       expect(output).toBeUndefined()
     }).catch((error) => {
       expect(error).toBeNull()

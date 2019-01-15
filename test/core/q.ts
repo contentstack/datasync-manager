@@ -3,14 +3,14 @@ import { setConfig } from '../../src'
 import { Q } from '../../src/core/q'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
-import { createLogger } from '../../src/util/logger'
+import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
 import { contentConnector } from '../dummy/connector-listener-instances'
 
 const configs: any = cloneDeep(merge({}, internalConfig, config))
 
 beforeAll(() => {
-  createLogger()
+  setLogger()
 })
 
 test('error handler should work fine', () => {

@@ -3,14 +3,14 @@ import { join, resolve } from 'path'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { mkdir, readFile, readFileSync, writeFile } from '../../src/util/fs'
-import { createLogger } from '../../src/util/logger'
+import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
 
 const configs: any = cloneDeep(merge({}, internalConfig, config))
 
 describe('fs utility', () => {
   beforeAll(() => {
-    createLogger()
+    setLogger()
     configs.paths = buildConfigPaths()
   })
 

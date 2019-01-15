@@ -1,10 +1,18 @@
+import { cloneDeep, merge } from 'lodash'
 import { join, resolve} from 'path'
-import { saveFilteredItems } from '../../src/util/log/filteredItems'
-import { createLogger } from '../../src/util/logger'
+
+import { setConfig } from '../../src'
+import { config as internalConfig } from '../../src/defaults'
+import { buildConfigPaths } from '../../src/util/build-paths'
+import { setLogger } from '../../src/util/logger'
+import { saveFilteredItems } from '../../src/util/unprocessible'
+import { config as mockConfig } from '../dummy/config'
+
+const config = cloneDeep(merge({}, internalConfig, mockConfig))
 
 describe('filter items', () => {
   beforeAll(() => {
-    createLogger()
+    setLogger()
   })
 
   test('Save filtered items should work without errors', () => {
@@ -15,11 +23,14 @@ describe('filter items', () => {
     ]
     const name = 'dummy_token'
     const token = '123'
-    const paths = {
-      filteredItems: resolve(join(__dirname, '..', '..', 'logs', 'failedItems.json')),
-    }
 
-    return saveFilteredItems(items, name, token, paths).then((empty) => {
+    const configs: any = cloneDeep(config)
+    configs.paths = buildConfigPaths()
+    const paths = configs.contentstack.paths
+    paths.filtered = resolve(join(__dirname, '..', '..', 'test-filtered'))
+    setConfig(configs)
+
+    return saveFilteredItems(items, name, token).then((empty) => {
       expect(empty).toBeUndefined()
     }).catch((error) => {
       expect(error).toBeNull()
@@ -34,11 +45,8 @@ describe('filter items', () => {
     ]
     const name = 'dummy_token'
     const token = '123'
-    const paths = {
-      // filteredItems: resolve(join(__dirname, '..', '..', 'logs', 'failedItems.json')),
-    }
 
-    return saveFilteredItems(items, name, token, paths).then((empty) => {
+    return saveFilteredItems(items, name, token).then((empty) => {
       expect(empty).toBeUndefined()
     }).catch((error) => {
       expect(error).toBeNull()
