@@ -45,8 +45,8 @@ describe('core-utilities', () => {
           uid: items[0].data.uid,
         },
       ]
-      expect(formatItems(items, configs)).toBeUndefined()
-      expect(items[0]).toEqual(modifiedItems[0])
+      expect(formatItems(items, configs)).toEqual(modifiedItems)
+      // expect(items[0]).toEqual(modifiedItems[0])
     })
 
     test('asset unpublish should work without errors', () => {
@@ -74,8 +74,8 @@ describe('core-utilities', () => {
           uid: items[0].data.uid,
         },
       ]
-      expect(formatItems(items, configs)).toBeUndefined()
-      expect(items[0]).toEqual(modifiedItems[0])
+      expect(formatItems(items, configs)).toEqual(modifiedItems)
+      // expect(items[0]).toEqual(modifiedItems[0])
     })
 
     test('asset delete should work without errors', () => {
@@ -103,8 +103,8 @@ describe('core-utilities', () => {
           uid: items[0].data.uid,
         },
       ]
-      expect(formatItems(items, configs)).toBeUndefined()
-      expect(items[0]).toEqual(modifiedItems[0])
+      expect(formatItems(items, configs)).toEqual(modifiedItems)
+      // expect(items[0]).toEqual(modifiedItems[0])
     })
 
     test('entry publish should work without errors', () => {
@@ -136,8 +136,8 @@ describe('core-utilities', () => {
           uid: items[0].data.uid,
         },
       ]
-      expect(formatItems(items, configs)).toBeUndefined()
-      expect(items[0]).toEqual(modifiedItems[0])
+      expect(formatItems(items, configs)).toEqual(modifiedItems)
+      // expect(items[0]).toEqual(modifiedItems[0])
     })
 
     test('entry unpublish should work without errors', () => {
@@ -165,8 +165,8 @@ describe('core-utilities', () => {
           uid: items[0].data.uid,
         },
       ]
-      expect(formatItems(items, configs)).toBeUndefined()
-      expect(items[0]).toEqual(modifiedItems[0])
+      expect(formatItems(items, configs)).toEqual(modifiedItems)
+      // expect(items[0]).toEqual(modifiedItems[0])
     })
 
     test('entry delete should work without errors', () => {
@@ -194,8 +194,8 @@ describe('core-utilities', () => {
           uid: items[0].data.uid,
         },
       ]
-      expect(formatItems(items, configs)).toBeUndefined()
-      expect(items[0]).toEqual(modifiedItems[0])
+      expect(formatItems(items, configs)).toEqual(modifiedItems)
+      // expect(items[0]).toEqual(modifiedItems[0])
     })
   })
 
