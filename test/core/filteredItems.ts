@@ -26,8 +26,7 @@ describe('filter items', () => {
 
     const configs: any = cloneDeep(config)
     configs.paths = buildConfigPaths()
-    const paths = configs.contentstack.paths
-    paths.filtered = resolve(join(__dirname, '..', '..', 'test-filtered'))
+    configs.paths.filtered = resolve(join(__dirname, '..', '..', 'test-filtered'))
     setConfig(configs)
 
     return saveFilteredItems(items, name, token).then((empty) => {

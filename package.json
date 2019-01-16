@@ -35,7 +35,7 @@
     "prepare": "npm run compile",
     "start": "dist",
     "tslint": "npx tslint -c tslint.json 'src/**/*.ts' --fix",
-    "test": "jest --colors --coverage --verbose"
+    "test": "PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose"
   },
   "engines": {
     "node": ">=6"

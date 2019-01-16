@@ -151,8 +151,8 @@ describe('core', () => {
     delete configs.plugins
     const contentstack: any = configs.contentstack
     contentstack.pagination_token = 'dummyPaginationToken'
-    contentstack.cdn = 'https://api.localhost.io'
-    contentstack.restAPIS.sync += '/delete-success'
+    contentstack.cdn = 'api.localhost.io'
+    contentstack.apis.sync += '/delete-success'
     setContentConnector(contentConnector)
     setAssetConnector(assetConnector)
     setListener(listener)
