@@ -205,31 +205,86 @@ export const getFile = (file, rotate) => {
   })
 }
 
-export const buildAssetReference = (entry) => {
-  if (entry && typeof entry === 'object' && !(Array.isArray(entry))) {
-    if (entry.filename && entry.url && entry.size && entry.uid) {
-      const assetkeys = Object.keys(entry)
-      assetkeys.forEach((k) => {
-        if (k !== 'uid') {
-          delete entry[k]
-        }
-        entry._content_type_uid = '_assets'
-      })
+export const buildContentReferences = (schema, entry) => {
+  const config = getConfig()
+  const enableAssetReferences = config['sync-manager'].enableAssetReferences
+  const enableContentReferences = config['sync-manager'].enableContentReferences
+  const parent = []
+  for (let i = 0, _i = schema.length; i < _i; i++) {
+    switch (schema[i].data_type) {
+    case 'reference':
+      if (enableAssetReferences) {
+        parent.push(schema[i].uid)
+        update(parent, schema[i].reference_to, entry)
+        parent.pop()
+      }
+      break
+    case 'file':
+      if (enableContentReferences) {
+        parent.push(schema[i].uid)
+        update(parent, '_assets', entry)
+        parent.pop()
+      }
+      break
+    case 'group':
+      parent.push(schema[i].uid)
+      buildContentReferences(schema[i].schema, entry)
+      parent.pop()
+      break
+    case 'blocks':
+      for (let j = 0, _j = schema[i].blocks.length; j < _j; j++) {
+        parent.push(schema[i].uid)
+        parent.push(schema[i].blocks[j].uid)
+        buildContentReferences(schema[i].blocks[j].schema, entry)
+        parent.pop()
+        parent.pop()
+      }
+      break
     }
-    const keys = Object.keys(entry)
-    keys.forEach((key) => {
-      const obj = entry[key]
-      if (typeof obj === 'object') {
-        buildAssetReference(obj)
-      }
-    })
-  } else if (entry && typeof entry === 'object' && Array.isArray(entry)) {
-    entry.forEach((subObj) => {
-      if (typeof subObj === 'object') {
-        buildAssetReference(subObj)
-      }
-    })
   }
 
   return entry
+}
+
+const update = (parent, reference, entry) => {
+  let _entry = entry
+  const len = parent.length
+  for (let j = 0; j < len; j++) {
+    if (_entry && parent[j]) {
+      if (j === (len - 1) && _entry[parent[j]]) {
+        if (reference !== '_assets') {
+          _entry[parent[j]] = {
+            values: _entry[parent[j]],
+            _content_type_id: reference
+          }
+        } else {
+          if (Array.isArray(_entry[parent[j]])) {
+            const assetIds = []
+            for (let k = 0; k < _entry[parent[j]].length; k++) {
+              assetIds.push(_entry[parent[j]][k]['uid'])
+            }
+            _entry[parent[j]] = {
+              values: assetIds,
+              _content_type_id: reference
+            };
+          } else {
+            _entry[parent[j]] = {
+              values: _entry[parent[j]]['uid'],
+              _content_type_id: reference
+            };
+          }
+        }
+      } else {
+        _entry = _entry[parent[j]]
+        const _keys = cloneDeep(parent).splice(eval(j + 1), len);
+        if (Array.isArray(_entry)) {
+          for (let i = 0, _i = _entry.length; i < _i; i++) {
+            update(_keys, reference, _entry[i])
+          }
+        } else if (typeof _entry !== 'object') {
+          break
+        }
+      }
+    }
+  }
 }
