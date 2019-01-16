@@ -27,53 +27,100 @@ let assetConnector
 let listener
 
 /**
- * @description Register content connector
+ * @summary Asset connector instance interface
+ */
+interface IAssetConnector {
+  download(): any,
+  unpublish(): any,
+  delete(): any,
+}
+
+/**
+ * @summary Content connector instance interface
+ */
+interface IContentConnector {
+  publish(): any,
+  unpublish(): any,
+  delete(): any,
+}
+
+/**
+ * @summary Connector interface
+ */
+interface IConnector {
+  start(): Promise<IAssetConnector | IContentConnector>,
+  setLogger(): ILogger
+}
+
+/**
+ * @summary Application config interface
+ */
+interface IConfig {
+  locales?: any[],
+  contentstack?: any,
+  'content-connector'?: any,
+  'sync-manager'?: any,
+  'asset-connector'?: any,
+}
+
+/**
+ * @summary Logger instance interface
+ */
+interface ILogger {
+  warn(): any,
+  info(): any,
+  log(): any,
+  error(): any,
+}
+
+/**
+ * @summary Register content connector
  * @param {Object} instance - Content connector instance
  */
-export const setContentConnector = (instance) => {
+export const setContentConnector = (instance: IConnector) => {
   debug('Content connector instance registered successfully')
   contentConnector = instance
 }
 
 /**
- * @description Register asset connector
+ * @summary Register asset connector
  * @param {Object} instance - Asset connector instance
  */
-export const setAssetConnector = (instance) => {
+export const setAssetConnector = (instance: IConnector) => {
   debug('Asset connector instance registered successfully')
   assetConnector = instance
 }
 
 /**
- * @description Register listener
+ * @summary Register listener
  * @param {Object} instance - Listener instance
  */
-export const setListener = (instance) => {
+export const setListener = (instance: ILogger) => {
   validateListener(instance)
   debug('Listener instance registered successfully')
   listener = instance
 }
 
 /**
- * @description Set the application's config
+ * @summary Set the application's config
  * @param {Object} config - Application config
  */
-export const setConfig = (config) => {
+export const setConfig = (config: IConfig) => {
   validateConfig(config)
   debug('Config set successfully!')
   appConfig = config
 }
 
 /**
- * @description Returns the application's configuration
+ * @summary Returns the application's configuration
  * @returns {Object} - Application config
  */
-export const getConfig = () => {
+export const getConfig = (): IConfig => {
   return appConfig
 }
 
 /**
- * @description Set custom logger for logging
+ * @summary Set custom logger for logging
  * @param {Object} instance - Custom logger instance
  */
 export { setLogger } from './util/logger'
@@ -86,7 +133,7 @@ export { setLogger } from './util/logger'
  *  Once done, builds the app's config and logger
  * @param {Object} config - Optional application config.
  */
-export const start = (config = {}) => {
+export const start = (config: IConfig = {}): Promise<{}> => {
   return new Promise((resolve, reject) => {
     try {
       validateInstances(assetConnector, contentConnector, listener)
@@ -98,7 +145,7 @@ export const start = (config = {}) => {
       assetConnector.setLogger(logger)
       contentConnector.setLogger(logger)
 
-      return assetConnector.start(appConfig).then((assetInstance) => {
+      return assetConnector.start(appConfig).then((assetInstance: IAssetConnector) => {
         debug('Asset connector instance has returned successfully!')
         validateAssetConnector(assetInstance)
 
