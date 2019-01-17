@@ -29,6 +29,8 @@ export const config = {
   'locales': [],
   'sync-manager': {
     cooloff: 3000,
+    enableAssetReferences: true,
+    enableContentReferences: true,
     limit: 100,
     // max file sizes in bytes
     maxsize: 2097152,

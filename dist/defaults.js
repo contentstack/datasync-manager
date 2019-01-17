@@ -27,6 +27,8 @@ exports.config = {
     'locales': [],
     'sync-manager': {
         cooloff: 3000,
+        enableAssetReferences: true,
+        enableContentReferences: true,
         limit: 100,
         maxsize: 2097152,
         saveFailedItems: true,
