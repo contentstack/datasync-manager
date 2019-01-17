@@ -21,21 +21,16 @@ let contentConnector;
 let assetConnector;
 let listener;
 exports.setContentConnector = (instance) => {
-    debug('Content connector instance registered successfully');
     contentConnector = instance;
 };
 exports.setAssetConnector = (instance) => {
-    debug('Asset connector instance registered successfully');
     assetConnector = instance;
 };
 exports.setListener = (instance) => {
     validations_1.validateListener(instance);
-    debug('Listener instance registered successfully');
     listener = instance;
 };
 exports.setConfig = (config) => {
-    validations_1.validateConfig(config);
-    debug('Config set successfully!');
     appConfig = config;
 };
 exports.getConfig = () => {
@@ -51,8 +46,12 @@ exports.start = (config = {}) => {
             validations_1.validateConfig(appConfig);
             appConfig.paths = build_paths_1.buildConfigPaths();
             logger_1.setLogger();
-            assetConnector.setLogger(logger_1.logger);
-            contentConnector.setLogger(logger_1.logger);
+            if (assetConnector.setLogger && typeof assetConnector.setLogger === 'function') {
+                assetConnector.setLogger(logger_1.logger);
+            }
+            if (contentConnector.setLogger && typeof contentConnector.setLogger === 'function') {
+                contentConnector.setLogger(logger_1.logger);
+            }
             return assetConnector.start(appConfig).then((assetInstance) => {
                 debug('Asset connector instance has returned successfully!');
                 validations_1.validateAssetConnector(assetInstance);

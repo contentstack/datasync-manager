@@ -12,3 +12,6 @@ coverage
 
 # Data filters
 unprocessible
+
+# Random files
+buildReferences.js

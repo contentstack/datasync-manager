@@ -21,7 +21,7 @@ const lodash_1 = require("lodash");
 const __1 = require("..");
 const core_utilities_1 = require("../util/core-utilities");
 const fs_1 = require("../util/fs");
-const debug = debug_1.default('sm:token-management');
+const debug = debug_1.default('token-management');
 let counter = 0;
 exports.getTokenByType = (type) => {
     debug(`Get token invoked with type: ${type}`);
@@ -86,6 +86,7 @@ exports.saveToken = (name, token, type) => {
                 counter++;
                 return `${config.paths.token.ledger}-${counter}`;
             });
+            debug(`ledger file: ${file} exists?(${fs_1.existsSync(file)})`);
             if (!fs_1.existsSync(file)) {
                 return fs_1.writeFile(file, JSON.stringify([obj]))
                     .then(resolve)

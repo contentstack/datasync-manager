@@ -16,7 +16,7 @@ const logger_1 = require("../util/logger");
 const unprocessible_1 = require("../util/unprocessible");
 const plugins_1 = require("./plugins");
 const token_management_1 = require("./token-management");
-const debug = debug_1.default('sm:core-q');
+const debug = debug_1.default('core-q');
 let instance = null;
 class Q extends events_1.EventEmitter {
     constructor(connector, config) {
@@ -73,11 +73,14 @@ class Q extends events_1.EventEmitter {
                     this.process(item);
                 });
             }
-            this.process(item);
+            else {
+                this.process(item);
+            }
         }
     }
     process(data) {
-        logger_1.logger.log(`Processing item\n${JSON.stringify(data, null, 2)}`);
+        logger_1.logger.log(`${data.action.toUpperCase()}ING}`);
+        logger_1.logger.log(`{ content_type: '${data.content_type_uid}', locale: '${data.locale}', uid: '${data.uid}'}`);
         switch (data.action) {
             case 'publish':
                 if (['_assets', '_content_types'].indexOf(data.content_type_uid) === -1) {

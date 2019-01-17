@@ -13,7 +13,7 @@ import { saveFailedItems } from '../util/unprocessible'
 import { load } from './plugins'
 import { saveToken } from './token-management'
 
-const debug = Debug('sm:core-q')
+const debug = Debug('core-q')
 let instance = null
 
 /**
@@ -103,8 +103,9 @@ export class Q extends EventEmitter {
           logger.error(error)
           this.process(item)
         })
+      } else {
+        this.process(item)
       }
-      this.process(item)
     }
   }
 
@@ -113,10 +114,10 @@ export class Q extends EventEmitter {
    * @param {Object} data - Current processing item
    */
   private process(data) {
-    logger.log(`Processing item\n${JSON.stringify(data, null, 2)}`)
+    logger.log(`${data.action.toUpperCase()}ING}`)
+    logger.log(`{ content_type: '${data.content_type_uid}', locale: '${data.locale}', uid: '${data.uid}'}`)
     switch (data.action) {
     case 'publish':
-      // 
       if (['_assets', '_content_types'].indexOf(data.content_type_uid) === -1) {
         data.data = buildContentReferences(data.content_type.schema, data.data)
       }

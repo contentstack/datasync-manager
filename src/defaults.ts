@@ -8,6 +8,8 @@
  * @description Default application's internal config
  */
 export const config = {
+  'asset-connector': {},
+  'content-connector': {},
   'contentstack': {
     MAX_RETRY_LIMIT: 6,
     actions: {
@@ -26,6 +28,7 @@ export const config = {
       get: 'GET',
     },
   },
+  'listener': {},
   'locales': [],
   'sync-manager': {
     cooloff: 3000,
