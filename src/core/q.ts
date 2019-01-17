@@ -13,7 +13,7 @@ import { saveFailedItems } from '../util/unprocessible'
 import { load } from './plugins'
 import { saveToken } from './token-management'
 
-const debug = Debug('core-q')
+const debug = Debug('q')
 let instance = null
 
 /**

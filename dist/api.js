@@ -13,23 +13,17 @@ const https_1 = require("https");
 const path_1 = require("path");
 const querystring_1 = require("querystring");
 const fs_1 = require("./util/fs");
-const debug = debug_1.default('api:get-requests');
+const debug = debug_1.default('api');
 let MAX_RETRY_LIMIT;
 let Contentstack;
 exports.init = (contentstack) => {
-    try {
-        console.log(path_1.join(__dirname, '..', 'package.json'));
-        const packageInfo = JSON.parse(fs_1.readFileSync(path_1.join(__dirname, '..', 'package.json')));
-        Contentstack = contentstack;
-        Contentstack.headers = {
-            'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
-            'access_token': Contentstack.token,
-            'api_key': Contentstack.apiKey,
-        };
-    }
-    catch (error) {
-        console.error(error);
-    }
+    const packageInfo = JSON.parse(fs_1.readFileSync(path_1.join(__dirname, '..', 'package.json')));
+    Contentstack = contentstack;
+    Contentstack.headers = {
+        'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
+        'access_token': Contentstack.token,
+        'api_key': Contentstack.apiKey,
+    };
     if (Contentstack.MAX_RETRY_LIMIT) {
         MAX_RETRY_LIMIT = Contentstack.MAX_RETRY_LIMIT;
     }
