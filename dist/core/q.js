@@ -16,7 +16,7 @@ const logger_1 = require("../util/logger");
 const unprocessible_1 = require("../util/unprocessible");
 const plugins_1 = require("./plugins");
 const token_management_1 = require("./token-management");
-const debug = debug_1.default('core-q');
+const debug = debug_1.default('q');
 let instance = null;
 class Q extends events_1.EventEmitter {
     constructor(connector, config) {

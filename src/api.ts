@@ -10,7 +10,7 @@ import { join } from 'path'
 import { stringify } from 'querystring'
 import { readFileSync } from './util/fs'
 
-const debug = Debug('api:get-requests')
+const debug = Debug('api')
 let MAX_RETRY_LIMIT
 let Contentstack
 
@@ -19,23 +19,17 @@ let Contentstack
  * @param {Object} contentstack - Contentstack configuration details
  */
 export const init = (contentstack) => {
-  try {
-    console.log(join(__dirname, '..', 'package.json'))
-    const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json')))
-    Contentstack = contentstack
-    Contentstack.headers = {
-      'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
-      'access_token': Contentstack.token,
-      'api_key': Contentstack.apiKey,
-    }
-  } catch (error) {
-    console.error(error)
+  const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json')))
+  Contentstack = contentstack
+  Contentstack.headers = {
+    'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
+    'access_token': Contentstack.token,
+    'api_key': Contentstack.apiKey,
   }
 
   // if (Contentstack.keepAlive) {
 
   // }
-
   if (Contentstack.MAX_RETRY_LIMIT) {
     MAX_RETRY_LIMIT = Contentstack.MAX_RETRY_LIMIT
   }
