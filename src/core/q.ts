@@ -114,8 +114,15 @@ export class Q extends EventEmitter {
    * @param {Object} data - Current processing item
    */
   private process(data) {
-    logger.log(`${data.action.toUpperCase()}ING}`)
-    logger.log(`{ content_type: '${data.content_type_uid}', locale: '${data.locale}', uid: '${data.uid}'}`)
+    const { content_type_uid, uid } = data
+    if (content_type_uid === '_content_types') {
+      logger.log(
+        `${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', uid: '${uid}'}`)
+    } else {
+      const { locale } = data
+      logger.log(
+        `${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`)
+    }
     switch (data.action) {
     case 'publish':
       if (['_assets', '_content_types'].indexOf(data.content_type_uid) === -1) {

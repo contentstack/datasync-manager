@@ -42,6 +42,14 @@ export const getTokenByType = (type) => {
   return new Promise((resolve, reject) => {
     try {
       const config = getConfig()
+      const file = config.paths.token[type]
+      if (existsSync(file)) {
+        return readFile(file).then((data) => {
+          return resolve(JSON.parse(data as any))
+        })
+      }
+
+
       const path = config.paths.token.ledger
       if (!existsSync(path)) {
         debug(`Token details do not exist! ${path} not found`)

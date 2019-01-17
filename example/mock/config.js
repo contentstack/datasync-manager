@@ -1,7 +1,7 @@
 module.exports = {
   contentstack: {
-    apiKey: '***REMOVED***',
-    token: '***REMOVED***'
+    apiKey: '',
+    token: ''
   },
   plugins: {
     myplugin: {
