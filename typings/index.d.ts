@@ -19,7 +19,7 @@ interface IConnector {
 }
 interface IConfig {
     locales?: any[];
-    paths?: any[];
+    paths?: any;
     contentstack?: any;
     'content-connector'?: any;
     'sync-manager'?: any;

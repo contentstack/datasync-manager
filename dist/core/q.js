@@ -81,7 +81,7 @@ class Q extends events_1.EventEmitter {
         switch (data.action) {
             case 'publish':
                 if (['_assets', '_content_types'].indexOf(data.content_type_uid) === -1) {
-                    core_utilities_1.buildContentReferences(data.data, data.content_type);
+                    data.data = core_utilities_1.buildContentReferences(data.content_type.schema, data.data);
                 }
                 this.exec(data, data.action, 'beforePublish', 'afterPublish');
                 break;
