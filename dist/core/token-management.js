@@ -28,6 +28,12 @@ exports.getTokenByType = (type) => {
     return new Promise((resolve, reject) => {
         try {
             const config = __1.getConfig();
+            const file = config.paths.token[type];
+            if (fs_1.existsSync(file)) {
+                return fs_1.readFile(file).then((data) => {
+                    return resolve(JSON.parse(data));
+                });
+            }
             const path = config.paths.token.ledger;
             if (!fs_1.existsSync(path)) {
                 debug(`Token details do not exist! ${path} not found`);
