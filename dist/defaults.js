@@ -6,6 +6,8 @@
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = {
+    'asset-connector': {},
+    'content-connector': {},
     'contentstack': {
         MAX_RETRY_LIMIT: 6,
         actions: {
@@ -24,6 +26,7 @@ exports.config = {
             get: 'GET',
         },
     },
+    'listener': {},
     'locales': [],
     'sync-manager': {
         cooloff: 3000,

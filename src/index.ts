@@ -79,7 +79,6 @@ interface ILogger {
  * @param {Object} instance - Content connector instance
  */
 export const setContentConnector = (instance: IConnector) => {
-  debug('Content connector instance registered successfully')
   contentConnector = instance
 }
 
@@ -88,7 +87,6 @@ export const setContentConnector = (instance: IConnector) => {
  * @param {Object} instance - Asset connector instance
  */
 export const setAssetConnector = (instance: IConnector) => {
-  debug('Asset connector instance registered successfully')
   assetConnector = instance
 }
 
@@ -98,7 +96,6 @@ export const setAssetConnector = (instance: IConnector) => {
  */
 export const setListener = (instance: ILogger) => {
   validateListener(instance)
-  debug('Listener instance registered successfully')
   listener = instance
 }
 
@@ -107,8 +104,6 @@ export const setListener = (instance: ILogger) => {
  * @param {Object} config - Application config
  */
 export const setConfig = (config: IConfig) => {
-  validateConfig(config)
-  debug('Config set successfully!')
   appConfig = config
 }
 
@@ -143,8 +138,13 @@ export const start = (config: IConfig = {}): Promise<{}> => {
       appConfig.paths = buildConfigPaths()
       // since logger is singleton, if previously set, it'll return that isnstance!
       setLogger()
-      assetConnector.setLogger(logger)
-      contentConnector.setLogger(logger)
+
+      if (assetConnector.setLogger && typeof assetConnector.setLogger === 'function') {
+        assetConnector.setLogger(logger)
+      }
+      if (contentConnector.setLogger && typeof contentConnector.setLogger === 'function') {
+        contentConnector.setLogger(logger)
+      }
 
       return assetConnector.start(appConfig).then((assetInstance: IAssetConnector) => {
         debug('Asset connector instance has returned successfully!')

@@ -12,11 +12,16 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
+const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const __1 = require("..");
 const fs_1 = require("./fs");
 const unprocessible_1 = require("./unprocessible");
+const debug = debug_1.default('core-utilities');
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
 const assetType = 'sys_assets';
@@ -119,6 +124,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
     const tokenValue = syncResponse[tokenName];
     const contentTypeUids = Object.keys(groupedItems);
     if (contentTypeUids.length === 1 && contentTypeUids[0] === '_assets') {
+        debug(`Only assets found in SYNC API response. Last content type is ${contentTypeUids[0]}`);
         const items = groupedItems[contentTypeUids[0]];
         items[items.length - 1].checkpoint = {
             name: tokenName,
@@ -126,6 +132,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
         };
     }
     else if (contentTypeUids.length === 1 && contentTypeUids[0] === '_content_types') {
+        debug(`Only content type events found in SYNC API response. Last content type is ${contentTypeUids[0]}`);
         const items = groupedItems[contentTypeUids[0]];
         items[items.length - 1].checkpoint = {
             name: tokenName,
@@ -133,6 +140,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
         };
     }
     else if (contentTypeUids.length === 2 && (contentTypeUids.indexOf('_assets') !== -1 && contentTypeUids.indexOf('_content_types'))) {
+        debug(`Assets & content types found found in SYNC API response. Last content type is ${contentTypeUids[1]}`);
         const items = groupedItems[contentTypeUids[1]];
         items[items.length - 1].checkpoint = {
             name: tokenName,
@@ -141,6 +149,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
     }
     else {
         const lastContentTypeUid = contentTypeUids[contentTypeUids.length - 1];
+        debug(`Mixed content types found in SYNC API response. Last content type is ${lastContentTypeUid}`);
         const entries = groupedItems[lastContentTypeUid];
         entries[entries.length - 1].checkpoint = {
             name: tokenName,
@@ -178,7 +187,7 @@ exports.buildContentReferences = (schema, entry, parent = []) => {
     const config = __1.getConfig();
     const enableAssetReferences = config['sync-manager'].enableAssetReferences;
     const enableContentReferences = config['sync-manager'].enableContentReferences;
-    for (let i = 0, _i = schema.length; i < _i; i++) {
+    for (let i = 0, c = schema.length; i < c; i++) {
         switch (schema[i].data_type) {
             case 'reference':
                 if (enableAssetReferences) {
@@ -200,7 +209,7 @@ exports.buildContentReferences = (schema, entry, parent = []) => {
                 parent.pop();
                 break;
             case 'blocks':
-                for (let j = 0, _j = schema[i].blocks.length; j < _j; j++) {
+                for (let j = 0, d = schema[i].blocks.length; j < d; j++) {
                     parent.push(schema[i].uid);
                     parent.push(schema[i].blocks[j].uid);
                     exports.buildContentReferences(schema[i].blocks[j].schema, entry, parent);
@@ -219,8 +228,8 @@ const update = (parent, reference, entry) => {
             if (j === (len - 1) && entry[parent[j]]) {
                 if (reference !== '_assets') {
                     entry[parent[j]] = {
+                        reference_to: reference,
                         values: entry[parent[j]],
-                        reference_to: reference
                     };
                 }
                 else {
@@ -230,24 +239,24 @@ const update = (parent, reference, entry) => {
                             assetIds.push(entry[parent[j]][k]);
                         }
                         entry[parent[j]] = {
+                            reference_to: reference,
                             values: assetIds,
-                            reference_to: reference
                         };
                     }
                     else {
                         entry[parent[j]] = {
+                            reference_to: reference,
                             values: entry[parent[j]],
-                            reference_to: reference
                         };
                     }
                 }
             }
             else {
                 entry = entry[parent[j]];
-                const _keys = lodash_1.cloneDeep(parent).splice(eval((j + 1)), len);
+                const keys = lodash_1.cloneDeep(parent).splice((j + 1), len);
                 if (Array.isArray(entry)) {
                     for (let i = 0, l = entry.length; i < l; i++) {
-                        update(_keys, reference, entry[i]);
+                        update(keys, reference, entry[i]);
                     }
                 }
                 else if (typeof entry !== 'object') {
