@@ -10,7 +10,7 @@ import { getConfig } from '..'
 import { getFile } from '../util/core-utilities'
 import { existsSync, readFile, writeFile } from '../util/fs'
 
-const debug = Debug('sm:token-management')
+const debug = Debug('token-management')
 let counter = 0
 
 /**
@@ -113,7 +113,7 @@ export const saveToken = (name, token, type) => {
 
         return `${config.paths.token.ledger}-${counter}`
       }) as any)
-
+      debug(`ledger file: ${file} exists?(${existsSync(file)})`)
       if (!existsSync(file)) {
         return writeFile(file, JSON.stringify([obj]))
         .then(resolve)

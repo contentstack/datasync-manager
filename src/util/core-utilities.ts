@@ -4,11 +4,13 @@
 * MIT Licensed
 */
 
+import Debug from 'debug'
 import { cloneDeep, map, remove } from 'lodash'
 import { getConfig } from '..'
 import { existsSync, mkdirpSync, stat } from './fs'
 import { saveFilteredItems } from './unprocessible'
 
+const debug = Debug('core-utilities')
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
 const assetType = 'sys_assets'
@@ -141,6 +143,7 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
   const tokenValue = syncResponse[tokenName]
   const contentTypeUids = Object.keys(groupedItems)
   if (contentTypeUids.length === 1 && contentTypeUids[0] === '_assets') {
+    debug(`Only assets found in SYNC API response. Last content type is ${contentTypeUids[0]}`)
     const items = groupedItems[contentTypeUids[0]]
     // find the last item, add checkpoint to it
     items[items.length - 1].checkpoint = {
@@ -148,6 +151,7 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
       token: tokenValue,
     }
   } else if (contentTypeUids.length === 1 && contentTypeUids[0] === '_content_types') {
+    debug(`Only content type events found in SYNC API response. Last content type is ${contentTypeUids[0]}`)
     const items = groupedItems[contentTypeUids[0]]
     // find the last item, add checkpoint to it
     items[items.length - 1].checkpoint = {
@@ -156,6 +160,7 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
     }
   } else if (contentTypeUids.length === 2 && (contentTypeUids.indexOf('_assets') !== -1 && contentTypeUids.indexOf(
       '_content_types'))) {
+        debug(`Assets & content types found found in SYNC API response. Last content type is ${contentTypeUids[1]}`)
         const items = groupedItems[contentTypeUids[1]]
         // find the last item, add checkpoint to it
         items[items.length - 1].checkpoint = {
@@ -164,6 +169,7 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
         }
   } else {
     const lastContentTypeUid = contentTypeUids[contentTypeUids.length - 1]
+    debug(`Mixed content types found in SYNC API response. Last content type is ${lastContentTypeUid}`)
     const entries = groupedItems[lastContentTypeUid]
     entries[entries.length - 1].checkpoint = {
       name: tokenName,
@@ -209,7 +215,7 @@ export const buildContentReferences = (schema: any[], entry: any, parent: string
   const config = getConfig()
   const enableAssetReferences = config['sync-manager'].enableAssetReferences
   const enableContentReferences = config['sync-manager'].enableContentReferences
-  for (let i = 0, _i = schema.length; i < _i; i++) {
+  for (let i = 0, c = schema.length; i < c; i++) {
     switch (schema[i].data_type) {
     case 'reference':
       if (enableAssetReferences) {
@@ -231,7 +237,7 @@ export const buildContentReferences = (schema: any[], entry: any, parent: string
       parent.pop()
       break
     case 'blocks':
-      for (let j = 0, _j = schema[i].blocks.length; j < _j; j++) {
+      for (let j = 0, d = schema[i].blocks.length; j < d; j++) {
         parent.push(schema[i].uid)
         parent.push(schema[i].blocks[j].uid)
         buildContentReferences(schema[i].blocks[j].schema, entry, parent)
@@ -252,32 +258,36 @@ const update = (parent, reference, entry) => {
       if (j === (len - 1) && entry[parent[j]]) {
         if (reference !== '_assets') {
           entry[parent[j]] = {
+            reference_to: reference,
             values: entry[parent[j]],
-            reference_to: reference
           }
         } else {
           if (Array.isArray(entry[parent[j]])) {
             const assetIds = []
+            // entry[parent[j]].forEach(assetIds.push)
             for (let k = 0; k < entry[parent[j]].length; k++) {
               assetIds.push(entry[parent[j]][k])
             }
             entry[parent[j]] = {
+              reference_to: reference,
               values: assetIds,
-              reference_to: reference
             }
           } else {
             entry[parent[j]] = {
+              reference_to: reference,
               values: entry[parent[j]],
-              reference_to: reference
             }
           }
         }
       } else {
         entry = entry[parent[j]]
-        const _keys = cloneDeep(parent).splice(eval((j + 1) as any), len)
+        const keys = cloneDeep(parent).splice((j + 1), len)
         if (Array.isArray(entry)) {
+          // entry.forEach((obj) => {
+          //   update(keys, reference, obj)
+          // })
           for (let i = 0, l = entry.length; i < l; i++) {
-            update(_keys, reference, entry[i])
+            update(keys, reference, entry[i])
           }
         } else if (typeof entry !== 'object') {
           break

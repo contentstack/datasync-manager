@@ -4,6 +4,8 @@
 * MIT Licensed
 */
 export declare const config: {
+    'asset-connector': {};
+    'content-connector': {};
     'contentstack': {
         MAX_RETRY_LIMIT: number;
         actions: {
@@ -22,6 +24,7 @@ export declare const config: {
             get: string;
         };
     };
+    'listener': {};
     'locales': any[];
     'sync-manager': {
         cooloff: number;
