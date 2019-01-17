@@ -116,8 +116,9 @@ export class Q extends EventEmitter {
     logger.log(`Processing item\n${JSON.stringify(data, null, 2)}`)
     switch (data.action) {
     case 'publish':
+      // 
       if (['_assets', '_content_types'].indexOf(data.content_type_uid) === -1) {
-        buildContentReferences(data.data, data.content_type)
+        data.data = buildContentReferences(data.content_type.schema, data.data)
       }
       this.exec(data, data.action, 'beforePublish', 'afterPublish')
       break

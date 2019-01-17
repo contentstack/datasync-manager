@@ -25,6 +25,8 @@ export declare const config: {
     'locales': any[];
     'sync-manager': {
         cooloff: number;
+        enableAssetReferences: boolean;
+        enableContentReferences: boolean;
         limit: number;
         maxsize: number;
         saveFailedItems: boolean;
