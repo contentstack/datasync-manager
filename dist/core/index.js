@@ -40,7 +40,7 @@ exports.init = (connector) => {
         try {
             Contentstack = config.contentstack;
             const paths = config.paths;
-            const environment = process.env.SYNC_ENV || Contentstack.environment || 'development';
+            const environment = process.env.NODE_ENV || Contentstack.environment || 'development';
             debug(`Environment: ${environment}`);
             const request = {
                 qs: {
@@ -156,7 +156,6 @@ const fire = (req) => {
                         return false;
                     });
                     return promise_map_1.map(contentTypeUids, (uid) => {
-                        logger_1.logger.info(`Fetching '${uid}' content type's schema`);
                         return new Promise((mapResolve, mapReject) => {
                             return api_1.get({
                                 path: `${Contentstack.apis.content_types}${uid}`,
