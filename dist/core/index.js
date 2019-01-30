@@ -129,6 +129,7 @@ const fire = (req) => {
         return api_1.get(req).then((response) => {
             delete req.qs.init;
             delete req.qs.pagination_token;
+            delete req.qs.sync_token;
             delete req.path;
             const syncResponse = response;
             if (syncResponse.items.length) {
