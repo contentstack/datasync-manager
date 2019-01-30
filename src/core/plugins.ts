@@ -8,6 +8,7 @@ import Debug from 'debug'
 import { existsSync } from 'fs'
 import { hasIn } from 'lodash'
 import { join, resolve } from 'path'
+import { logger } from '../util/logger'
 
 const debug = Debug('sm:core-plugins')
 const pluginMethods = ['beforePublish', 'beforeUnpublish', 'afterPublish', 'afterUnpublish', 'beforeDelete',
@@ -42,7 +43,7 @@ export const load = (config) => {
         }
       })
     } else {
-      // unable to load plugin
+      logger.warn(`Unable to load ${pluginName} plugin since ${pluginPath} was not found!`)
     }
   }
   debug('Plugins built successfully!')

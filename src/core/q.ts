@@ -153,13 +153,13 @@ export class Q extends EventEmitter {
   private exec(data, action, beforeAction, afterAction) {
     try {
       debug(`Exec called. Action is ${action}`)
-      const promisifiedBucket = []
+      const beforeActionPlugins = []
       const clonedData = cloneDeep(data)
       this.pluginInstances[beforeAction].forEach((action1) => {
-        promisifiedBucket.push(action1(data))
+        beforeActionPlugins.push(action1(data))
       })
 
-      Promise.all(promisifiedBucket)
+      Promise.all(beforeActionPlugins)
       .then(() => {
         debug('Before action plugins executed successfully!')
 

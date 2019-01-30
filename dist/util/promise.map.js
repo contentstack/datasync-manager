@@ -23,4 +23,3 @@ exports.map = (arr, fn, concurrency = 1, resultBucket = []) => {
         }).catch(reject);
     });
 };
-//# sourceMappingURL=promise.map.js.map

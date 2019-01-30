@@ -7,9 +7,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = require("path");
 exports.buildConfigPaths = () => {
-    const baseDir = process.cwd();
+    const baseDir = path_1.resolve(path_1.join(__dirname, '..', '..'));
     const paths = {
-        cwd: baseDir,
+        baseDir: path_1.resolve(path_1.join(__dirname, '..', '..')),
         failed: path_1.resolve(path_1.join(baseDir, 'unprocessible', 'failed')),
         filtered: path_1.resolve(path_1.join(baseDir, 'unprocessible', 'filtered')),
         plugin: path_1.resolve(path_1.join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
@@ -22,4 +22,3 @@ exports.buildConfigPaths = () => {
     };
     return paths;
 };
-//# sourceMappingURL=build-paths.js.map

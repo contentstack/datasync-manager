@@ -45,7 +45,7 @@ exports.validateInstances = (assetConnector, contentConnector, listener) => {
     }
 };
 exports.validateContentConnector = (instance) => {
-    const fns = ['publish', 'unpublish', 'delete', 'find', 'findOne'];
+    const fns = ['publish', 'unpublish', 'delete'];
     fns.forEach((fn) => {
         if (!(lodash_1.hasIn(instance, fn))) {
             throw new Error(`${instance} content connector does not support '${fn}()'`);
@@ -82,4 +82,127 @@ exports.validateLogger = (instance) => {
     });
     return !flag;
 };
-//# sourceMappingURL=validations.js.map
+exports.validateItemStructure = (item) => {
+    try {
+        if (!(item.type) || typeof item.type !== 'string' || !(item.type.length)) {
+            item._error = '\'type\' key is missing!';
+            return false;
+        }
+        switch (item.type) {
+            case 'asset_published':
+                return assetPublishedStructure(item);
+            case 'asset_unpublished':
+                return assetUnpublishedStructure(item);
+            case 'asset_deleted':
+                return assetDeletedStructure(item);
+            case 'entry_published':
+                return entryPublishedStructure(item);
+            case 'entry_unpublished':
+                return entryUnpublishedStructure(item);
+            case 'entry_deleted':
+                return entryDeletedStructure(item);
+            case 'content_type_deleted':
+                return contentTypeDeletedStructure(item);
+            default:
+                return false;
+        }
+    }
+    catch (error) {
+        return false;
+    }
+};
+const assetPublishedStructure = (asset) => {
+    const requiredKeys = ['content_type_uid', 'data', 'data.uid', 'data.url', 'data.publish_details',
+        'data.publish_details.locale', 'data.title',
+    ];
+    requiredKeys.forEach((key) => {
+        if (!(lodash_1.hasIn(asset, key))) {
+            asset._error = asset._error || '';
+            asset._error += `${key} is missing!`;
+        }
+    });
+    if (asset._error) {
+        return false;
+    }
+    return true;
+};
+const entryPublishedStructure = (entry) => {
+    const requiredKeys = ['content_type_uid', 'data', 'data.uid', 'data.publish_details',
+        'data.publish_details.locale',
+    ];
+    requiredKeys.forEach((key) => {
+        if (!(lodash_1.hasIn(entry, key))) {
+            entry._error = entry._error || '';
+            entry._error += `${key} is missing!`;
+        }
+    });
+    if (entry._error) {
+        return false;
+    }
+    return true;
+};
+const assetDeletedStructure = (asset) => {
+    const requiredKeys = ['content_type_uid', 'data', 'data.uid', 'data.locale'];
+    requiredKeys.forEach((key) => {
+        if (!(lodash_1.hasIn(asset, key))) {
+            asset._error = asset._error || '';
+            asset._error += `${key} is missing!`;
+        }
+    });
+    if (asset._error) {
+        return false;
+    }
+    return true;
+};
+const entryDeletedStructure = (entry) => {
+    const requiredKeys = ['content_type_uid', 'data', 'data.uid', 'data.locale'];
+    requiredKeys.forEach((key) => {
+        if (!(lodash_1.hasIn(entry, key))) {
+            entry._error = entry._error || '';
+            entry._error += `${key} is missing!`;
+        }
+    });
+    if (entry._error) {
+        return false;
+    }
+    return true;
+};
+const assetUnpublishedStructure = (asset) => {
+    const requiredKeys = ['content_type_uid', 'data', 'data.uid', 'data.locale'];
+    requiredKeys.forEach((key) => {
+        if (!(lodash_1.hasIn(asset, key))) {
+            asset._error = asset._error || '';
+            asset._error += `${key} is missing!`;
+        }
+    });
+    if (asset._error) {
+        return false;
+    }
+    return true;
+};
+const entryUnpublishedStructure = (entry) => {
+    const requiredKeys = ['content_type_uid', 'data', 'data.uid', 'data.locale'];
+    requiredKeys.forEach((key) => {
+        if (!(lodash_1.hasIn(entry, key))) {
+            entry._error = entry._error || '';
+            entry._error += `${key} is missing!`;
+        }
+    });
+    if (entry._error) {
+        return false;
+    }
+    return true;
+};
+const contentTypeDeletedStructure = (contentType) => {
+    const requiredKeys = ['content_type_uid'];
+    requiredKeys.forEach((key) => {
+        if (!(lodash_1.hasIn(contentType, key))) {
+            contentType._error = contentType._error || '';
+            contentType._error += `${key} is missing!`;
+        }
+    });
+    if (contentType._error) {
+        return false;
+    }
+    return true;
+};

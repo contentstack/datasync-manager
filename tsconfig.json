@@ -5,7 +5,6 @@
     "baseUrl": ".",
     "declarationDir": "typings",
     "declaration": true,
-    "diagnostics": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "importHelpers": false,
@@ -13,7 +12,6 @@
     "esModuleInterop": true,
     "target": "es6",
     "moduleResolution": "node",
-    "sourceMap": true,
     "outDir": "./dist",
     "paths": {
       "*": [

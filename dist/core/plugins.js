@@ -12,6 +12,7 @@ const debug_1 = __importDefault(require("debug"));
 const fs_1 = require("fs");
 const lodash_1 = require("lodash");
 const path_1 = require("path");
+const logger_1 = require("../util/logger");
 const debug = debug_1.default('sm:core-plugins');
 const pluginMethods = ['beforePublish', 'beforeUnpublish', 'afterPublish', 'afterUnpublish', 'beforeDelete',
     'afterDelete',
@@ -36,9 +37,9 @@ exports.load = (config) => {
             });
         }
         else {
+            logger_1.logger.warn(`Unable to load ${pluginName} plugin since ${pluginPath} was not found!`);
         }
     }
     debug('Plugins built successfully!');
     return pluginInstances;
 };
-//# sourceMappingURL=plugins.js.map
