@@ -130,6 +130,8 @@ const sync = () => {
       return fire(request)
         .then(resolve)
         .catch(reject)
+    }).catch((error) => {
+      logger.error(error)
     })
   })
 }
@@ -156,14 +158,14 @@ export const unlock = () => {
  * @param {Object} req - Contentstack sync API request object
  */
 const fire = (req) => {
-  debug(`Fire!\n${JSON.stringify(req)}`)
+  debug(`Fire called with: ${JSON.stringify(req)}`)
   flag.SQ = true
 
   return new Promise((resolve, reject) => {
     return get(req).then((response) => {
       delete req.qs.init
       delete req.qs.pagination_token
-      debug(`Fired response\n${JSON.stringify(response)}`)
+      delete req.path
       const syncResponse: any = response
       if (syncResponse.items.length) {
         return filterItems(syncResponse, config).then(() => {

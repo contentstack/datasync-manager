@@ -107,12 +107,12 @@ class Q extends events_1.EventEmitter {
     exec(data, action, beforeAction, afterAction) {
         try {
             debug(`Exec called. Action is ${action}`);
-            const promisifiedBucket = [];
+            const beforeActionPlugins = [];
             const clonedData = lodash_1.cloneDeep(data);
             this.pluginInstances[beforeAction].forEach((action1) => {
-                promisifiedBucket.push(action1(data));
+                beforeActionPlugins.push(action1(data));
             });
-            Promise.all(promisifiedBucket)
+            Promise.all(beforeActionPlugins)
                 .then(() => {
                 debug('Before action plugins executed successfully!');
                 return this.connectorInstance[action](clonedData);
@@ -143,4 +143,3 @@ class Q extends events_1.EventEmitter {
     }
 }
 exports.Q = Q;
-//# sourceMappingURL=q.js.map

@@ -4,7 +4,7 @@
 * MIT Licensed
 */
 export declare const buildConfigPaths: () => {
-    cwd: string;
+    baseDir: string;
     failed: string;
     filtered: string;
     plugin: string;

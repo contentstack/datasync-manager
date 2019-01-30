@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const core_1 = require("./core");
+const process_1 = require("./core/process");
 const defaults_1 = require("./defaults");
 const build_paths_1 = require("./util/build-paths");
 const logger_1 = require("./util/logger");
@@ -46,6 +47,7 @@ exports.start = (config = {}) => {
             validations_1.validateConfig(appConfig);
             appConfig.paths = build_paths_1.buildConfigPaths();
             logger_1.setLogger();
+            process_1.configure();
             if (assetConnector.setLogger && typeof assetConnector.setLogger === 'function') {
                 assetConnector.setLogger(logger_1.logger);
             }
@@ -74,4 +76,3 @@ exports.start = (config = {}) => {
         }
     });
 };
-//# sourceMappingURL=index.js.map

@@ -11,9 +11,9 @@ import { join, resolve } from 'path'
  * @returns {Object} Returns config paths
  */
 export const buildConfigPaths = () => {
-  const baseDir = process.cwd()
+  const baseDir = resolve(join(__dirname, '..', '..'))
   const paths = {
-    cwd: baseDir,
+    baseDir: resolve(join(__dirname, '..', '..')),
     failed: resolve(join(baseDir, 'unprocessible', 'failed')),
     filtered: resolve(join(baseDir, 'unprocessible', 'filtered')),
     plugin: resolve(join((process.env.PLUGIN_PATH || baseDir), 'plugins')),

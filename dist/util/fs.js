@@ -1,6 +1,7 @@
 "use strict";
 /*!
 * Contentstack Sync Manager
+*   - This module overrides nodejs internal 'fs' module functionalities
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
@@ -90,4 +91,3 @@ var fs_2 = require("fs");
 exports.stat = fs_2.stat;
 var mkdirp_2 = require("mkdirp");
 exports.mkdirpSync = mkdirp_2.sync;
-//# sourceMappingURL=fs.js.map

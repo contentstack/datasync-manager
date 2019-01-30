@@ -3,4 +3,4 @@
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
-export {};
+export declare const configure: () => void;

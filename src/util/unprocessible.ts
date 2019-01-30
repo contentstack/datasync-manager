@@ -16,7 +16,7 @@ const counter = {
 }
 
 /**
- * Decision pending
+ * TODO
  * This method logs all failed items.
  * Failed items should be 'retried' when app is started Or after a specific interval
  * @param {Object} obj - Contains 'error' and 'data' key

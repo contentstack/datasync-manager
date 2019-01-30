@@ -7,6 +7,7 @@
 import Debug from 'debug'
 import { merge } from 'lodash'
 import { init, poke } from './core'
+import { configure } from './core/process'
 import { config as internalConfig } from './defaults'
 import { buildConfigPaths } from './util/build-paths'
 import { logger, setLogger } from './util/logger'
@@ -138,7 +139,7 @@ export const start = (config: IConfig = {}): Promise<{}> => {
       appConfig.paths = buildConfigPaths()
       // since logger is singleton, if previously set, it'll return that isnstance!
       setLogger()
-
+      configure()
       if (assetConnector.setLogger && typeof assetConnector.setLogger === 'function') {
         assetConnector.setLogger(logger)
       }
