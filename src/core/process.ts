@@ -58,7 +58,9 @@ const abort = () => {
   process.abort()
 }
 
-process.on('SIGTERM', handleExit)
-process.on('SIGINT', handleExit)
-process.on('uncaughtException', unhandledErrors)
-process.on('unhandledRejection', unhandledErrors)
+export const configure = () => {
+  process.on('SIGTERM', handleExit)
+  process.on('SIGINT', handleExit)
+  process.on('uncaughtException', unhandledErrors)
+  process.on('unhandledRejection', unhandledErrors)
+}

@@ -108,6 +108,8 @@ const sync = () => {
             return fire(request)
                 .then(resolve)
                 .catch(reject);
+        }).catch((error) => {
+            logger_1.logger.error(error);
         });
     });
 };
@@ -121,13 +123,13 @@ exports.unlock = () => {
     check();
 };
 const fire = (req) => {
-    debug(`Fire!\n${JSON.stringify(req)}`);
+    debug(`Fire called with: ${JSON.stringify(req)}`);
     flag.SQ = true;
     return new Promise((resolve, reject) => {
         return api_1.get(req).then((response) => {
             delete req.qs.init;
             delete req.qs.pagination_token;
-            debug(`Fired response\n${JSON.stringify(response)}`);
+            delete req.path;
             const syncResponse = response;
             if (syncResponse.items.length) {
                 return core_utilities_1.filterItems(syncResponse, config).then(() => {
@@ -219,4 +221,3 @@ const postProcess = (req, resp) => {
     });
 };
 emitter.on('check', check);
-//# sourceMappingURL=index.js.map

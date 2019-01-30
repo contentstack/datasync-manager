@@ -9,3 +9,4 @@ export declare const validateContentConnector: (instance: any) => void;
 export declare const validateAssetConnector: (instance: any) => void;
 export declare const validateListener: (instance: any) => void;
 export declare const validateLogger: (instance: any) => boolean;
+export declare const validateItemStructure: (item: any) => boolean;

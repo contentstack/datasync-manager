@@ -28,7 +28,7 @@
     "typescript": "^3.2.2"
   },
   "scripts": {
-    "clean": "rimraf dist typings coverage",
+    "clean": "rimraf dist typings coverage .tokens",
     "build-ts": "npm run clean && tsc",
     "watch-ts": "npm run clean && tsc -w",
     "compile": "tsc",

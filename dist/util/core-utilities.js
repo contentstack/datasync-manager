@@ -21,6 +21,7 @@ const lodash_1 = require("lodash");
 const __1 = require("..");
 const fs_1 = require("./fs");
 const unprocessible_1 = require("./unprocessible");
+const validations_1 = require("./validations");
 const debug = debug_1.default('core-utilities');
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
@@ -30,6 +31,9 @@ exports.filterItems = (response, config) => __awaiter(this, void 0, void 0, func
         try {
             const locales = lodash_1.map(config.locales, 'code');
             const filteredObjects = lodash_1.remove(response.items, (item) => {
+                if (!(validations_1.validateItemStructure(item))) {
+                    return item;
+                }
                 if (item.data.publish_details) {
                     return locales.indexOf(item.data.publish_details.locale) !== -1;
                 }
@@ -266,4 +270,3 @@ const update = (parent, reference, entry) => {
         }
     }
 };
-//# sourceMappingURL=core-utilities.js.map

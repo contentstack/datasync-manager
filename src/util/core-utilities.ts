@@ -9,6 +9,7 @@ import { cloneDeep, map, remove } from 'lodash'
 import { getConfig } from '..'
 import { existsSync, mkdirpSync, stat } from './fs'
 import { saveFilteredItems } from './unprocessible'
+import { validateItemStructure } from './validations'
 
 const debug = Debug('core-utilities')
 const formattedAssetType = '_assets'
@@ -26,6 +27,11 @@ export const filterItems = async (response, config) => {
     try {
       const locales = map(config.locales, 'code')
       const filteredObjects = remove(response.items, (item) => {
+        // validate item structure. If the structure is not as expected, filter it out
+        if (!(validateItemStructure(item))) {
+
+          return item
+        }
         // for published items
         if ((item as any).data.publish_details) {
           return locales.indexOf((item as any).data.publish_details.locale) !== -1
@@ -264,7 +270,6 @@ const update = (parent, reference, entry) => {
         } else {
           if (Array.isArray(entry[parent[j]])) {
             const assetIds = []
-            // entry[parent[j]].forEach(assetIds.push)
             for (let k = 0; k < entry[parent[j]].length; k++) {
               assetIds.push(entry[parent[j]][k])
             }
@@ -283,9 +288,6 @@ const update = (parent, reference, entry) => {
         entry = entry[parent[j]]
         const keys = cloneDeep(parent).splice((j + 1), len)
         if (Array.isArray(entry)) {
-          // entry.forEach((obj) => {
-          //   update(keys, reference, obj)
-          // })
           for (let i = 0, l = entry.length; i < l; i++) {
             update(keys, reference, entry[i])
           }
