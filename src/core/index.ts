@@ -170,6 +170,11 @@ const fire = (req) => {
       const syncResponse: any = response
       if (syncResponse.items.length) {
         return filterItems(syncResponse, config).then(() => {
+          if (syncResponse.items.length === 0) {
+            return postProcess(req, syncResponse)
+            .then(resolve)
+            .catch(reject)
+          }
           syncResponse.items = formatItems(syncResponse.items, config)
           let groupedItems = groupItems(syncResponse.items)
           groupedItems = markCheckpoint(groupedItems, syncResponse)
