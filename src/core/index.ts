@@ -165,6 +165,7 @@ const fire = (req) => {
     return get(req).then((response) => {
       delete req.qs.init
       delete req.qs.pagination_token
+      delete req.qs.sync_token
       delete req.path
       const syncResponse: any = response
       if (syncResponse.items.length) {
