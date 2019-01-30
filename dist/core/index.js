@@ -134,6 +134,11 @@ const fire = (req) => {
             const syncResponse = response;
             if (syncResponse.items.length) {
                 return core_utilities_1.filterItems(syncResponse, config).then(() => {
+                    if (syncResponse.items.length === 0) {
+                        return postProcess(req, syncResponse)
+                            .then(resolve)
+                            .catch(reject);
+                    }
                     syncResponse.items = core_utilities_1.formatItems(syncResponse.items, config);
                     let groupedItems = core_utilities_1.groupItems(syncResponse.items);
                     groupedItems = core_utilities_1.markCheckpoint(groupedItems, syncResponse);
