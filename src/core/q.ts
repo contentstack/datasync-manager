@@ -70,24 +70,29 @@ export class Q extends EventEmitter {
     if (obj.data.checkpoint) {
       saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
         saveFailedItems(obj).then(() => {
+          self.inProgress = false
           self.emit('next')
         }).catch((error) => {
           debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`)
+          self.inProgress = false
           // fatal error
           self.emit('next')
         })
       }).catch((error) => {
         logger.error('Errorred while saving token')
         logger.error(error)
+        self.inProgress = false
         self.emit('next')
       })
     }
 
     saveFailedItems(obj).then(() => {
+      self.inProgress = false
       self.emit('next')
     }).catch((error) => {
       logger.error('Errorred while saving failed items')
       logger.error(error)
+      self.inProgress = false
       self.emit('next')
     })
   }
@@ -184,14 +189,12 @@ export class Q extends EventEmitter {
         self.inProgress = false
         self.emit('next', data)
       }).catch((error) => {
-        self.inProgress = false
         self.emit('error', {
           data,
           error,
         })
       })
     } catch (error) {
-      self.inProgress = false
       self.emit('error', {
         data,
         error,
