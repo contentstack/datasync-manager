@@ -64,26 +64,31 @@ export class Q extends EventEmitter {
    * @param {Object} obj - Errorred item
    */
   public errorHandler(obj) {
+    const self = this
     logger.error(obj)
     debug(`Error handler called with ${JSON.stringify(obj)}`)
     if (obj.data.checkpoint) {
       saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
-        saveFailedItems(obj).then(this.next).catch((error) => {
+        saveFailedItems(obj).then(() => {
+          self.emit('next')
+        }).catch((error) => {
           debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`)
           // fatal error
-          this.next()
+          self.emit('next')
         })
       }).catch((error) => {
         logger.error('Errorred while saving token')
         logger.error(error)
-        this.next()
+        self.emit('next')
       })
     }
 
-    saveFailedItems(obj).then(this.next).catch((error) => {
+    saveFailedItems(obj).then(() => {
+      self.emit('next')
+    }).catch((error) => {
       logger.error('Errorred while saving failed items')
       logger.error(error)
-      this.next()
+      self.emit('next')
     })
   }
 
@@ -91,17 +96,18 @@ export class Q extends EventEmitter {
    * @description Calls next item in the queue
    */
   private next() {
+    const self = this
     debug(`Calling 'next'. In progress status is ${this.inProgress} and Q length is ${this.q.length}`)
     if (!this.inProgress && this.q.length) {
       this.inProgress = true
       const item = this.q.shift()
       if (item.checkpoint) {
         saveToken(item.checkpoint.name, item.checkpoint.token, 'checkpoint').then(() => {
-          this.process(item)
+          self.process(item)
         }).catch((error) => {
           logger.error('Save token failed to save a checkpoint!')
           logger.error(error)
-          this.process(item)
+          self.process(item)
         })
       } else {
         this.process(item)
@@ -151,6 +157,7 @@ export class Q extends EventEmitter {
    * @returns {Promise} Returns promise
    */
   private exec(data, action, beforeAction, afterAction) {
+    const self = this
     try {
       debug(`Exec called. Action is ${action}`)
       const beforeActionPlugins = []
@@ -163,27 +170,29 @@ export class Q extends EventEmitter {
       .then(() => {
         debug('Before action plugins executed successfully!')
 
-        return this.connectorInstance[action](clonedData)
+        return self.connectorInstance[action](clonedData)
       }).then(() => {
         debug('Connector instance called successfully!')
         const promisifiedBucket2 = []
-        this.pluginInstances[afterAction].forEach((action2) => {
+        self.pluginInstances[afterAction].forEach((action2) => {
           promisifiedBucket2.push(action2(clonedData))
         })
 
         return Promise.all(promisifiedBucket2)
       }).then(() => {
         debug('After action plugins executed successfully!')
-        this.inProgress = false
-        this.emit('next', data)
+        self.inProgress = false
+        self.emit('next', data)
       }).catch((error) => {
-        this.emit('error', {
+        self.inProgress = false
+        self.emit('error', {
           data,
           error,
         })
       })
     } catch (error) {
-      this.emit('error', {
+      self.inProgress = false
+      self.emit('error', {
         data,
         error,
       })

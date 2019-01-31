@@ -1,4 +1,5 @@
-const assetConnector = require('./mock/asset-connector')
+// const assetConnector = require('./mock/asset-connector')
+const assetConnector = require('../../contentstack-asset-store-filesystem')
 const config = require('./mock/config')
 const console = require('./console')
 // const contentConnector = require('./mock/content-connector')
