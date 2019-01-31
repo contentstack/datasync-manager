@@ -39,38 +39,44 @@ class Q extends events_1.EventEmitter {
         this.next();
     }
     errorHandler(obj) {
+        const self = this;
         logger_1.logger.error(obj);
         debug(`Error handler called with ${JSON.stringify(obj)}`);
         if (obj.data.checkpoint) {
             token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
-                unprocessible_1.saveFailedItems(obj).then(this.next).catch((error) => {
+                unprocessible_1.saveFailedItems(obj).then(() => {
+                    self.emit('next');
+                }).catch((error) => {
                     debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`);
-                    this.next();
+                    self.emit('next');
                 });
             }).catch((error) => {
                 logger_1.logger.error('Errorred while saving token');
                 logger_1.logger.error(error);
-                this.next();
+                self.emit('next');
             });
         }
-        unprocessible_1.saveFailedItems(obj).then(this.next).catch((error) => {
+        unprocessible_1.saveFailedItems(obj).then(() => {
+            self.emit('next');
+        }).catch((error) => {
             logger_1.logger.error('Errorred while saving failed items');
             logger_1.logger.error(error);
-            this.next();
+            self.emit('next');
         });
     }
     next() {
+        const self = this;
         debug(`Calling 'next'. In progress status is ${this.inProgress} and Q length is ${this.q.length}`);
         if (!this.inProgress && this.q.length) {
             this.inProgress = true;
             const item = this.q.shift();
             if (item.checkpoint) {
                 token_management_1.saveToken(item.checkpoint.name, item.checkpoint.token, 'checkpoint').then(() => {
-                    this.process(item);
+                    self.process(item);
                 }).catch((error) => {
                     logger_1.logger.error('Save token failed to save a checkpoint!');
                     logger_1.logger.error(error);
-                    this.process(item);
+                    self.process(item);
                 });
             }
             else {
@@ -105,6 +111,7 @@ class Q extends events_1.EventEmitter {
         }
     }
     exec(data, action, beforeAction, afterAction) {
+        const self = this;
         try {
             debug(`Exec called. Action is ${action}`);
             const beforeActionPlugins = [];
@@ -115,27 +122,29 @@ class Q extends events_1.EventEmitter {
             Promise.all(beforeActionPlugins)
                 .then(() => {
                 debug('Before action plugins executed successfully!');
-                return this.connectorInstance[action](clonedData);
+                return self.connectorInstance[action](clonedData);
             }).then(() => {
                 debug('Connector instance called successfully!');
                 const promisifiedBucket2 = [];
-                this.pluginInstances[afterAction].forEach((action2) => {
+                self.pluginInstances[afterAction].forEach((action2) => {
                     promisifiedBucket2.push(action2(clonedData));
                 });
                 return Promise.all(promisifiedBucket2);
             }).then(() => {
                 debug('After action plugins executed successfully!');
-                this.inProgress = false;
-                this.emit('next', data);
+                self.inProgress = false;
+                self.emit('next', data);
             }).catch((error) => {
-                this.emit('error', {
+                self.inProgress = false;
+                self.emit('error', {
                     data,
                     error,
                 });
             });
         }
         catch (error) {
-            this.emit('error', {
+            self.inProgress = false;
+            self.emit('error', {
                 data,
                 error,
             });
