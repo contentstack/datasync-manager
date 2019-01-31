@@ -45,22 +45,27 @@ class Q extends events_1.EventEmitter {
         if (obj.data.checkpoint) {
             token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
                 unprocessible_1.saveFailedItems(obj).then(() => {
+                    self.inProgress = false;
                     self.emit('next');
                 }).catch((error) => {
                     debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`);
+                    self.inProgress = false;
                     self.emit('next');
                 });
             }).catch((error) => {
                 logger_1.logger.error('Errorred while saving token');
                 logger_1.logger.error(error);
+                self.inProgress = false;
                 self.emit('next');
             });
         }
         unprocessible_1.saveFailedItems(obj).then(() => {
+            self.inProgress = false;
             self.emit('next');
         }).catch((error) => {
             logger_1.logger.error('Errorred while saving failed items');
             logger_1.logger.error(error);
+            self.inProgress = false;
             self.emit('next');
         });
     }
@@ -135,7 +140,6 @@ class Q extends events_1.EventEmitter {
                 self.inProgress = false;
                 self.emit('next', data);
             }).catch((error) => {
-                self.inProgress = false;
                 self.emit('error', {
                     data,
                     error,
@@ -143,7 +147,6 @@ class Q extends events_1.EventEmitter {
             });
         }
         catch (error) {
-            self.inProgress = false;
             self.emit('error', {
                 data,
                 error,
