@@ -9,7 +9,7 @@ const logger_1 = require("../util/logger");
 const _1 = require("./");
 const handleExit = (signal) => {
     _1.lock();
-    const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : 2000;
+    const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : 10000;
     logger_1.logger.info(`Received ${signal}. This will shut down the process in ${killDuration}ms..`);
     setTimeout(abort, killDuration);
 };
