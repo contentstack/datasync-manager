@@ -27,9 +27,6 @@ export const init = (contentstack) => {
     'api_key': Contentstack.apiKey,
   }
 
-  // if (Contentstack.keepAlive) {
-
-  // }
   if (Contentstack.MAX_RETRY_LIMIT) {
     MAX_RETRY_LIMIT = Contentstack.MAX_RETRY_LIMIT
   }
@@ -102,11 +99,7 @@ export const get = (req, RETRY = 1) => {
               }
             })
         })
-        .on('error', (error) => {
-          console.error(error)
-
-          return reject(error)
-        })
+        .on('error', reject)
         .end()
     } catch (error) {
       return reject(error)
