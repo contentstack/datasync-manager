@@ -18,7 +18,7 @@ import { lock, unlock } from './'
  */
 const handleExit = (signal) => {
   lock()
-  const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : 10000
+  const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : 1000
   logger.info(`Received ${signal}. This will shut down the process in ${killDuration}ms..`)
   setTimeout(abort, killDuration)
 }
