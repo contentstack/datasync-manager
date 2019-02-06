@@ -43,7 +43,7 @@ class Q extends events_1.EventEmitter {
         logger_1.logger.error(obj);
         debug(`Error handler called with ${JSON.stringify(obj)}`);
         if (obj.data.checkpoint) {
-            token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
+            token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
                 unprocessible_1.saveFailedItems(obj).then(() => {
                     self.inProgress = false;
                     self.emit('next');
@@ -76,7 +76,7 @@ class Q extends events_1.EventEmitter {
             this.inProgress = true;
             const item = this.q.shift();
             if (item.checkpoint) {
-                token_management_1.saveToken(item.checkpoint.name, item.checkpoint.token, 'checkpoint').then(() => {
+                token_management_1.saveToken(item.checkpoint.name, item.checkpoint.token).then(() => {
                     self.process(item);
                 }).catch((error) => {
                     logger_1.logger.error('Save token failed to save a checkpoint!');

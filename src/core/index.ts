@@ -14,7 +14,7 @@ import { existsSync, readFileSync } from '../util/fs'
 import { logger } from '../util/logger'
 import { map } from '../util/promise.map'
 import { Q as Queue } from './q'
-import { getTokenByType, saveToken } from './token-management'
+import { getToken } from './token-management'
 
 interface IToken {
   name: string
@@ -61,8 +61,8 @@ export const init = (connector) => {
         request.qs.sync_token = Contentstack.sync_token
       } else if (typeof Contentstack.pagination_token === 'string' && Contentstack.pagination_token.length !== 0) {
         request.qs.pagination_token = Contentstack.pagination_token
-      } else if (existsSync(paths.token.checkpoint)) {
-        const token = JSON.parse(readFileSync(paths.token.checkpoint))
+      } else if (existsSync(paths.token)) {
+        const token = JSON.parse(readFileSync(paths.token))
         request.qs[token.name] = token.token
       } else {
         request.qs.init = true
@@ -117,7 +117,7 @@ const check = () => {
  */
 const sync = () => {
   return new Promise((resolve, reject) => {
-    return getTokenByType('checkpoint').then((tokenObject) => {
+    return getToken().then((tokenObject) => {
       const token: IToken = (tokenObject as IToken)
       const request: any = {
         qs: {
@@ -268,23 +268,18 @@ const postProcess = (req, resp) => {
       name = 'sync_token'
     }
 
-    return saveToken(name, resp[name], 'current').then(() => {
-      // re-fire!
-      req.qs[name] = resp[name]
-      if (name === 'sync_token') {
-        flag.SQ = false
+    // re-fire!
+    req.qs[name] = resp[name]
+    if (name === 'sync_token') {
+      flag.SQ = false
 
-        return resolve()
-      }
+      return resolve()
+    }
 
-      return fire(req)
-        .then(resolve)
-        .catch(reject)
-    }).catch((error) => {
-      // error saving token
+    return fire(req)
+      .then(resolve)
+      .catch(reject)
 
-      return reject(error)
-    })
   })
 }
 

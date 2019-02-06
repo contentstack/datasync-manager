@@ -118,7 +118,7 @@ const assetPublishedStructure = (asset) => {
     requiredKeys.forEach((key) => {
         if (!(lodash_1.hasIn(asset, key))) {
             asset._error = asset._error || '';
-            asset._error += `${key} is missing!`;
+            asset._error += `${key} is missing!\t`;
         }
     });
     if (asset._error) {

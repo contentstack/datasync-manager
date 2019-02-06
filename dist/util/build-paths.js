@@ -12,12 +12,9 @@ exports.buildConfigPaths = () => {
         baseDir: path_1.resolve(path_1.join(__dirname, '..', '..')),
         failed: path_1.resolve(path_1.join(baseDir, 'unprocessible', 'failed')),
         filtered: path_1.resolve(path_1.join(baseDir, 'unprocessible', 'filtered')),
+        ledger: path_1.resolve(path_1.join(baseDir, '.ledger')),
         plugin: path_1.resolve(path_1.join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
-        token: {
-            checkpoint: path_1.resolve(path_1.join(baseDir, '.tokens', 'checkpoint')),
-            current: path_1.resolve(path_1.join(baseDir, '.tokens', 'current')),
-            ledger: path_1.resolve(path_1.join(baseDir, '.tokens', 'ledger')),
-        },
+        token: path_1.resolve(path_1.join(baseDir, '.token')),
         unprocessibleDir: path_1.resolve(path_1.join(baseDir, 'unprocessible')),
     };
     return paths;

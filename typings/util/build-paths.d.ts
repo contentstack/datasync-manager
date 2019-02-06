@@ -7,11 +7,8 @@ export declare const buildConfigPaths: () => {
     baseDir: string;
     failed: string;
     filtered: string;
+    ledger: string;
     plugin: string;
-    token: {
-        checkpoint: string;
-        current: string;
-        ledger: string;
-    };
+    token: string;
     unprocessibleDir: string;
 };

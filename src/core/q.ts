@@ -68,7 +68,7 @@ export class Q extends EventEmitter {
     logger.error(obj)
     debug(`Error handler called with ${JSON.stringify(obj)}`)
     if (obj.data.checkpoint) {
-      saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token, 'checkpoint').then(() => {
+      saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
         saveFailedItems(obj).then(() => {
           self.inProgress = false
           self.emit('next')
@@ -107,7 +107,7 @@ export class Q extends EventEmitter {
       this.inProgress = true
       const item = this.q.shift()
       if (item.checkpoint) {
-        saveToken(item.checkpoint.name, item.checkpoint.token, 'checkpoint').then(() => {
+        saveToken(item.checkpoint.name, item.checkpoint.token).then(() => {
           self.process(item)
         }).catch((error) => {
           logger.error('Save token failed to save a checkpoint!')
