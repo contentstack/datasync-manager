@@ -12,16 +12,14 @@ import { join, resolve } from 'path'
  */
 export const buildConfigPaths = () => {
   const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
+
   const paths = {
     baseDir: resolve(join(__dirname, '..', '..')),
     failed: resolve(join(baseDir, 'unprocessible', 'failed')),
     filtered: resolve(join(baseDir, 'unprocessible', 'filtered')),
+    ledger: resolve(join(baseDir, '.ledger')),
     plugin: resolve(join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
-    token: {
-      checkpoint: resolve(join(baseDir, '.tokens', 'checkpoint')),
-      current: resolve(join(baseDir, '.tokens', 'current')),
-      ledger: resolve(join(baseDir, '.tokens', 'ledger')),
-    },
+    token: resolve(join(baseDir, '.token')),
     unprocessibleDir: resolve(join(baseDir, 'unprocessible')),
   }
 
