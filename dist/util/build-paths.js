@@ -7,7 +7,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const path_1 = require("path");
 exports.buildConfigPaths = () => {
-    const baseDir = path_1.resolve(path_1.join(__dirname, '..', '..'));
+    const baseDir = path_1.resolve(path_1.join(__dirname, '..', '..', '..', '..'));
     const paths = {
         baseDir: path_1.resolve(path_1.join(__dirname, '..', '..')),
         failed: path_1.resolve(path_1.join(baseDir, 'unprocessible', 'failed')),

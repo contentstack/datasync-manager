@@ -11,7 +11,7 @@ import { join, resolve } from 'path'
  * @returns {Object} Returns config paths
  */
 export const buildConfigPaths = () => {
-  const baseDir = resolve(join(__dirname, '..', '..'))
+  const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
   const paths = {
     baseDir: resolve(join(__dirname, '..', '..')),
     failed: resolve(join(baseDir, 'unprocessible', 'failed')),
