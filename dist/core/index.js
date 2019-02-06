@@ -54,8 +54,8 @@ exports.init = (connector) => {
             else if (typeof Contentstack.pagination_token === 'string' && Contentstack.pagination_token.length !== 0) {
                 request.qs.pagination_token = Contentstack.pagination_token;
             }
-            else if (fs_1.existsSync(paths.token.checkpoint)) {
-                const token = JSON.parse(fs_1.readFileSync(paths.token.checkpoint));
+            else if (fs_1.existsSync(paths.token)) {
+                const token = JSON.parse(fs_1.readFileSync(paths.token));
                 request.qs[token.name] = token.token;
             }
             else {
@@ -96,7 +96,7 @@ const check = () => {
 };
 const sync = () => {
     return new Promise((resolve, reject) => {
-        return token_management_1.getTokenByType('checkpoint').then((tokenObject) => {
+        return token_management_1.getToken().then((tokenObject) => {
             const token = tokenObject;
             const request = {
                 qs: {
@@ -212,18 +212,14 @@ const postProcess = (req, resp) => {
         else {
             name = 'sync_token';
         }
-        return token_management_1.saveToken(name, resp[name], 'current').then(() => {
-            req.qs[name] = resp[name];
-            if (name === 'sync_token') {
-                flag.SQ = false;
-                return resolve();
-            }
-            return fire(req)
-                .then(resolve)
-                .catch(reject);
-        }).catch((error) => {
-            return reject(error);
-        });
+        req.qs[name] = resp[name];
+        if (name === 'sync_token') {
+            flag.SQ = false;
+            return resolve();
+        }
+        return fire(req)
+            .then(resolve)
+            .catch(reject);
     });
 };
 emitter.on('check', check);
