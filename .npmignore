@@ -1,2 +1,20 @@
+# Source files
 src
+
+# Typescript configurations
 tsconfig.json
+
+# Typescript linting
+tslint.json
+
+# Test configurations
+jest.config.js
+
+# Data
+_contents
+
+# Samples
+example
+
+# Node module dependencies
+node_modules
