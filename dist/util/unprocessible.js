@@ -31,7 +31,7 @@ exports.saveFilteredItems = (items, name, token) => {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         try {
             const config = __1.getConfig();
-            if (!config['sync-manager'].saveFilteredItems) {
+            if (!config.syncManager.saveFilteredItems) {
                 return resolve();
             }
             const objDetails = {

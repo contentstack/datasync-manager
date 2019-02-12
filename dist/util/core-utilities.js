@@ -171,7 +171,7 @@ exports.getFile = (file, rotate) => {
                     return reject(statError);
                 }
                 else if (stats.isFile()) {
-                    if (stats.size > config['sync-manager'].maxsize) {
+                    if (stats.size > config.syncManager.maxsize) {
                         file = rotate();
                     }
                     return resolve(file);
@@ -189,8 +189,8 @@ exports.getFile = (file, rotate) => {
 };
 exports.buildContentReferences = (schema, entry, parent = []) => {
     const config = __1.getConfig();
-    const enableAssetReferences = config['sync-manager'].enableAssetReferences;
-    const enableContentReferences = config['sync-manager'].enableContentReferences;
+    const enableAssetReferences = config.syncManager.enableAssetReferences;
+    const enableContentReferences = config.syncManager.enableContentReferences;
     for (let i = 0, c = schema.length; i < c; i++) {
         switch (schema[i].data_type) {
             case 'reference':

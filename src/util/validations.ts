@@ -11,7 +11,7 @@ import { hasIn } from 'lodash'
  * @param {Object} config - Application config
  */
 export const validateConfig = (config) => {
-  const keys = ['listener', 'asset-connector', 'content-connector', 'sync-manager', 'contentstack',
+  const keys = ['listener', 'assetStore', 'contentStore', 'syncManager', 'contentstack',
     'locales',
   ]
   keys.forEach((key) => {
@@ -19,59 +19,59 @@ export const validateConfig = (config) => {
       throw new Error(`Config '${key}' key cannot be undefined`)
     }
   })
-  if (typeof config.contentstack !== 'object' || !config.contentstack.apiKey || !config.contentstack.token) {
+  if (typeof config.contentstack !== 'object' || !config.contentstack.apiKey || !config.contentstack.deliveryToken) {
     throw new Error('Config \'contentstack\' should be of type object and have \'apiKey\' and \'token\'')
   }
 }
 
 /**
  * @description Validates registered instances
- * @param {Object} assetConnector - Asset connector instance
- * @param {Object} contentConnector - Content connector instance
+ * @param {Object} assetStore - Asset store instance
+ * @param {Object} contentStore - Content store instance
  * @param {Object} listener - Listener instance
  */
-export const validateInstances = (assetConnector, contentConnector, listener) => {
-  if (typeof assetConnector === 'undefined') {
-    throw new Error('Call \'setAssetConnector()\' before calling sync-manager start!')
-  } else if (typeof contentConnector === 'undefined') {
-    throw new Error('Call \'setContentConnector()\' before calling sync-manager start!')
+export const validateInstances = (assetStore, contentStore, listener) => {
+  if (typeof assetStore === 'undefined') {
+    throw new Error('Call \'setAssetStore()\' before calling sync-manager start!')
+  } else if (typeof contentStore === 'undefined') {
+    throw new Error('Call \'setContentStore()\' before calling sync-manager start!')
   } else if (typeof listener === 'undefined') {
     throw new Error('Call \'setListener()\' before calling sync-manager start!')
-  } else if (!assetConnector.start || !contentConnector.start || !listener.start) {
+  } else if (!assetStore.start || !contentStore.start || !listener.start) {
     throw new Error('Connector and listener instances should have \'start()\' method')
-  } else if (typeof assetConnector.start !== 'function' || typeof contentConnector.start !== 'function' ||
+  } else if (typeof assetStore.start !== 'function' || typeof contentStore.start !== 'function' ||
    typeof listener.start !== 'function') {
     throw new Error('Connector and listener instances should have \'start()\' method')
-  } else if (!assetConnector.setLogger || !contentConnector.setLogger || !listener.setLogger) {
+  } else if (!assetStore.setLogger || !contentStore.setLogger || !listener.setLogger) {
     throw new Error('Connector and listener instances should have \'setLogger\' method')
-  } else if (typeof assetConnector.setLogger !== 'function' ||
-   typeof contentConnector.setLogger !== 'function' || typeof listener.setLogger !== 'function') {
+  } else if (typeof assetStore.setLogger !== 'function' ||
+   typeof contentStore.setLogger !== 'function' || typeof listener.setLogger !== 'function') {
     throw new Error('Connector and listener instances should have \'start()\' method')
   }
 }
 
 /**
- * @description Validates if the registered content connector supports required methods
- * @param {Object} instance - Content connector instance
+ * @description Validates if the registered content store supports required methods
+ * @param {Object} instance - Content store instance
  */
 export const validateContentConnector = (instance) => {
   const fns = ['publish', 'unpublish', 'delete']
   fns.forEach((fn) => {
     if (!(hasIn(instance, fn))) {
-      throw new Error(`${instance} content connector does not support '${fn}()'`)
+      throw new Error(`${instance} content store does not support '${fn}()'`)
     }
   })
 }
 
 /**
- * @description Validates if the registered asset connector supports required methods
- * @param {Object} instance - Asset connector instance
+ * @description Validates if the registered asset store supports required methods
+ * @param {Object} instance - Asset store instance
  */
 export const validateAssetConnector = (instance) => {
   const fns = ['delete', 'download', 'unpublish']
   fns.forEach((fn) => {
     if (!(hasIn(instance, fn))) {
-      throw new Error(`${instance} asset connector does not support '${fn}()'`)
+      throw new Error(`${instance} asset store does not support '${fn}()'`)
     }
   })
 }
@@ -101,7 +101,6 @@ export const validateLogger = (instance) => {
   const requiredFn = ['info', 'warn', 'log', 'error', 'debug']
   requiredFn.forEach((name) => {
     if (typeof instance[name] !== 'function') {
-      console.warn(`Unable to register custom logger since '${name}()' does not exist on ${instance}!`)
       flag = true
     }
   })

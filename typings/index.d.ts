@@ -21,9 +21,9 @@ interface IConfig {
     locales?: any[];
     paths?: any;
     contentstack?: any;
-    'content-connector'?: any;
-    'sync-manager'?: any;
-    'asset-connector'?: any;
+    contentStore?: any;
+    syncManager?: any;
+    assetStore?: any;
 }
 interface ILogger {
     warn(): any;
@@ -31,8 +31,8 @@ interface ILogger {
     log(): any;
     error(): any;
 }
-export declare const setContentConnector: (instance: IConnector) => void;
-export declare const setAssetConnector: (instance: IConnector) => void;
+export declare const setContentStore: (instance: IConnector) => void;
+export declare const setAssetStore: (instance: IConnector) => void;
 export declare const setListener: (instance: ILogger) => void;
 export declare const setConfig: (config: IConfig) => void;
 export declare const getConfig: () => IConfig;

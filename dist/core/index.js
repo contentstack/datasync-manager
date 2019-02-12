@@ -45,7 +45,7 @@ exports.init = (connector) => {
             const request = {
                 qs: {
                     environment,
-                    limit: config['sync-manager'].limit,
+                    limit: config.syncManager.limit,
                 },
             };
             if (typeof Contentstack.sync_token === 'string' && Contentstack.sync_token.length !== 0) {
@@ -83,11 +83,11 @@ const check = () => {
         flag.WQ = false;
         flag.SQ = true;
         sync().then(() => {
-            debug(`Sync completed and SQ flag updated. Cooloff duration is ${config['sync-manager'].cooloff}`);
+            debug(`Sync completed and SQ flag updated. Cooloff duration is ${config.syncManager.cooloff}`);
             return setTimeout(() => {
                 flag.SQ = false;
                 emitter.emit('check');
-            }, config['sync-manager'].cooloff);
+            }, config.syncManager.cooloff);
         }).catch((error) => {
             logger_1.logger.error(error);
             return check();
@@ -101,7 +101,7 @@ const sync = () => {
             const request = {
                 qs: {
                     environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
-                    limit: config['sync-manager'].limit,
+                    limit: config.syncManager.limit,
                     [token.name]: token.token,
                 },
             };

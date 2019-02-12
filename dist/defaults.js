@@ -6,9 +6,9 @@
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.config = {
-    'asset-connector': {},
-    'content-connector': {},
-    'contentstack': {
+    assetStore: {},
+    contentStore: {},
+    contentstack: {
         MAX_RETRY_LIMIT: 6,
         actions: {
             delete: 'delete',
@@ -26,9 +26,9 @@ exports.config = {
             get: 'GET',
         },
     },
-    'listener': {},
-    'locales': [],
-    'sync-manager': {
+    listener: {},
+    locales: [],
+    syncManager: {
         cooloff: 3000,
         enableAssetReferences: true,
         enableContentReferences: true,

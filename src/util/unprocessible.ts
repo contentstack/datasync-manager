@@ -48,7 +48,7 @@ export const saveFilteredItems = (items, name, token) => {
   return new Promise(async (resolve, reject) => {
     try {
       const config = getConfig()
-      if (!config['sync-manager'].saveFilteredItems) {
+      if (!config.syncManager.saveFilteredItems) {
         return resolve()
       }
       const objDetails = {
