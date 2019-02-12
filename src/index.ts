@@ -23,12 +23,12 @@ import {
 const debug = Debug('registration')
 
 let appConfig: any = {}
-let contentConnector
-let assetConnector
+let contentStore
+let assetStore
 let listener
 
 /**
- * @summary Asset connector instance interface
+ * @summary Asset store instance interface
  */
 interface IAssetConnector {
   download(): any,
@@ -37,7 +37,7 @@ interface IAssetConnector {
 }
 
 /**
- * @summary Content connector instance interface
+ * @summary Content store instance interface
  */
 interface IContentConnector {
   publish(): any,
@@ -60,9 +60,9 @@ interface IConfig {
   locales?: any[],
   paths?: any,
   contentstack?: any,
-  'content-connector'?: any,
-  'sync-manager'?: any,
-  'asset-connector'?: any,
+  contentStore?: any,
+  syncManager?: any,
+  assetStore?: any,
 }
 
 /**
@@ -76,19 +76,19 @@ interface ILogger {
 }
 
 /**
- * @summary Register content connector
- * @param {Object} instance - Content connector instance
+ * @summary Register content store
+ * @param {Object} instance - Content store instance
  */
-export const setContentConnector = (instance: IConnector) => {
-  contentConnector = instance
+export const setContentStore = (instance: IConnector) => {
+  contentStore = instance
 }
 
 /**
- * @summary Register asset connector
- * @param {Object} instance - Asset connector instance
+ * @summary Register asset store
+ * @param {Object} instance - Asset store instance
  */
-export const setAssetConnector = (instance: IConnector) => {
-  assetConnector = instance
+export const setAssetStore = (instance: IConnector) => {
+  assetStore = instance
 }
 
 /**
@@ -126,37 +126,37 @@ export { setLogger } from './util/logger'
  * @summary
  *  Starts the sync manager utility
  * @description
- *  Registers, validates asset, content connectors and listener instances.
+ *  Registers, validates asset, content stores and listener instances.
  *  Once done, builds the app's config and logger
  * @param {Object} config - Optional application config.
  */
 export const start = (config: IConfig = {}): Promise<{}> => {
   return new Promise((resolve, reject) => {
     try {
-      validateInstances(assetConnector, contentConnector, listener)
+      validateInstances(assetStore, contentStore, listener)
       appConfig = merge({}, internalConfig, appConfig, config)
       validateConfig(appConfig)
       appConfig.paths = buildConfigPaths()
       // since logger is singleton, if previously set, it'll return that isnstance!
       setLogger()
       configure()
-      if (assetConnector.setLogger && typeof assetConnector.setLogger === 'function') {
-        assetConnector.setLogger(logger)
+      if (assetStore.setLogger && typeof assetStore.setLogger === 'function') {
+        assetStore.setLogger(logger)
       }
-      if (contentConnector.setLogger && typeof contentConnector.setLogger === 'function') {
-        contentConnector.setLogger(logger)
+      if (contentStore.setLogger && typeof contentStore.setLogger === 'function') {
+        contentStore.setLogger(logger)
       }
 
-      return assetConnector.start(appConfig).then((assetInstance: IAssetConnector) => {
-        debug('Asset connector instance has returned successfully!')
+      return assetStore.start(appConfig).then((assetInstance: IAssetConnector) => {
+        debug('Asset store instance has returned successfully!')
         validateAssetConnector(assetInstance)
 
-        return contentConnector.start(assetInstance, appConfig)
-      }).then((connectorInstance) => {
-        debug('Content connector instance has returned successfully!')
-        validateContentConnector(connectorInstance)
+        return contentStore.start(assetInstance, appConfig)
+      }).then((storeInstance) => {
+        debug('Content store instance has returned successfully!')
+        validateContentConnector(storeInstance)
 
-        return init(connectorInstance)
+        return init(storeInstance)
       }).then(() => {
         debug('Sync Manager initiated successfully!')
         listener.register(poke)

@@ -23,7 +23,7 @@ export const init = (contentstack) => {
   Contentstack = contentstack
   Contentstack.headers = {
     'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
-    'access_token': Contentstack.token,
+    'access_token': Contentstack.deliveryToken,
     'api_key': Contentstack.apiKey,
   }
 

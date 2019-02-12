@@ -21,7 +21,7 @@ exports.init = (contentstack) => {
     Contentstack = contentstack;
     Contentstack.headers = {
         'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
-        'access_token': Contentstack.token,
+        'access_token': Contentstack.deliveryToken,
         'api_key': Contentstack.apiKey,
     };
     if (Contentstack.MAX_RETRY_LIMIT) {

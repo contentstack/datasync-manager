@@ -1,6 +1,6 @@
 import { cloneDeep, merge } from 'lodash'
 import nock from 'nock'
-import { setAssetConnector, setConfig, setContentConnector, setListener, start } from '../src'
+import { setAssetStore, setConfig, setContentStore, setListener, start } from '../src'
 import { config as internalConfig } from '../src/defaults'
 import { setLogger } from '../src/util/logger'
 import { contentType as contentTypeSchema } from './dummy/api-responses/content-type'
@@ -81,15 +81,15 @@ describe('core', () => {
   // })
 
   test('set content connector without errors', () => {
-    expect(setContentConnector(contentConnector)).toBeUndefined()
+    expect(setContentStore((contentConnector as any))).toBeUndefined()
   })
 
   test('set asset connector without errors', () => {
-    expect(setAssetConnector(assetConnector)).toBeUndefined()
+    expect(setAssetStore((assetConnector as any))).toBeUndefined()
   })
 
   test('set listener without errors', () => {
-    expect(setListener(listener)).toBeUndefined()
+    expect(setListener((listener as any))).toBeUndefined()
   })
 
   test('set config without errors', () => {
@@ -101,9 +101,9 @@ describe('core', () => {
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
     contentstack.host = 'api.localhost.io'
-    setContentConnector(contentConnector)
-    setAssetConnector(assetConnector)
-    setListener(listener)
+    setContentStore((contentConnector as any))
+    setAssetStore((assetConnector as any))
+    setListener((listener as any))
 
     return start(configs).then((status) => {
       expect(status).toBeUndefined()
@@ -118,9 +118,9 @@ describe('core', () => {
     contentstack.sync_token = 'dummySyncToken'
     contentstack.host = 'api.localhost.io'
     contentstack.apis.sync += '/publish-success'
-    setContentConnector(contentConnector)
-    setAssetConnector(assetConnector)
-    setListener(listener)
+    setContentStore((contentConnector as any))
+    setAssetStore((assetConnector as any))
+    setListener((listener as any))
 
     return start(configs).then((status) => {
       expect(status).toBeUndefined()
@@ -135,9 +135,9 @@ describe('core', () => {
     contentstack.sync_token = 'dummySyncToken'
     contentstack.host = 'api.localhost.io'
     contentstack.apis.sync += '/unpublish-success'
-    setContentConnector(contentConnector)
-    setAssetConnector(assetConnector)
-    setListener(listener)
+    setContentStore((contentConnector as any))
+    setAssetStore((assetConnector as any))
+    setListener((listener as any))
 
     return start(configs).then((status) => {
       expect(status).toBeUndefined()
@@ -153,9 +153,9 @@ describe('core', () => {
     contentstack.pagination_token = 'dummyPaginationToken'
     contentstack.cdn = 'api.localhost.io'
     contentstack.apis.sync += '/delete-success'
-    setContentConnector(contentConnector)
-    setAssetConnector(assetConnector)
-    setListener(listener)
+    setContentStore((contentConnector as any))
+    setAssetStore((assetConnector as any))
+    setListener((listener as any))
     delete contentstack.sync_token
     setConfig(configs)
 

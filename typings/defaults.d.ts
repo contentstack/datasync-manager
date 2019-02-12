@@ -4,9 +4,9 @@
 * MIT Licensed
 */
 export declare const config: {
-    'asset-connector': {};
-    'content-connector': {};
-    'contentstack': {
+    assetStore: {};
+    contentStore: {};
+    contentstack: {
         MAX_RETRY_LIMIT: number;
         actions: {
             delete: string;
@@ -24,9 +24,9 @@ export declare const config: {
             get: string;
         };
     };
-    'listener': {};
-    'locales': any[];
-    'sync-manager': {
+    listener: {};
+    locales: any[];
+    syncManager: {
         cooloff: number;
         enableAssetReferences: boolean;
         enableContentReferences: boolean;

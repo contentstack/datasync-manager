@@ -8,9 +8,9 @@
  * @description Default application's internal config
  */
 export const config = {
-  'asset-connector': {},
-  'content-connector': {},
-  'contentstack': {
+  assetStore: {},
+  contentStore: {},
+  contentstack: {
     MAX_RETRY_LIMIT: 6,
     actions: {
       delete: 'delete',
@@ -28,9 +28,9 @@ export const config = {
       get: 'GET',
     },
   },
-  'listener': {},
-  'locales': [],
-  'sync-manager': {
+  listener: {},
+  locales: [],
+  syncManager: {
     cooloff: 3000,
     enableAssetReferences: true,
     enableContentReferences: true,
