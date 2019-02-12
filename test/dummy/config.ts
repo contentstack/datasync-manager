@@ -1,26 +1,13 @@
 export const config = {
-  'asset-connector': {
-
-  },
-  'content-connector': {
-
-  },
-  'contentstack': {
+  contentstack: {
     apiKey: 'dummyApiKey',
+    deliveryToken: 'dummyDeliveryToken',
     host: 'api.localhost.io',
     sync_token: 'dummySyncToken',
-    token: 'dummyDeliveryToken',
   },
-  'listener': {
-
-  },
-  'locales': [],
-  'plugins': {
+  plugins: {
     myplugin: {
       name: 'Jane Doe',
     },
-  },
-  'sync-manager': {
-
   },
 }

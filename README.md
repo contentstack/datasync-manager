@@ -24,15 +24,15 @@ Once the sync-manager fetches the updated details from Contentstack - it needs t
 ### Usage
 
 ```js
-  const assetConnector = require('contentstack-asset-connector')
-  const contentConnector = require('contentstack-mongodb-content-connector')
+  const assetStore = require('contentstack-asset-store-filesystem')
+  const contentStore = require('contentstack-content-store-mongodb')
   const listener = require('contentstack-webhook-listener')
 
   const config = require('./config')
   const syncManager = require('./dist')
 
-  syncManager.setAssetConnector(assetConnector)
-  syncManager.setContentConnector(contentConnector)
+  syncManager.setAssetStore(assetStore)
+  syncManager.setContentStore(contentStore)
   syncManager.setListener(listener)
   syncManager.setConfig(config)
 
@@ -53,7 +53,7 @@ By default, sync manager uses the following config to get started
     // stack api key
     apiKey: '', // (required)
     // stack delivery token
-    token: '', // (required)
+    deliveryToken: '', // (required)
     // sync token from where data is to synced when app starts
     sync_token: '',
     // pagination token from where data is to be synced when app starts
@@ -69,7 +69,7 @@ By default, sync manager uses the following config to get started
       code: 'hi-in'
     }
   ],
-  sync-manager: {
+  syncManager: {
     // milliseconds to wait before firing SYNC API
     cooloff: 3000,
     // no of items to be fetched at a time
@@ -102,7 +102,7 @@ Here's a sample config to help you get started!
         "greetings": ["Hello there!", "Ola amigo!"]
       }
     },
-    "sync-manager": {
+    "syncManager": {
       "cooloff": 3000,
       "limit": 100,
     }

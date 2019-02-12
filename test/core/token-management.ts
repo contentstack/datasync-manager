@@ -1,10 +1,8 @@
 import { writeFileSync } from 'fs'
 import { cloneDeep } from 'lodash'
-import { sync as mkdirp } from 'mkdirp'
 import { join, resolve } from 'path'
-import { sync as rimraf } from 'rimraf'
 import { setConfig } from '../../src'
-import { getTokenByType } from '../../src/core/token-management'
+import { getToken } from '../../src/core/token-management'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
@@ -15,30 +13,21 @@ describe('token management', () => {
   })
 
   test('get token by type should work without errors', () => {
-    const tokenData = [
-      {
-        name: 'sync_token',
-        timestamp: 'ts-one',
-        token: 'token-one',
-        type: 'checkpoint',
-      },
-    ]
+    const tokenData = {
+      name: 'sync_token',
+      timestamp: 'ts-one',
+      token: 'token-one',
+    }
     const configs: any = cloneDeep(config)
     configs.paths = buildConfigPaths()
-    configs.paths.token = {
-      ledger: resolve(join(__dirname, '..', '..', '.tokens', 'ledger')),
-    }
+    configs.paths.token = resolve(join(__dirname, '..', '..', '.token'))
+    configs.paths.ledger = resolve(join(__dirname, '..', '..', '.ledger'))
     setConfig(configs)
-    const tokenDirectory = resolve(join(__dirname, '..', '..', '.tokens'))
-    const ledgerPath = join(tokenDirectory, 'ledger')
-    rimraf(tokenDirectory)
-    // throw new Error('hey')
-    mkdirp(tokenDirectory)
-    writeFileSync(ledgerPath, JSON.stringify(tokenData))
 
-    return getTokenByType('checkpoint').then((tokenDetails) => {
-      expect(tokenDetails).toMatchObject(tokenData[0])
-      // expect(tokenDetails).toBeUndefined()
+    writeFileSync(configs.paths.token, JSON.stringify(tokenData))
+
+    return getToken().then((tokenDetails) => {
+      expect(tokenDetails).toMatchObject(tokenData)
     }).catch((error) => {
       console.error(error)
       expect(error).toBeNull()

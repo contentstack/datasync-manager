@@ -39,7 +39,7 @@ describe('validations', () => {
     test('config contentstack does not have required - token', () => {
       const configs: any = cloneDeep(merge({}, internalConfig, config))
       configs.paths = buildConfigPaths()
-      delete configs.contentstack.token
+      delete configs.contentstack.deliveryToken
       expect(() => {
         validateConfig(configs)
       }).toThrowError(/^Config 'contentstack' should be of type object and have 'apiKey' and 'token'$/)
@@ -51,13 +51,13 @@ describe('validations', () => {
       expect(() => {
         validateInstances(undefined, contentConnector, listener)
         // Question: Why 'regex' does not work here?
-      }).toThrowError("Call 'setAssetConnector()' before calling sync-manager start!")
+      }).toThrowError("Call 'setAssetStore()' before calling sync-manager start!")
     })
 
     test('content connector is not defined', () => {
       expect(() => {
         validateInstances(assetConnector, undefined, listener)
-      }).toThrowError("Call 'setContentConnector()' before calling sync-manager start!")
+      }).toThrowError("Call 'setContentStore()' before calling sync-manager start!")
     })
 
     test('listener is not defined', () => {
@@ -97,7 +97,7 @@ describe('validations', () => {
       delete assetConnectorClone.download
       expect(() => {
         validateAssetConnector(assetConnectorClone)
-      }).toThrowError(`${assetConnectorClone} asset connector does not support 'download()'`)
+      }).toThrowError(`${assetConnectorClone} asset store does not support 'download()'`)
     })
 
     test('content connector does not have publish()', () => {
@@ -105,7 +105,7 @@ describe('validations', () => {
       delete contentConnectorClone.publish
       expect(() => {
         validateContentConnector(contentConnectorClone)
-      }).toThrowError(`${contentConnectorClone} content connector does not support 'publish()'`)
+      }).toThrowError(`${contentConnectorClone} content store does not support 'publish()'`)
     })
 
     test('listener does not have register()', () => {
