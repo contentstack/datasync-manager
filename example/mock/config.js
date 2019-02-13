@@ -1,11 +1,14 @@
 module.exports = {
   contentstack: {
     apiKey: '',
-    token: ''
+    deliveryToken: ''
   },
   plugins: {
     myplugin: {
       name: 'John doe'
+    },
+    sitemap: {
+      name: 'sitemap generator'
     }
   }
 }

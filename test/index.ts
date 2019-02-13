@@ -161,8 +161,6 @@ describe('core', () => {
 
     return start().then((status) => {
       expect(status).toBeUndefined()
-    }).catch((error) => {
-      console.error(error)
-    })
+    }).catch(console.error)
   })
 })
