@@ -10,5 +10,8 @@ module.exports = {
     sitemap: {
       name: 'sitemap generator'
     }
+  },
+  contentStore: {
+    collectionName: 'example'
   }
 }

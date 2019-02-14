@@ -103,4 +103,19 @@ module.exports = function Plugins (pluginOptions) {
       return resolve()
     })
   }
+
+  Plugins.afterUnpublish = (input) => {
+    return new Promise((resolve, reject) => {
+      if (input.hasOwnProperty('content_type')) {
+        const entry = input.data
+        const contentType = input.content_type
+        if (entry.url && typeof entry.url === 'string' && contentType.options.is_page) {
+          return map(entry, contentType)
+            .then(resolve)
+            .catch(reject)
+        }
+      }
+      return resolve()
+    })
+  }
 }
