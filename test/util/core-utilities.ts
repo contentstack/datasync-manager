@@ -2,10 +2,13 @@ import { cloneDeep, merge } from 'lodash'
 import { setConfig } from '../../src'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
-import { filterItems, formatItems } from '../../src/util/core-utilities'
+import { buildContentReferences, filterItems, formatItems } from '../../src/util/core-utilities'
 import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
 import { response } from '../dummy/filter-items'
+import { schema } from '../dummy/references-content-type' 
+import { entry as inputEntry } from '../dummy/references-entry'
+import { entry as outputEntry } from '../dummy/references-entry-expected'
 
 const formattedAssetType = '_assets'
 const conf: any = cloneDeep(merge({}, internalConfig, config))
@@ -213,6 +216,12 @@ describe('core-utilities', () => {
       }).catch((error) => {
         expect(error).toBeNull()
       })
+    })
+  })
+
+  describe('buildContentReferences', () => {
+    test('building entry references should work without errors', () => {
+      expect(buildContentReferences(schema, inputEntry, [])).toEqual(outputEntry)
     })
   })
 })
