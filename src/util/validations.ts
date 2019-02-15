@@ -46,7 +46,7 @@ export const validateInstances = (assetStore, contentStore, listener) => {
     throw new Error('Connector and listener instances should have \'setLogger\' method')
   } else if (typeof assetStore.setLogger !== 'function' ||
    typeof contentStore.setLogger !== 'function' || typeof listener.setLogger !== 'function') {
-    throw new Error('Connector and listener instances should have \'start()\' method')
+    throw new Error('Connector and listener instances should have \'setLogger()\' method')
   }
 }
 
@@ -129,10 +129,8 @@ export const validateItemStructure = (item: any) => {
         return entryUnpublishedStructure(item)
       case 'entry_deleted':
         return entryDeletedStructure(item)
-      case 'content_type_deleted':
-        return contentTypeDeletedStructure(item)
       default:
-        return false
+        return contentTypeDeletedStructure(item)
     }
   } catch (error) {
     return false
