@@ -50,7 +50,8 @@ export const response = {
       },
       event_at: '2019-01-08T15:19:53.844Z',
       type: 'asset_deleted',
-    },    {
+    },    
+    {
       content_type_uid: 'authors',
       data: {
         locale: 'es-es',

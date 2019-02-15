@@ -23,7 +23,7 @@ describe('core', () => {
       'x-user-agent': 'contentstack-sync-manager/v1.0.0',
     }})
       .get('/v3/stacks/sync/publish-success')
-      .query({sync_token: 'dummySyncToken', environment: 'development', limit: 100})
+      .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
       .reply(200, publishResponse)
   })
 
@@ -34,7 +34,7 @@ describe('core', () => {
         'x-user-agent': 'contentstack-sync-manager/v1.0.0',
       }})
         .get('/v3/stacks/sync/unpublish-success')
-        .query({sync_token: 'dummySyncToken', environment: 'development', limit: 100})
+        .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
         .reply(200, mixedUnpublishResponse)
 
   })
@@ -48,7 +48,7 @@ describe('core', () => {
       'x-user-agent': 'contentstack-sync-manager/v1.0.0',
     }})
       .get('/v3/stacks/sync/delete-success')
-      .query({pagination_token: 'dummyPaginationToken', environment: 'development', limit: 100})
+      .query({pagination_token: 'dummyPaginationToken', environment: 'test', limit: 100})
       .reply(200, deleteResponse)
   })
 
@@ -59,7 +59,7 @@ describe('core', () => {
       'x-user-agent': 'contentstack-sync-manager/v1.0.0',
     }})
       .get('/v3/stacks/sync')
-      .query({sync_token: 'dummySyncToken', environment: 'development', limit: 100})
+      .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
       .reply(200, deleteResponse)
   })
 
