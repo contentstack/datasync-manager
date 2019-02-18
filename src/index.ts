@@ -8,6 +8,7 @@ import Debug from 'debug'
 import { merge } from 'lodash'
 import { init, poke } from './core'
 import { configure } from './core/process'
+import { notifications } from './core/q'
 import { config as internalConfig } from './defaults'
 import { buildConfigPaths } from './util/build-paths'
 import { logger, setLogger } from './util/logger'
@@ -121,6 +122,12 @@ export const getConfig = (): IConfig => {
  * @param {Object} instance - Custom logger instance
  */
 export { setLogger } from './util/logger'
+
+/**
+ * @summary Event emitter object, that allows client notifications on event raised by sync-manager queue
+ * @returns an event-emitter object, events raised: publish, unpublish, delete, error
+ */
+export { notifications }
 
 /**
  * @summary

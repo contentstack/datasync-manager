@@ -14,6 +14,8 @@ import { load } from './plugins'
 import { saveToken } from './token-management'
 
 const debug = Debug('q')
+const notifications = new EventEmitter()
+
 let instance = null
 
 /**
@@ -64,6 +66,7 @@ export class Q extends EventEmitter {
    * @param {Object} obj - Errorred item
    */
   public errorHandler(obj) {
+    notify('error', obj)
     const self = this
     logger.error(obj)
     debug(`Error handler called with ${JSON.stringify(obj)}`)
@@ -134,6 +137,8 @@ export class Q extends EventEmitter {
       logger.log(
         `${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`)
     }
+
+    notify(data.action, data)
     switch (data.action) {
     case 'publish':
       if (['_assets', '_content_types'].indexOf(data.content_type_uid) === -1) {
@@ -144,11 +149,8 @@ export class Q extends EventEmitter {
     case 'unpublish':
       this.exec(data, data.action, 'beforeUnpublish', 'afterUnpublish')
       break
-    case 'delete':
-      this.exec(data, data.action, 'beforeDelete', 'afterDelete')
-      break
     default:
-      // undefined action invoked
+      this.exec(data, data.action, 'beforeDelete', 'afterDelete')
       break
     }
   }
@@ -202,3 +204,9 @@ export class Q extends EventEmitter {
     }
   }
 }
+
+const notify = (event, obj) => {
+  notifications.emit(event, obj)
+}
+
+export { notifications }

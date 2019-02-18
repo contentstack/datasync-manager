@@ -5,6 +5,7 @@
 */
 /// <reference types="node" />
 import { EventEmitter } from 'events';
+declare const notifications: EventEmitter;
 export declare class Q extends EventEmitter {
     private inProgress;
     private pluginInstances;
@@ -17,3 +18,4 @@ export declare class Q extends EventEmitter {
     private process;
     private exec;
 }
+export { notifications };

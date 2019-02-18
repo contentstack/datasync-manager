@@ -17,6 +17,8 @@ const unprocessible_1 = require("../util/unprocessible");
 const plugins_1 = require("./plugins");
 const token_management_1 = require("./token-management");
 const debug = debug_1.default('q');
+const notifications = new events_1.EventEmitter();
+exports.notifications = notifications;
 let instance = null;
 class Q extends events_1.EventEmitter {
     constructor(connector, config) {
@@ -39,6 +41,7 @@ class Q extends events_1.EventEmitter {
         this.next();
     }
     errorHandler(obj) {
+        notify('error', obj);
         const self = this;
         logger_1.logger.error(obj);
         debug(`Error handler called with ${JSON.stringify(obj)}`);
@@ -98,6 +101,7 @@ class Q extends events_1.EventEmitter {
             const { locale } = data;
             logger_1.logger.log(`${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`);
         }
+        notify(data.action, data);
         switch (data.action) {
             case 'publish':
                 if (['_assets', '_content_types'].indexOf(data.content_type_uid) === -1) {
@@ -108,10 +112,8 @@ class Q extends events_1.EventEmitter {
             case 'unpublish':
                 this.exec(data, data.action, 'beforeUnpublish', 'afterUnpublish');
                 break;
-            case 'delete':
-                this.exec(data, data.action, 'beforeDelete', 'afterDelete');
-                break;
             default:
+                this.exec(data, data.action, 'beforeDelete', 'afterDelete');
                 break;
         }
     }
@@ -155,3 +157,6 @@ class Q extends events_1.EventEmitter {
     }
 }
 exports.Q = Q;
+const notify = (event, obj) => {
+    notifications.emit(event, obj);
+};
