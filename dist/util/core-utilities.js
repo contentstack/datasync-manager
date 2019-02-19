@@ -272,7 +272,7 @@ const update = (parent, reference, entry) => {
         }
     }
 };
-const findAssets = (schema, entry, bucket, isFindNotReplace) => {
+const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) => {
     var matches, regexp;
     const isMarkdown = (schema.field_metadata.markdown) ? true : false;
     if (isMarkdown) {
@@ -295,12 +295,17 @@ const findAssets = (schema, entry, bucket, isFindNotReplace) => {
             if (isFindNotReplace) {
                 bucket.push(assetObject);
             }
-            else if (bucket[assetUrl]) {
-                if (isMarkdown) {
-                    entry = entry.replace(assetUrl, `${encodeURI(bucket[assetUrl])}\\n`);
-                }
-                else {
-                    entry = entry.replace(assetUrl, encodeURI(bucket[assetUrl]));
+            else {
+                const asset = lodash_1.find(bucket, (item) => {
+                    return item.data.download_id === assetObject.download_id;
+                });
+                if (typeof asset !== 'undefined') {
+                    if (isMarkdown) {
+                        parentEntry[key] = entry.replace(assetUrl, `${encodeURI(asset.data._internal_url)}\\n`);
+                    }
+                    else {
+                        parentEntry[key] = entry.replace(assetUrl, encodeURI(asset.data._internal_url));
+                    }
                 }
             }
         }
@@ -310,25 +315,25 @@ const get = (parent, schema, entry, bucket, isFindNotReplace) => {
     try {
         const len = parent.length;
         for (let j = 0; j < len; j++) {
-            entry = entry[parent[j]];
-            if (j === (len - 1) && entry) {
-                if (entry instanceof Array) {
-                    for (let i = 0, _i = entry.length; i < _i; i++) {
-                        findAssets(schema, entry[i], bucket, isFindNotReplace);
+            const subEntry = entry[parent[j]];
+            if (j === (len - 1) && subEntry) {
+                if (subEntry instanceof Array) {
+                    for (let i = 0, _i = subEntry.length; i < _i; i++) {
+                        findAssets(entry, parent[j], schema, subEntry[i], bucket, isFindNotReplace);
                     }
                 }
                 else {
-                    findAssets(schema, entry, bucket, isFindNotReplace);
+                    findAssets(entry, parent[j], schema, subEntry, bucket, isFindNotReplace);
                 }
             }
             else {
                 const keys = lodash_1.cloneDeep(parent).splice((j + 1), len);
-                if (entry instanceof Array) {
-                    for (let m = 0, _m = entry.length; m < _m; m++) {
-                        get(keys, schema, entry[m], bucket, isFindNotReplace);
+                if (subEntry instanceof Array) {
+                    for (let m = 0, _m = subEntry.length; m < _m; m++) {
+                        get(keys, schema, subEntry[m], bucket, isFindNotReplace);
                     }
                 }
-                else if (typeof entry !== 'object') {
+                else if (typeof subEntry !== 'object') {
                     break;
                 }
             }
