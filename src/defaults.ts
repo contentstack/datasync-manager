@@ -34,6 +34,7 @@ export const config = {
     cooloff: 3000,
     enableAssetReferences: true,
     enableContentReferences: true,
+    enableRteMarkdownDownload: true,
     limit: 100,
     // max file sizes in bytes
     maxsize: 2097152,

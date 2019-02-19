@@ -54,14 +54,16 @@ exports.start = (config = {}) => {
             if (contentStore.setLogger && typeof contentStore.setLogger === 'function') {
                 contentStore.setLogger(logger_1.logger);
             }
+            let assetStoreInstance;
             return assetStore.start(appConfig).then((assetInstance) => {
                 debug('Asset store instance has returned successfully!');
                 validations_1.validateAssetConnector(assetInstance);
+                assetStoreInstance = assetInstance;
                 return contentStore.start(assetInstance, appConfig);
-            }).then((storeInstance) => {
+            }).then((contentStoreInstance) => {
                 debug('Content store instance has returned successfully!');
-                validations_1.validateContentConnector(storeInstance);
-                return core_1.init(storeInstance);
+                validations_1.validateContentConnector(contentStoreInstance);
+                return core_1.init(contentStoreInstance, assetStoreInstance);
             }).then(() => {
                 debug('Sync Manager initiated successfully!');
                 listener.register(core_1.poke);

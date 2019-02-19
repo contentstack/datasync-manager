@@ -39,9 +39,9 @@ let Q
  * @param {Object} connector - Content connector instance
  * @param {Object} config - Application config
  */
-export const init = (connector) => {
+export const init = (contentStore, assetStore) => {
   config = getConfig()
-  Q = new Queue(connector, config)
+  Q = new Queue(contentStore, assetStore, config)
   initAPI(config.contentstack)
   debug('Sync core:start invoked')
 
