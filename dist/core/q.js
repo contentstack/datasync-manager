@@ -28,8 +28,8 @@ class Q extends events_1.EventEmitter {
             this.contentStore = contentStore;
             this.assetStore = assetStore;
             this.inProgress = false;
-            this.rteInProgress = false;
             this.q = [];
+            this.config = config;
             this.on('next', this.next);
             this.on('error', this.errorHandler);
             instance = this;
@@ -50,38 +50,33 @@ class Q extends events_1.EventEmitter {
             token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
                 unprocessible_1.saveFailedItems(obj).then(() => {
                     self.inProgress = false;
-                    self.rteInProgress = false;
                     self.emit('next');
                 }).catch((error) => {
                     debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`);
                     self.inProgress = false;
-                    self.rteInProgress = false;
                     self.emit('next');
                 });
             }).catch((error) => {
                 logger_1.logger.error('Errorred while saving token');
                 logger_1.logger.error(error);
                 self.inProgress = false;
-                self.rteInProgress = false;
                 self.emit('next');
             });
         }
         unprocessible_1.saveFailedItems(obj).then(() => {
             self.inProgress = false;
-            self.rteInProgress = false;
             self.emit('next');
         }).catch((error) => {
             logger_1.logger.error('Errorred while saving failed items');
             logger_1.logger.error(error);
-            self.rteInProgress = false;
             self.inProgress = false;
             self.emit('next');
         });
     }
     next() {
         const self = this;
-        debug(`Calling 'next'. In progress status is ${this.inProgress}, RTE in progress status is ${this.rteInProgress} and Q length is ${this.q.length}`);
-        if (!this.inProgress && !this.rteInProgress && this.q.length) {
+        debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`);
+        if (!this.inProgress && this.q.length) {
             this.inProgress = true;
             const item = this.q.shift();
             if (item.checkpoint) {
@@ -113,18 +108,35 @@ class Q extends events_1.EventEmitter {
                 if (isEntry) {
                     data.data = core_utilities_1.buildContentReferences(data.content_type.schema, data.data);
                 }
-                if (isEntry && this.detectRteMarkdownAssets) {
+                if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
                     let assets = core_utilities_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
+                    if (assets.length === 0) {
+                        this.exec(data, data.action, 'beforePublish', 'afterPublish');
+                        return;
+                    }
                     assets = assets.map((asset) => { return this.reStructureAssetObjects(asset, data.locale); });
+                    const assetBucket = [];
                     return promise_map_1.map(assets, (asset) => {
-                        this.rteInProgress = true;
-                        return this.assetStore.download(asset).then(() => {
-                            this.exec(asset, 'publish', 'beforePublish', 'afterPublish');
+                        return new Promise((resolve, reject) => {
+                            return this.assetStore.download(asset)
+                                .then((updatedAsset) => {
+                                assetBucket.push(updatedAsset);
+                                return resolve();
+                            })
+                                .catch(reject);
                         });
                     }, 1)
                         .then(() => {
-                        data.data = core_utilities_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assets, false);
-                        this.exec(data, data.action, 'beforePublish', 'afterPublish');
+                        data.data = core_utilities_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assetBucket, false);
+                        data.pre_processed = true;
+                        this.q.unshift(data);
+                        assetBucket.forEach((asset) => {
+                            if (asset && typeof asset === 'object' && asset.data) {
+                                this.q.unshift(asset);
+                            }
+                        });
+                        this.inProgress = false;
+                        this.emit('next');
                     })
                         .catch((error) => {
                         this.emit('error', {
@@ -138,10 +150,8 @@ class Q extends events_1.EventEmitter {
             case 'unpublish':
                 this.exec(data, data.action, 'beforeUnpublish', 'afterUnpublish');
                 break;
-            case 'delete':
-                this.exec(data, data.action, 'beforeDelete', 'afterDelete');
-                break;
             default:
+                this.exec(data, data.action, 'beforeDelete', 'afterDelete');
                 break;
         }
     }
@@ -149,6 +159,7 @@ class Q extends events_1.EventEmitter {
         return {
             content_type_uid: '_assets',
             data: asset,
+            action: this.config.contentstack.actions.publish,
             locale,
             uid: asset.uid
         };
@@ -176,7 +187,6 @@ class Q extends events_1.EventEmitter {
             }).then(() => {
                 debug('After action plugins executed successfully!');
                 self.inProgress = false;
-                self.rteInProgress = false;
                 self.emit('next', data);
             }).catch((error) => {
                 self.emit('error', {

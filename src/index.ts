@@ -140,12 +140,6 @@ export const start = (config: IConfig = {}): Promise<{}> => {
       // since logger is singleton, if previously set, it'll return that isnstance!
       setLogger()
       configure()
-      if (assetStore.setLogger && typeof assetStore.setLogger === 'function') {
-        assetStore.setLogger(logger)
-      }
-      if (contentStore.setLogger && typeof contentStore.setLogger === 'function') {
-        contentStore.setLogger(logger)
-      }
 
       let assetStoreInstance
 

@@ -6,9 +6,9 @@
 /// <reference types="node" />
 import { EventEmitter } from 'events';
 export declare class Q extends EventEmitter {
+    private config;
     private detectRteMarkdownAssets;
     private inProgress;
-    private rteInProgress;
     private pluginInstances;
     private assetStore;
     private contentStore;

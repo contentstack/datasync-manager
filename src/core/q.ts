@@ -23,9 +23,9 @@ let instance = null
  *  Handles/processes 'sync' items one at a time, firing 'before' and 'after' hooks
  */
 export class Q extends EventEmitter {
+  private config: any
   private detectRteMarkdownAssets: any
   private inProgress: boolean
-  private rteInProgress: boolean
   private pluginInstances: any
   private assetStore: any
   private contentStore: any
@@ -45,8 +45,8 @@ export class Q extends EventEmitter {
       this.contentStore = contentStore
       this.assetStore = assetStore
       this.inProgress = false
-      this.rteInProgress = false
       this.q = []
+      this.config = config
       this.on('next', this.next)
       this.on('error', this.errorHandler)
       instance = this
@@ -78,12 +78,10 @@ export class Q extends EventEmitter {
       saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
         saveFailedItems(obj).then(() => {
           self.inProgress = false
-          self.rteInProgress = false
           self.emit('next')
         }).catch((error) => {
           debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`)
           self.inProgress = false
-          self.rteInProgress = false
           // fatal error
           self.emit('next')
         })
@@ -91,19 +89,16 @@ export class Q extends EventEmitter {
         logger.error('Errorred while saving token')
         logger.error(error)
         self.inProgress = false
-        self.rteInProgress = false
         self.emit('next')
       })
     }
 
     saveFailedItems(obj).then(() => {
       self.inProgress = false
-      self.rteInProgress = false
       self.emit('next')
     }).catch((error) => {
       logger.error('Errorred while saving failed items')
       logger.error(error)
-      self.rteInProgress = false
       self.inProgress = false
       self.emit('next')
     })
@@ -114,8 +109,8 @@ export class Q extends EventEmitter {
    */
   private next() {
     const self = this
-    debug(`Calling 'next'. In progress status is ${this.inProgress}, RTE in progress status is ${this.rteInProgress} and Q length is ${this.q.length}`)
-    if (!this.inProgress && !this.rteInProgress && this.q.length) {
+    debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`)
+    if (!this.inProgress && this.q.length) {
       this.inProgress = true
       const item = this.q.shift()
       if (item.checkpoint) {
@@ -153,18 +148,35 @@ export class Q extends EventEmitter {
         data.data = buildContentReferences(data.content_type.schema, data.data)
       }
 
-      if (isEntry && this.detectRteMarkdownAssets) {
+      if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
         let assets = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true)
+        if (assets.length === 0) {
+          this.exec(data, data.action, 'beforePublish', 'afterPublish')
+          return
+        }
         assets = assets.map((asset) => { return this.reStructureAssetObjects(asset, data.locale) })
+        const assetBucket = []
         return map(assets, (asset) => {
-          this.rteInProgress = true
-          return this.assetStore.download(asset).then(() => {
-            this.exec(asset, 'publish', 'beforePublish', 'afterPublish')
+          return new Promise((resolve, reject) => {
+            return this.assetStore.download(asset)
+              .then((updatedAsset) => {
+                assetBucket.push(updatedAsset)
+                return resolve()
+              })
+              .catch(reject)
           })
         }, 1)
         .then(() => {
-          data.data = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assets, false)
-          this.exec(data, data.action, 'beforePublish', 'afterPublish')
+          data.data = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assetBucket, false)
+          data.pre_processed = true
+          this.q.unshift(data)
+          assetBucket.forEach((asset) => {
+            if (asset && typeof asset === 'object' && asset.data) {
+              this.q.unshift(asset)
+            }
+          })
+          this.inProgress = false
+          this.emit('next')
         })
         .catch((error) => {
           this.emit('error', {
@@ -178,11 +190,8 @@ export class Q extends EventEmitter {
     case 'unpublish':
       this.exec(data, data.action, 'beforeUnpublish', 'afterUnpublish')
       break
-    case 'delete':
-      this.exec(data, data.action, 'beforeDelete', 'afterDelete')
-      break
     default:
-      // undefined action invoked
+      this.exec(data, data.action, 'beforeDelete', 'afterDelete')
       break
     }
   }
@@ -191,6 +200,7 @@ export class Q extends EventEmitter {
     return {
       content_type_uid: '_assets',
       data: asset,
+      action: this.config.contentstack.actions.publish,
       locale,
       uid: asset.uid
     }
@@ -230,7 +240,6 @@ export class Q extends EventEmitter {
       }).then(() => {
         debug('After action plugins executed successfully!')
         self.inProgress = false
-        self.rteInProgress = false
         self.emit('next', data)
       }).catch((error) => {
         self.emit('error', {
