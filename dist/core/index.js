@@ -31,9 +31,9 @@ const flag = {
 let config;
 let Contentstack;
 let Q;
-exports.init = (connector) => {
+exports.init = (contentStore, assetStore) => {
     config = __1.getConfig();
-    Q = new q_1.Q(connector, config);
+    Q = new q_1.Q(contentStore, assetStore, config);
     api_1.init(config.contentstack);
     debug('Sync core:start invoked');
     return new Promise((resolve, reject) => {

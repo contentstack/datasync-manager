@@ -9,3 +9,4 @@ export declare const formatItems: (items: any, config: any) => any;
 export declare const markCheckpoint: (groupedItems: any, syncResponse: any) => any;
 export declare const getFile: (file: any, rotate: any) => Promise<{}>;
 export declare const buildContentReferences: (schema: any[], entry: any, parent?: string[]) => any;
+export declare const getOrSetRTEMarkdownAssets: (schema: any, entry: any, bucket: any[], isFindNotReplace: any, parent?: any[]) => any;

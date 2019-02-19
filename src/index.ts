@@ -147,16 +147,19 @@ export const start = (config: IConfig = {}): Promise<{}> => {
         contentStore.setLogger(logger)
       }
 
+      let assetStoreInstance
+
       return assetStore.start(appConfig).then((assetInstance: IAssetConnector) => {
         debug('Asset store instance has returned successfully!')
         validateAssetConnector(assetInstance)
+        assetStoreInstance = assetInstance
 
         return contentStore.start(assetInstance, appConfig)
-      }).then((storeInstance) => {
+      }).then((contentStoreInstance) => {
         debug('Content store instance has returned successfully!')
-        validateContentConnector(storeInstance)
+        validateContentConnector(contentStoreInstance)
 
-        return init(storeInstance)
+        return init(contentStoreInstance, assetStoreInstance)
       }).then(() => {
         debug('Sync Manager initiated successfully!')
         listener.register(poke)

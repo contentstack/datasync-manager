@@ -13,18 +13,22 @@ const events_1 = require("events");
 const lodash_1 = require("lodash");
 const core_utilities_1 = require("../util/core-utilities");
 const logger_1 = require("../util/logger");
+const promise_map_1 = require("../util/promise.map");
 const unprocessible_1 = require("../util/unprocessible");
 const plugins_1 = require("./plugins");
 const token_management_1 = require("./token-management");
 const debug = debug_1.default('q');
 let instance = null;
 class Q extends events_1.EventEmitter {
-    constructor(connector, config) {
-        if (!instance && connector && config) {
+    constructor(contentStore, assetStore, config) {
+        if (!instance && contentStore && assetStore && config) {
             super();
+            this.detectRteMarkdownAssets = (config.contentStore && typeof config.contentStore.enableRteMarkdownDownload === 'boolean') ? config.contentStore.enableRteMarkdownDownload : true;
             this.pluginInstances = plugins_1.load(config);
-            this.connectorInstance = connector;
+            this.contentStore = contentStore;
+            this.assetStore = assetStore;
             this.inProgress = false;
+            this.rteInProgress = false;
             this.q = [];
             this.on('next', this.next);
             this.on('error', this.errorHandler);
@@ -36,7 +40,7 @@ class Q extends events_1.EventEmitter {
     push(data) {
         this.q.push(data);
         debug(`Content type '${data.content_type_uid}' received for '${data.action}'`);
-        this.next();
+        this.emit('next');
     }
     errorHandler(obj) {
         const self = this;
@@ -46,33 +50,38 @@ class Q extends events_1.EventEmitter {
             token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
                 unprocessible_1.saveFailedItems(obj).then(() => {
                     self.inProgress = false;
+                    self.rteInProgress = false;
                     self.emit('next');
                 }).catch((error) => {
                     debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`);
                     self.inProgress = false;
+                    self.rteInProgress = false;
                     self.emit('next');
                 });
             }).catch((error) => {
                 logger_1.logger.error('Errorred while saving token');
                 logger_1.logger.error(error);
                 self.inProgress = false;
+                self.rteInProgress = false;
                 self.emit('next');
             });
         }
         unprocessible_1.saveFailedItems(obj).then(() => {
             self.inProgress = false;
+            self.rteInProgress = false;
             self.emit('next');
         }).catch((error) => {
             logger_1.logger.error('Errorred while saving failed items');
             logger_1.logger.error(error);
+            self.rteInProgress = false;
             self.inProgress = false;
             self.emit('next');
         });
     }
     next() {
         const self = this;
-        debug(`Calling 'next'. In progress status is ${this.inProgress} and Q length is ${this.q.length}`);
-        if (!this.inProgress && this.q.length) {
+        debug(`Calling 'next'. In progress status is ${this.inProgress}, RTE in progress status is ${this.rteInProgress} and Q length is ${this.q.length}`);
+        if (!this.inProgress && !this.rteInProgress && this.q.length) {
             this.inProgress = true;
             const item = this.q.shift();
             if (item.checkpoint) {
@@ -100,8 +109,29 @@ class Q extends events_1.EventEmitter {
         }
         switch (data.action) {
             case 'publish':
-                if (['_assets', '_content_types'].indexOf(data.content_type_uid) === -1) {
+                const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1;
+                if (isEntry) {
                     data.data = core_utilities_1.buildContentReferences(data.content_type.schema, data.data);
+                }
+                if (isEntry && this.detectRteMarkdownAssets) {
+                    let assets = core_utilities_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
+                    assets = assets.map((asset) => { return this.reStructureAssetObjects(asset, data.locale); });
+                    return promise_map_1.map(assets, (asset) => {
+                        this.rteInProgress = true;
+                        return this.assetStore.download(asset).then(() => {
+                            this.exec(asset, 'publish', 'beforePublish', 'afterPublish');
+                        });
+                    }, 1)
+                        .then(() => {
+                        data.data = core_utilities_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assets, false);
+                        this.exec(data, data.action, 'beforePublish', 'afterPublish');
+                    })
+                        .catch((error) => {
+                        this.emit('error', {
+                            data,
+                            error
+                        });
+                    });
                 }
                 this.exec(data, data.action, 'beforePublish', 'afterPublish');
                 break;
@@ -115,6 +145,14 @@ class Q extends events_1.EventEmitter {
                 break;
         }
     }
+    reStructureAssetObjects(asset, locale) {
+        return {
+            content_type_uid: '_assets',
+            data: asset,
+            locale,
+            uid: asset.uid
+        };
+    }
     exec(data, action, beforeAction, afterAction) {
         const self = this;
         try {
@@ -127,7 +165,7 @@ class Q extends events_1.EventEmitter {
             Promise.all(beforeActionPlugins)
                 .then(() => {
                 debug('Before action plugins executed successfully!');
-                return self.connectorInstance[action](clonedData);
+                return self.contentStore[action](clonedData);
             }).then(() => {
                 debug('Connector instance called successfully!');
                 const promisifiedBucket2 = [];
@@ -138,6 +176,7 @@ class Q extends events_1.EventEmitter {
             }).then(() => {
                 debug('After action plugins executed successfully!');
                 self.inProgress = false;
+                self.rteInProgress = false;
                 self.emit('next', data);
             }).catch((error) => {
                 self.emit('error', {

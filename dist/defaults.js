@@ -32,6 +32,7 @@ exports.config = {
         cooloff: 3000,
         enableAssetReferences: true,
         enableContentReferences: true,
+        enableRteMarkdownDownload: true,
         limit: 100,
         maxsize: 2097152,
         saveFailedItems: true,
