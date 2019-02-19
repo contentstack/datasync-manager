@@ -30,6 +30,7 @@ export declare const config: {
         cooloff: number;
         enableAssetReferences: boolean;
         enableContentReferences: boolean;
+        enableRteMarkdownDownload: boolean;
         limit: number;
         maxsize: number;
         saveFailedItems: boolean;

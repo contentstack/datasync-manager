@@ -6,14 +6,18 @@
 /// <reference types="node" />
 import { EventEmitter } from 'events';
 export declare class Q extends EventEmitter {
+    private detectRteMarkdownAssets;
     private inProgress;
+    private rteInProgress;
     private pluginInstances;
-    private connectorInstance;
+    private assetStore;
+    private contentStore;
     private q;
-    constructor(connector: any, config: any);
+    constructor(contentStore: any, assetStore: any, config: any);
     push(data: any): void;
     errorHandler(obj: any): void;
     private next;
     private process;
+    private reStructureAssetObjects;
     private exec;
 }

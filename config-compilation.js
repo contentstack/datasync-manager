@@ -6,9 +6,13 @@ const mongoStore = {
   dbName: 'contentstack-persistent-db',
   // Collection name in which contents will be stored
   collectionName: 'contents',
-  // Indexes to be applied
-  indexes: {
-    published_at: 1,
+  // keys that form part of sys_keys, pass { key: true } to add, { key: false } to remove
+  // currently, only top level keys from SYNC API response item are supported
+  indexedKeys: {
+    content_type_uid: true,
+    locale: true,
+    uid: true,
+    published_at: true
   },
   // Refer http://mongodb.github.io/node-mongodb-native/3.1/api/MongoClient.html for more configuration options
   options: {
@@ -22,12 +26,30 @@ const mongoStore = {
   },
   // Keys to be deleted, while data is being inserted
   unwantedKeys: {
-    // asset keys to be deleted
-    asset: ['created_by', 'updated_by'],
-    // content type keys to be deleted
-    contentType: ['created_by', 'updated_by', 'DEFAULT_ACL', 'SYS_ACL', 'abilities', 'last_activity'],
-    // entry keys to be deleted
-    entry: ['created_by', 'updated_by'],
+    asset: {
+      action: true,
+      checkpoint: true,
+      'data.created_by': true,
+      event_at: true,
+      type: true,
+      'data.updated_by': true
+    },
+    contentType: {
+      'data.created_by': true,
+      'data.updated_by': true,
+      'data.DEFAULT_ACL': true,
+      'data.SYS_ACL': true,
+      'data.abilities': true,
+      'data.last_activity': true
+    },
+    entry: {
+      action: true,
+      checkpoint: true,
+      'data.created_by': true,
+      event_at: true,
+      type: true,
+      'data.updated_by': true
+    },
   },
   // mongodb connection url
   url: 'mongodb://localhost:27017',
@@ -89,6 +111,8 @@ const syncManager = {
     // references in entries, will appear as 'references' when this is `true`, else only its uid will appear
     // ex: { reference_to: 'content_type_uid', values: ['entry_uid'] }
     enableContentReferences: true,
+    // if enabled, contentstack assets in RTE/Markdown will be downloaded onto database
+    enableRteMarkdownDownload: true,
     // max no of items to be fetched in a SYNC API request
     limit: 100,
     // max file sizes in bytes
@@ -164,5 +188,5 @@ const mongoSDK = {
  * Filesystem content store specific configurations
  */
 const filesystemStore = {
-  
+
 }
