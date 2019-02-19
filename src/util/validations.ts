@@ -42,11 +42,6 @@ export const validateInstances = (assetStore, contentStore, listener) => {
   } else if (typeof assetStore.start !== 'function' || typeof contentStore.start !== 'function' ||
    typeof listener.start !== 'function') {
     throw new Error('Connector and listener instances should have \'start()\' method')
-  } else if (!assetStore.setLogger || !contentStore.setLogger || !listener.setLogger) {
-    throw new Error('Connector and listener instances should have \'setLogger\' method')
-  } else if (typeof assetStore.setLogger !== 'function' ||
-   typeof contentStore.setLogger !== 'function' || typeof listener.setLogger !== 'function') {
-    throw new Error('Connector and listener instances should have \'setLogger()\' method')
   }
 }
 

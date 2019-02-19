@@ -4,7 +4,7 @@ module.exports = {
     return Promise.resolve()
   },
   download: function (asset) {
-    asset.key = 'new key added'
+    asset.data._internal_url = 'internal_url'
     return Promise.resolve(asset)
   },
   unpublish: function () {
