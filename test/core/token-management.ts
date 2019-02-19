@@ -33,23 +33,4 @@ describe('token management', () => {
       expect(error).toBeNull()
     })
   })
-
-  // test('get token by type should throw error (path does not exist!)', () => {
-  //   const configs: any = cloneDeep(config)
-  //   configs.paths = {
-  //     token: {
-  //       ledger: resolve(join(__dirname, '..', '..', '.tokens', 'ledger')),
-  //     },
-  //   }
-  //   setConfig(configs)
-  //   const tokenDirectory = resolve(join(__dirname, '..', '..', '.tokens'))
-  //   const ledgerPath = join(tokenDirectory, 'ledger')
-  //   rimraf(tokenDirectory)
-
-  //   return getTokenByType('checkpoint').then((result) => {
-  //     expect(result).toBeUndefined()
-  //   }).catch((error) => {
-  //     expect(error.message).toEqual(`Token path ${ledgerPath} does not exist`)
-  //   })
-  // })
 })
