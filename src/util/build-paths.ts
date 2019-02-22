@@ -12,14 +12,15 @@ import { join, resolve } from 'path'
  */
 export const buildConfigPaths = () => {
   const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
+  const tokenBasePath = process.env.TOKEN_PATH || baseDir
 
   const paths = {
     baseDir: resolve(join(__dirname, '..', '..')),
     failed: resolve(join(baseDir, 'unprocessible', 'failed')),
     filtered: resolve(join(baseDir, 'unprocessible', 'filtered')),
-    ledger: resolve(join(baseDir, '.ledger')),
+    ledger: resolve(join(tokenBasePath, '.ledger')),
     plugin: resolve(join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
-    token: resolve(join(baseDir, '.token')),
+    token: resolve(join(tokenBasePath, '.token')),
     unprocessibleDir: resolve(join(baseDir, 'unprocessible')),
   }
 
