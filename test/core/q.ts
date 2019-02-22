@@ -5,7 +5,7 @@ import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
-import { contentConnector } from '../dummy/connector-listener-instances'
+import { contentConnector, assetConnector } from '../dummy/connector-listener-instances'
 
 const configs: any = cloneDeep(merge({}, internalConfig, config))
 
@@ -17,7 +17,7 @@ test('error handler should work fine', () => {
   setConfig(configs)
   configs.paths = buildConfigPaths()
 
-  const q = new Q(contentConnector, configs)
+  const q = new Q(contentConnector, assetConnector, configs)
   const errorObject = {
     data: {
       checkpoint: {
