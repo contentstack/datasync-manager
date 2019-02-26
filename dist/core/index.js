@@ -60,6 +60,12 @@ exports.init = (connector) => {
             }
             else {
                 request.qs.init = true;
+                if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
+                    const filters = config.syncManager.filters;
+                    for (let filter in filters) {
+                        request.qs[filter] = filters[filter].join(',');
+                    }
+                }
             }
             return fire(request)
                 .then(resolve)
