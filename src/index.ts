@@ -11,6 +11,7 @@ import { configure } from './core/process'
 import { notifications } from './core/q'
 import { config as internalConfig } from './defaults'
 import { buildConfigPaths } from './util/build-paths'
+import { formatSyncFilters } from './util/core-utilities'
 import { logger, setLogger } from './util/logger'
 
 import {
@@ -162,6 +163,7 @@ export const start = (config: IConfig = {}): Promise<{}> => {
       }).then((storeInstance) => {
         debug('Content store instance has returned successfully!')
         validateContentConnector(storeInstance)
+        appConfig = formatSyncFilters(appConfig)
 
         return init(storeInstance)
       }).then(() => {

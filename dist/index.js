@@ -16,6 +16,7 @@ const q_1 = require("./core/q");
 exports.notifications = q_1.notifications;
 const defaults_1 = require("./defaults");
 const build_paths_1 = require("./util/build-paths");
+const core_utilities_1 = require("./util/core-utilities");
 const logger_1 = require("./util/logger");
 const validations_1 = require("./util/validations");
 const debug = debug_1.default('registration');
@@ -63,6 +64,7 @@ exports.start = (config = {}) => {
             }).then((storeInstance) => {
                 debug('Content store instance has returned successfully!');
                 validations_1.validateContentConnector(storeInstance);
+                appConfig = core_utilities_1.formatSyncFilters(appConfig);
                 return core_1.init(storeInstance);
             }).then(() => {
                 debug('Sync Manager initiated successfully!');
