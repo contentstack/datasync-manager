@@ -21,11 +21,11 @@ interface IToken {
   token: string
 }
 
-const debug = Debug('sm:core-sync')
+const debug = Debug('sync-core')
 const emitter = new EventEmitter()
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
-const flag = {
+const flag: any = {
   SQ: false,
   WQ: false,
   lockdown: false,
@@ -147,9 +147,17 @@ export const lock = () => {
 /**
  * @description Used to unlock the 'sync' process in case of errors/exceptions
  */
-export const unlock = () => {
+export const unlock = (refire?) => {
   logger.info('Contentstack sync unlocked..')
   flag.lockdown = false
+  if (typeof refire === 'boolean' && refire) {
+    flag.WQ = true
+    if (flag.requestCache && Object.keys(flag.requestCache)) {
+      return fire(flag.requestCache.params)
+        .then(flag.requestCache.resolve)
+        .catch(flag.requestCache.reject)
+    }
+  }
   check()
 }
 
@@ -270,16 +278,25 @@ const postProcess = (req, resp) => {
 
     // re-fire!
     req.qs[name] = resp[name]
-    if (name === 'sync_token') {
-      flag.SQ = false
 
-      return resolve()
+    if (flag.lockdown) {
+      console.log('lockdown has been invoked')
+      flag.requestCache = {
+        params: req,
+        resolve,
+        reject
+      }
+    } else {
+      if (name === 'sync_token') {
+        flag.SQ = false
+
+        return resolve()
+      }
+
+      return fire(req)
+        .then(resolve)
+        .catch(reject)
     }
-
-    return fire(req)
-      .then(resolve)
-      .catch(reject)
-
   })
 }
 

@@ -32,6 +32,10 @@ export declare const config: {
         enableContentReferences: boolean;
         limit: number;
         maxsize: number;
+        queue: {
+            pause_threshold: number;
+            resume_threshold: number;
+        };
         saveFailedItems: boolean;
         saveFilteredItems: boolean;
     };
