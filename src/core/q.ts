@@ -7,6 +7,7 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep } from 'lodash'
+import { lock, unlock } from '.'
 import { buildContentReferences } from '../util/core-utilities'
 import { logger } from '../util/logger'
 import { saveFailedItems } from '../util/unprocessible'
@@ -22,6 +23,8 @@ let instance = null
  *  Handles/processes 'sync' items one at a time, firing 'before' and 'after' hooks
  */
 export class Q extends EventEmitter {
+  private config: any
+  private iLock: boolean
   private inProgress: boolean
   private pluginInstances: any
   private connectorInstance: any
@@ -36,8 +39,10 @@ export class Q extends EventEmitter {
   constructor(connector, config) {
     if (!instance && connector && config) {
       super()
+      this.config = config
       this.pluginInstances = load(config)
       this.connectorInstance = connector
+      this.iLock = false
       this.inProgress = false
       this.q = []
       this.on('next', this.next)
@@ -55,6 +60,10 @@ export class Q extends EventEmitter {
    */
   public push(data) {
     this.q.push(data)
+    if (this.q.length > this.config.syncManager.queue.pause_threshold) {
+      this.iLock = true
+      lock()
+    }
     debug(`Content type '${data.content_type_uid}' received for '${data.action}'`)
     this.next()
   }
@@ -101,6 +110,10 @@ export class Q extends EventEmitter {
    * @description Calls next item in the queue
    */
   private next() {
+    if (this.iLock && this.q.length < this.config.syncManager.queue.resume_threshold) {
+      unlock(true)
+      this.iLock = false
+    }
     const self = this
     debug(`Calling 'next'. In progress status is ${this.inProgress} and Q length is ${this.q.length}`)
     if (!this.inProgress && this.q.length) {
@@ -119,6 +132,10 @@ export class Q extends EventEmitter {
       }
     }
   }
+
+  public peek() {
+    return this.q
+  } 
 
   /**
    * @description Passes and calls the appropriate methods and hooks for item execution

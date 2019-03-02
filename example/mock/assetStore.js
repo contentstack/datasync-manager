@@ -5,7 +5,11 @@ module.exports = {
   },
   download: function (asset) {
     asset.key = 'new key added'
-    return Promise.resolve(asset)
+    return new Promise((resolve) => {
+      return setTimeout(() => {
+        return resolve(asset)
+      }, 1000)
+    })
   },
   unpublish: function () {
     return Promise.resolve()
