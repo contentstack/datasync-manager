@@ -11,6 +11,7 @@ exports.buildConfigPaths = () => {
     const tokenBasePath = process.env.TOKEN_PATH || baseDir;
     const paths = {
         baseDir: path_1.resolve(path_1.join(__dirname, '..', '..')),
+        checkpoint: path_1.resolve(path_1.join(tokenBasePath, '.checkpoint')),
         failed: path_1.resolve(path_1.join(baseDir, 'unprocessible', 'failed')),
         filtered: path_1.resolve(path_1.join(baseDir, 'unprocessible', 'filtered')),
         ledger: path_1.resolve(path_1.join(tokenBasePath, '.ledger')),

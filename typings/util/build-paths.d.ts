@@ -5,6 +5,7 @@
 */
 export declare const buildConfigPaths: () => {
     baseDir: string;
+    checkpoint: string;
     failed: string;
     filtered: string;
     ledger: string;

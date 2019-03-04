@@ -16,6 +16,7 @@ export const buildConfigPaths = () => {
 
   const paths = {
     baseDir: resolve(join(__dirname, '..', '..')),
+    checkpoint: resolve(join(tokenBasePath, '.checkpoint')),
     failed: resolve(join(baseDir, 'unprocessible', 'failed')),
     filtered: resolve(join(baseDir, 'unprocessible', 'filtered')),
     ledger: resolve(join(tokenBasePath, '.ledger')),
