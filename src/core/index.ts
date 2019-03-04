@@ -14,7 +14,7 @@ import { existsSync, readFileSync } from '../util/fs'
 import { logger } from '../util/logger'
 import { map } from '../util/promise.map'
 import { Q as Queue } from './q'
-import { getToken } from './token-management'
+import { getToken, saveCheckpoint } from './token-management'
 
 interface IToken {
   name: string
@@ -147,7 +147,7 @@ export const lock = () => {
 /**
  * @description Used to unlock the 'sync' process in case of errors/exceptions
  */
-export const unlock = (refire?) => {
+export const unlock = (refire ? ) => {
   logger.info('Contentstack sync unlocked..')
   flag.lockdown = false
   if (typeof refire === 'boolean' && refire) {
@@ -180,8 +180,8 @@ const fire = (req) => {
         return filterItems(syncResponse, config).then(() => {
           if (syncResponse.items.length === 0) {
             return postProcess(req, syncResponse)
-            .then(resolve)
-            .catch(reject)
+              .then(resolve)
+              .catch(reject)
           }
           syncResponse.items = formatItems(syncResponse.items, config)
           let groupedItems = groupItems(syncResponse.items)
@@ -217,7 +217,9 @@ const fire = (req) => {
               return get({
                 path: `${Contentstack.apis.content_types}${uid}`,
               }).then((contentTypeSchemaResponse) => {
-                const schemaResponse: { content_type: any } = (contentTypeSchemaResponse as any)
+                const schemaResponse: {
+                  content_type: any
+                } = (contentTypeSchemaResponse as any)
                 if (schemaResponse.content_type) {
                   const items = groupedItems[uid]
                   items.forEach((entry) => {
@@ -276,27 +278,31 @@ const postProcess = (req, resp) => {
       name = 'sync_token'
     }
 
-    // re-fire!
-    req.qs[name] = resp[name]
+    return saveCheckpoint(name, resp[name])
+    .then(() => {
+      // re-fire!
+      req.qs[name] = resp[name]
 
-    if (flag.lockdown) {
-      console.log('lockdown has been invoked')
-      flag.requestCache = {
-        params: req,
-        resolve,
-        reject
+      if (flag.lockdown) {
+        console.log('Checkpoint: lockdown has been invoked')
+        flag.requestCache = {
+          params: req,
+          resolve,
+          reject
+        }
+      } else {
+        if (name === 'sync_token') {
+          flag.SQ = false
+
+          return resolve()
+        }
+
+        return fire(req)
+          .then(resolve)
+          .catch(reject)
       }
-    } else {
-      if (name === 'sync_token') {
-        flag.SQ = false
-
-        return resolve()
-      }
-
-      return fire(req)
-        .then(resolve)
-        .catch(reject)
-    }
+    })
+    .catch(reject)
   })
 }
 

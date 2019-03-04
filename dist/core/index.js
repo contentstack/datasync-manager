@@ -220,24 +220,28 @@ const postProcess = (req, resp) => {
         else {
             name = 'sync_token';
         }
-        req.qs[name] = resp[name];
-        if (flag.lockdown) {
-            console.log('lockdown has been invoked');
-            flag.requestCache = {
-                params: req,
-                resolve,
-                reject
-            };
-        }
-        else {
-            if (name === 'sync_token') {
-                flag.SQ = false;
-                return resolve();
+        return token_management_1.saveCheckpoint(name, resp[name])
+            .then(() => {
+            req.qs[name] = resp[name];
+            if (flag.lockdown) {
+                console.log('Checkpoint: lockdown has been invoked');
+                flag.requestCache = {
+                    params: req,
+                    resolve,
+                    reject
+                };
             }
-            return fire(req)
-                .then(resolve)
-                .catch(reject);
-        }
+            else {
+                if (name === 'sync_token') {
+                    flag.SQ = false;
+                    return resolve();
+                }
+                return fire(req)
+                    .then(resolve)
+                    .catch(reject);
+            }
+        })
+            .catch(reject);
     });
 };
 emitter.on('check', check);
