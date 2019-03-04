@@ -26,9 +26,17 @@ exports.getToken = () => {
     return new Promise((resolve, reject) => {
         try {
             const config = __1.getConfig();
-            const path = config.paths.token;
-            if (fs_1.existsSync(path)) {
-                return fs_1.readFile(path).then((data) => {
+            const checkpoint = config.paths.checkpoint;
+            const token = config.paths.token;
+            if (fs_1.existsSync(checkpoint)) {
+                debug(`Checkpoint read: ${checkpoint}`);
+                return fs_1.readFile(checkpoint).then((data) => {
+                    return resolve(JSON.parse(data));
+                });
+            }
+            else if (fs_1.existsSync(token)) {
+                debug(`Token read: ${token}`);
+                return fs_1.readFile(token).then((data) => {
                     return resolve(JSON.parse(data));
                 });
             }
@@ -69,18 +77,29 @@ exports.saveToken = (name, token) => {
             debug(`ledger file: ${file} exists?(${fs_1.existsSync(file)})`);
             if (!fs_1.existsSync(file)) {
                 return fs_1.writeFile(file, JSON.stringify([obj]))
-                    .then(resolve)
-                    .catch(reject);
+                    .then(resolve);
             }
             return fs_1.readFile(file).then((ledger) => {
                 const ledgerDetails = JSON.parse(ledger);
                 ledgerDetails.splice(0, 0, obj);
                 return fs_1.writeFile(file, JSON.stringify(ledgerDetails))
-                    .then(resolve)
-                    .catch(reject);
-            }).catch(reject);
-        })).catch((error) => {
-            return reject(error);
-        });
+                    .then(resolve);
+            });
+        })).catch(reject);
+    });
+};
+exports.saveCheckpoint = (name, token) => {
+    debug(`Save token invoked with name: ${name}, token: ${token}`);
+    return new Promise((resolve, reject) => {
+        const config = __1.getConfig();
+        const path = config.paths.checkpoint;
+        const data = {
+            name,
+            timestamp: new Date().toISOString(),
+            token,
+        };
+        return fs_1.writeFile(path, JSON.stringify(data))
+            .then(resolve)
+            .catch(reject);
     });
 };

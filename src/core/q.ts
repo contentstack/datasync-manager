@@ -61,6 +61,7 @@ export class Q extends EventEmitter {
   public push(data) {
     this.q.push(data)
     if (this.q.length > this.config.syncManager.queue.pause_threshold) {
+      console.log('this.queue length: ', this.q)
       this.iLock = true
       lock()
     }
@@ -112,6 +113,7 @@ export class Q extends EventEmitter {
   private next() {
     if (this.iLock && this.q.length < this.config.syncManager.queue.resume_threshold) {
       unlock(true)
+      console.log('this.queue length went below limit', this.q.length)
       this.iLock = false
     }
     const self = this
