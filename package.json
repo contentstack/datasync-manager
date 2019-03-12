@@ -5,9 +5,7 @@
   "description": "Manage sync'ed data from Contentstack",
   "main": "dist",
   "dependencies": {
-    "cheerio": "^1.0.0-rc.2",
     "debug": "4.1.0",
-    "js2xmlparser": "^3.0.0",
     "lodash": "4.17.11",
     "write-file-atomic": "^2.3.0"
   },
@@ -30,7 +28,7 @@
     "typescript": "^3.2.2"
   },
   "scripts": {
-    "clean": "rimraf dist typings coverage .tokens",
+    "clean": "rimraf dist typings coverage .tokens .ledger .checkpoint",
     "build-ts": "npm run clean && tsc",
     "watch-ts": "npm run clean && tsc -w",
     "compile": "tsc",
@@ -40,7 +38,7 @@
     "test": "PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "keywords": [
     "contentstack",
@@ -50,12 +48,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/contentstack/contentstack-sync.git"
+    "url": "git+https://github.com/contentstack/contentstack-sync-manager.git"
   },
   "types": "./typings",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/contentstack/contentstack-sync/issues"
+    "url": "https://github.com/contentstack/contentstack-sync-manager/issues"
   },
   "homepage": "https://www.contentstack.com/"
 }

@@ -1,5 +1,7 @@
 # Runtime data
 .tokens
+.ledger
+.checkpoint
 
 # IDE config
 .vscode
@@ -18,4 +20,3 @@ _contents
 
 # Random files
 plugins/sitemap/map.xml
-.vscode
