@@ -20,7 +20,7 @@ describe('token management', () => {
     }
     const configs: any = cloneDeep(config)
     configs.paths = buildConfigPaths()
-    configs.paths.token = resolve(join(__dirname, '..', '..', '.token'))
+    configs.paths.checkpoint = resolve(join(__dirname, '..', '..', '.checkpoint'))
     configs.paths.ledger = resolve(join(__dirname, '..', '..', '.ledger'))
     setConfig(configs)
 
