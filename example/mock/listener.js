@@ -1,5 +1,3 @@
-const console = require('../console')
-
 let consumer
 
 module.exports = {
@@ -10,9 +8,6 @@ module.exports = {
     consumer = fn
     console.log(`${fn} has been registered with the listener`)
     return
-  },
-  setLogger: () => {
-
   },
   start: () => {
     console.log('Listener started')

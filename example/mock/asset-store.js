@@ -1,15 +1,11 @@
-// Build mock asset connector
+// Build mock asset store
 module.exports = {
   delete: function () {
     return Promise.resolve()
   },
   download: function (asset) {
-    asset.key = 'new key added'
-    return new Promise((resolve) => {
-      return setTimeout(() => {
-        return resolve(asset)
-      }, 1000)
-    })
+    asset.data.key = 'newKey'
+    return new Promise.resolve(asset)
   },
   unpublish: function () {
     return Promise.resolve()
