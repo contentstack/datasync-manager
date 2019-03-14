@@ -3,7 +3,6 @@ src
 
 # Beautifiers & Indenters
 .jsbeautifyrc
-.tslint.json
 tsconfig.json
 
 # Test configurations
