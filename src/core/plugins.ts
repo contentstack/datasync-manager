@@ -10,10 +10,8 @@ import { hasIn } from 'lodash'
 import { join, resolve } from 'path'
 import { logger } from '../util/logger'
 
-const debug = Debug('sm:core-plugins')
-const pluginMethods = ['beforePublish', 'beforeUnpublish', 'afterPublish', 'afterUnpublish', 'beforeDelete',
-  'afterDelete',
-]
+const debug = Debug('plugins')
+const pluginMethods = ['beforeSync', 'afterSync']
 
 /**
  * @description Load registered plugins
@@ -40,13 +38,16 @@ export const load = (config) => {
       pluginMethods.forEach((pluginMethod) => {
         if (hasIn(Plugin, pluginMethod)) {
           pluginInstances[pluginMethod].push(Plugin[pluginMethod])
+          debug(`${pluginMethod} loaded from ${pluginName} successfully!`)
+        } else {
+          debug(`${pluginMethod} not found in ${pluginName}`)
         }
       })
     } else {
       logger.warn(`Unable to load ${pluginName} plugin since ${pluginPath} was not found!`)
     }
   }
-  debug('Plugins built successfully!')
+  debug('Plugins loaded successfully!')
 
   return pluginInstances
 }
