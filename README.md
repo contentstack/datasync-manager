@@ -10,13 +10,6 @@ The Sync Manager performs synchronization operations and ensures your infrastruc
 
 It uses Contentstack's Sync APIs to sync data from Contentstack with your preferred database. Any publish, unpublish, or delete actions performed on the Contentstack server are tracked and the data syncs with your database accordingly.
 
-Currently, Contentstack offers the following databases for storing the synced data:
-- Filesystem data store: [contentstack-content-store-filesystem](https://github.com/contentstack/contentstack-content-store-filesystem)
-- Filesystem asset store: [contentstack-asset-store-filesystem](https://github.com/contentstack/contentstack-asset-store-filesystem)
-- Mongodb data store: [contentstack-content-store-mongodb](https://github.com/contentstack/contentstack-content-store-mongodb)
-
-To notify contentstack-sync-manager, you can use a listener module - [contentstack-webhook-listener](https://github.com/contentstack/contentstack-webhook-listener) or your own personalized cron job can be used to invoke the app and sync the data on a regular interval.
-
 ### Prerequisite
 
 - nodejs v8+
@@ -26,11 +19,13 @@ To notify contentstack-sync-manager, you can use a listener module - [contentsta
 
 ### Working
 
-When an entry or an asset is published, unpublished or deleted, the listener fires a notification event and the sync manager uses the `Contentstack's Sync API` to sync the latest changes.
+#### How do Contentstack sync utilities work?
 
-Once the sync manager fetches the updated details from Contentstack, it passes them to the registered plugins and data connectors.
+When an entry or an asset is published, unpublished, or deleted, the listener fires a notification event and the sync manager uses the `Contentstack's Sync API` to fetch the details. Once the sync manager fetches the updated details from Contentstack, it passes them to the registered plugins and data stores. Read more on how to get started with [Contentstack sync utility]().
 
-Read more on how to get started with [Contentstack Sync Utility]()
+#### How does Contentstack sync manager work?
+
+The `.start()` method serves as the entry point to the application. When started, it fires up the `Contentstack Sync API` and iteratively fetches all the changes upto the current point in time. Each item received is validated, filtered and grouped and passed down to registered plugins and data store. Once complete it starts listening for `notifications` via the `.notify()` method. On receiving a `notification` event it once again follows the process of calling the Sync API to sync the latest changes.
 
 ## Documentation & Getting started
 
