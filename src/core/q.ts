@@ -145,11 +145,11 @@ export class Q extends EventEmitter {
     const { content_type_uid, uid } = data
     if (content_type_uid === '_content_types') {
       logger.log(
-        `${data.action.toUpperCase()}: { content_type: '${content_type_uid}', uid: '${uid}'}`)
+        `${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', uid: '${uid}'}`)
     } else {
       const { locale } = data
       logger.log(
-        `${data.action.toUpperCase()}: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`)
+        `${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`)
     }
     switch (data.action) {
     case 'publish':
@@ -206,11 +206,11 @@ export class Q extends EventEmitter {
         const { content_type_uid, uid } = data
         if (content_type_uid === '_content_types') {
           logger.log(
-            `${action.toUpperCase()}: { content_type: '${content_type_uid}', uid: '${uid}'} - completed successfully!`)
+            `${action.toUpperCase()}ED: { content_type: '${content_type_uid}', uid: '${uid}'}`)
         } else {
           const { locale } = data
           logger.log(
-            `${action.toUpperCase()}: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'} - completed successfully!`)
+            `${action.toUpperCase()}ED: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`)
         }
         self.inProgress = false
         self.emit('next', data)

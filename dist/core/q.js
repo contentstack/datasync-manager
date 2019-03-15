@@ -106,11 +106,11 @@ class Q extends events_1.EventEmitter {
     process(data) {
         const { content_type_uid, uid } = data;
         if (content_type_uid === '_content_types') {
-            logger_1.logger.log(`${data.action.toUpperCase()}: { content_type: '${content_type_uid}', uid: '${uid}'}`);
+            logger_1.logger.log(`${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', uid: '${uid}'}`);
         }
         else {
             const { locale } = data;
-            logger_1.logger.log(`${data.action.toUpperCase()}: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`);
+            logger_1.logger.log(`${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`);
         }
         switch (data.action) {
             case 'publish':
@@ -153,11 +153,11 @@ class Q extends events_1.EventEmitter {
                 debug('After action plugins executed successfully!');
                 const { content_type_uid, uid } = data;
                 if (content_type_uid === '_content_types') {
-                    logger_1.logger.log(`${action.toUpperCase()}: { content_type: '${content_type_uid}', uid: '${uid}'} - completed successfully!`);
+                    logger_1.logger.log(`${action.toUpperCase()}ED: { content_type: '${content_type_uid}', uid: '${uid}'}`);
                 }
                 else {
                     const { locale } = data;
-                    logger_1.logger.log(`${action.toUpperCase()}: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'} - completed successfully!`);
+                    logger_1.logger.log(`${action.toUpperCase()}ED: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`);
                 }
                 self.inProgress = false;
                 self.emit('next', data);

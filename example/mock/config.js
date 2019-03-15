@@ -1,6 +1,6 @@
 module.exports = {
   contentstack: {
-    apiKey: '',
-    deliveryToken: ''
+    apiKey: '***REMOVED***',
+    deliveryToken: '***REMOVED***'
   }
 }
