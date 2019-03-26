@@ -1,13 +1,13 @@
 {
   "name": "@contentstack/datasync-manager",
   "author": "Contentstack LLC <support@contentstack.com>",
-  "version": "0.0.1-rc.2",
+  "version": "0.0.1",
   "description": "The primary module of Contentstack DataSync that syncs Contentstack data with your server.",
   "main": "dist",
   "dependencies": {
     "debug": "4.1.0",
     "lodash": "4.17.11",
-    "write-file-atomic": "^2.3.0"
+    "write-file-atomic": "2.3.0"
   },
   "devDependencies": {
     "@types/debug": "0.0.31",
@@ -55,5 +55,5 @@
   "bugs": {
     "url": "https://github.com/contentstack/datasync-manager/issues"
   },
-  "homepage": "https://github.com/contentstack/datasync-manager"
+  "homepage": "https://www.contentstack.com/docs/guide/synchronization/contentstack-datasync"
 }

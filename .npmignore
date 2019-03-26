@@ -5,9 +5,6 @@ src
 .jsbeautifyrc
 tsconfig.json
 
-# test
-test
-
 # Test configurations
 jest.config.js
 
