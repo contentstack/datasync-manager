@@ -1,15 +1,20 @@
+import { readFileSync } from 'fs'
 import { cloneDeep, merge } from 'lodash'
 import nock from 'nock'
+import { join } from 'path'
 import { setAssetStore, setConfig, setContentStore, setListener, start } from '../src'
 import { config as internalConfig } from '../src/defaults'
 import { setLogger } from '../src/util/logger'
 import { contentType as contentTypeSchema } from './dummy/api-responses/content-type'
 import { response as deleteResponse } from './dummy/api-responses/delete'
+import { response as emptyResponse } from './dummy/api-responses/empty'
 import { response as mixedUnpublishResponse } from './dummy/api-responses/entries'
 import { response as publishResponse } from './dummy/api-responses/publish'
 // import { response as unpublishResponse } from './dummy/api-responses/unpublish'
 import { config } from './dummy/config'
 import { assetConnector, contentConnector, listener } from './dummy/connector-listener-instances'
+
+const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
 
 describe('core', () => {
   beforeAll(() => {
@@ -20,7 +25,7 @@ describe('core', () => {
     nock('https://api.localhost.io', { reqheaders: {
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
-      'x-user-agent': 'contentstack-sync-manager/v1.0.0',
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`
     }})
       .get('/v3/stacks/sync/publish-success')
       .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
@@ -29,9 +34,44 @@ describe('core', () => {
 
   beforeEach(() => {
     nock('https://api.localhost.io', { reqheaders: {
+      'access_token': 'dummyDeliveryToken',
+      'api_key': 'dummyApiKey',
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`
+    }})
+      .get('/v3/stacks/sync')
+      .query({pagination_token: 'publish-token', environment: 'test', limit: 100})
+      .reply(200, emptyResponse)
+  })
+
+  beforeEach(() => {
+    nock('https://api.localhost.io', { reqheaders: {
+      'access_token': 'dummyDeliveryToken',
+      'api_key': 'dummyApiKey',
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`
+    }})
+      .get('/v3/stacks/sync/publish-success')
+      .query({pagination_token: 'publish-token', environment: 'test', limit: 100})
+      .reply(200, emptyResponse)
+  })
+
+  beforeEach(() => {
+    nock('https://api.localhost.io', { reqheaders: {
+      'access_token': 'dummyDeliveryToken',
+      'api_key': 'dummyApiKey',
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`
+    }})
+    // "url": "https://api.localhost.io/v3/stacks/sync/publish-success?environment=test&limit=100&sync_token=dummySyncToken",
+
+      .get('/v3/stacks/sync')
+      .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
+      .reply(200, publishResponse)
+  })
+
+  beforeEach(() => {
+    nock('https://api.localhost.io', { reqheaders: {
         'access_token': 'dummyDeliveryToken',
         'api_key': 'dummyApiKey',
-        'x-user-agent': 'contentstack-sync-manager/v1.0.0',
+        'x-user-agent': `datasync-manager/v${packageInfo.version}`,
       }})
         .get('/v3/stacks/sync/unpublish-success')
         .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
@@ -108,6 +148,7 @@ describe('core', () => {
     return start(configs).then((status) => {
       expect(status).toBeUndefined()
     }).catch((error) => {
+      console.error(error)
       expect(error).toBeNull()
     })
   })
