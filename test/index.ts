@@ -10,7 +10,6 @@ import { response as deleteResponse } from './dummy/api-responses/delete'
 import { response as emptyResponse } from './dummy/api-responses/empty'
 import { response as mixedUnpublishResponse } from './dummy/api-responses/entries'
 import { response as publishResponse } from './dummy/api-responses/publish'
-// import { response as unpublishResponse } from './dummy/api-responses/unpublish'
 import { config } from './dummy/config'
 import { assetConnector, contentConnector, listener } from './dummy/connector-listener-instances'
 
@@ -148,7 +147,6 @@ describe('core', () => {
     return start(configs).then((status) => {
       expect(status).toBeUndefined()
     }).catch((error) => {
-      console.error(error)
       expect(error).toBeNull()
     })
   })
@@ -166,7 +164,7 @@ describe('core', () => {
     return start(configs).then((status) => {
       expect(status).toBeUndefined()
     }).catch((error) => {
-      console.error(error)
+      expect(error).toBeNull()
     })
   })
 
@@ -183,7 +181,7 @@ describe('core', () => {
     return start(configs).then((status) => {
       expect(status).toBeUndefined()
     }).catch((error) => {
-      console.error(error)
+      expect(error).toBeNull()
     })
   })
 
@@ -202,6 +200,8 @@ describe('core', () => {
 
     return start().then((status) => {
       expect(status).toBeUndefined()
-    }).catch(console.error)
+    }).catch((error) => {
+      expect(error).toBeNull()
+    })
   })
 })
