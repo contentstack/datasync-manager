@@ -4,6 +4,10 @@ src
 # Beautifiers & Indenters
 .jsbeautifyrc
 tsconfig.json
+tslint.json
+
+# test
+test
 
 # Test configurations
 jest.config.js
