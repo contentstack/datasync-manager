@@ -1,9 +1,9 @@
 {
-  "name": "contentstack-sync-manager",
-  "author": "Contentstack Ecosystem",
-  "version": "1.0.0",
-  "description": "Manage sync'ed data from Contentstack",
-  "main": "./dist/index",
+  "name": "@contentstack/datasync-manager",
+  "author": "Contentstack LLC <support@contentstack.com>",
+  "version": "0.0.1-rc.2",
+  "description": "The primary module of Contentstack DataSync that syncs Contentstack data with your server.",
+  "main": "dist",
   "dependencies": {
     "debug": "4.1.0",
     "lodash": "4.17.11",
@@ -42,18 +42,18 @@
   },
   "keywords": [
     "contentstack",
-    "sync",
-    "sync-manager-utility",
+    "datasync",
+    "datasync-manager",
     "utility"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/contentstack/contentstack-sync-manager.git"
+    "url": "git+https://github.com/contentstack/datasync-manager"
   },
   "types": "./typings",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/contentstack/contentstack-sync-manager/issues"
+    "url": "https://github.com/contentstack/datasync-manager/issues"
   },
-  "homepage": "https://www.contentstack.com/"
+  "homepage": "https://github.com/contentstack/datasync-manager"
 }
