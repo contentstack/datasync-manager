@@ -35,11 +35,21 @@ syncManager.start()
   })
   .catch(console.error)
 ```
-You can replace [contentstack-content-store-filesystem]() used above, with [contentstack-content-store-mongodb]() and switch content store databases.
+You can replace [@contentstack/datasync-content-store-filesystem](https://www.npmjs.com/package/@contentstack/datasync-content-store-filesystem) used above, with [@contentstack/datasync-content-store-mongodb](https://www.npmjs.com/package/@contentstack/datasync-content-store-mongodb) and switch content store databases.
 
 ### Configuration
 
-Here's a list of configuration keys for contentstack datasync-manager:
+- Here's a list of contentstack's configuration keys
+
+| Key Name | Default | Description |
+| :--- |:---:| :---|
+| apiKey | | **Required**. Your stack's API key |
+| deliveryToken | | **Required**. Your environment's delivery token |
+| sync_token | | Token from where you'd like to start the process |
+| pagination_token | | Token from where you'd like to start the process |
+| MAX_RETRY_LIMIT | 6 | Number of times the API call would retry, if the server fails |
+
+- Here's a list of configuration keys for contentstack datasync-manager:
 
 <table>
   <thead>
@@ -133,39 +143,20 @@ Here's a list of configuration keys for contentstack datasync-manager:
   </tbody>
 </table>
 
-Example: 
-
+And here's an example to get you started:
 ```js
 {
-  // exmaple to override default values of DataSync Manager
-  syncManager: {
-      cooloff: 2000,
-      limit: 80,
-    }
-  }
-}
-```
-
-Here's a list of contentstack's configuration keys
-
-| Key Name | Default | Description |
-| :--- |:---:| :---|
-| apiKey | | **Required**. Your stack's API key |
-| deliveryToken | | **Required**. Your environment's delivery token |
-| sync_token | | Token from where you'd like to start the process |
-| pagination_token | | Token from where you'd like to start the process |
-| MAX_RETRY_LIMIT | 6 | Number of times the API call would retry, if the server fails |
-
-Example:
-
-```js
-{
-  // exmaple to override default values of contentstack properties
+  // exmaple to override default values
   contentstack: {
       apiKey: '',
       deliveryToken: '',
       sync_token: '',
       MAX_RETRY_LIMIT: 5
+    }
+  },
+  syncManager: {
+      cooloff: 2000,
+      limit: 80,
     }
   }
 }
