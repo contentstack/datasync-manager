@@ -19,7 +19,7 @@ const logger_1 = require("../util/logger");
 const promise_map_1 = require("../util/promise.map");
 const q_1 = require("./q");
 const token_management_1 = require("./token-management");
-const debug = debug_1.default('sm:core-sync');
+const debug = debug_1.default('sync-core');
 const emitter = new events_1.EventEmitter();
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
@@ -123,9 +123,17 @@ exports.lock = () => {
     logger_1.logger.info('Contentstack sync locked..');
     flag.lockdown = true;
 };
-exports.unlock = () => {
+exports.unlock = (refire) => {
     logger_1.logger.info('Contentstack sync unlocked..');
     flag.lockdown = false;
+    if (typeof refire === 'boolean' && refire) {
+        flag.WQ = true;
+        if (flag.requestCache && Object.keys(flag.requestCache)) {
+            return fire(flag.requestCache.params)
+                .then(flag.requestCache.resolve)
+                .catch(flag.requestCache.reject);
+        }
+    }
     check();
 };
 const fire = (req) => {
@@ -218,13 +226,27 @@ const postProcess = (req, resp) => {
         else {
             name = 'sync_token';
         }
-        req.qs[name] = resp[name];
-        if (name === 'sync_token') {
-            flag.SQ = false;
-            return resolve();
-        }
-        return fire(req)
-            .then(resolve)
+        return token_management_1.saveCheckpoint(name, resp[name])
+            .then(() => {
+            req.qs[name] = resp[name];
+            if (flag.lockdown) {
+                console.log('Checkpoint: lockdown has been invoked');
+                flag.requestCache = {
+                    params: req,
+                    resolve,
+                    reject
+                };
+            }
+            else {
+                if (name === 'sync_token') {
+                    flag.SQ = false;
+                    return resolve();
+                }
+                return fire(req)
+                    .then(resolve)
+                    .catch(reject);
+            }
+        })
             .catch(reject);
     });
 };

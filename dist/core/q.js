@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
+const _1 = require(".");
 const core_utilities_1 = require("../util/core-utilities");
 const logger_1 = require("../util/logger");
 const unprocessible_1 = require("../util/unprocessible");
@@ -24,8 +25,10 @@ class Q extends events_1.EventEmitter {
     constructor(connector, config) {
         if (!instance && connector && config) {
             super();
+            this.config = config;
             this.pluginInstances = plugins_1.load(config);
             this.connectorInstance = connector;
+            this.iLock = false;
             this.inProgress = false;
             this.q = [];
             this.on('next', this.next);
@@ -37,6 +40,10 @@ class Q extends events_1.EventEmitter {
     }
     push(data) {
         this.q.push(data);
+        if (this.q.length > this.config.syncManager.queue.pause_threshold) {
+            this.iLock = true;
+            _1.lock();
+        }
         debug(`Content type '${data.content_type_uid}' received for '${data.action}'`);
         this.next();
     }
@@ -73,6 +80,10 @@ class Q extends events_1.EventEmitter {
         });
     }
     next() {
+        if (this.iLock && this.q.length < this.config.syncManager.queue.resume_threshold) {
+            _1.unlock(true);
+            this.iLock = false;
+        }
         const self = this;
         debug(`Calling 'next'. In progress status is ${this.inProgress} and Q length is ${this.q.length}`);
         if (!this.inProgress && this.q.length) {
@@ -91,6 +102,9 @@ class Q extends events_1.EventEmitter {
                 this.process(item);
             }
         }
+    }
+    peek() {
+        return this.q;
     }
     process(data) {
         const { content_type_uid, uid } = data;
@@ -139,6 +153,14 @@ class Q extends events_1.EventEmitter {
                 return Promise.all(promisifiedBucket2);
             }).then(() => {
                 debug('After action plugins executed successfully!');
+                const { content_type_uid, uid } = data;
+                if (content_type_uid === '_content_types') {
+                    logger_1.logger.log(`${action.toUpperCase()}ED: { content_type: '${content_type_uid}', uid: '${uid}'}`);
+                }
+                else {
+                    const { locale } = data;
+                    logger_1.logger.log(`${action.toUpperCase()}ED: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`);
+                }
                 self.inProgress = false;
                 self.emit('next', data);
             }).catch((error) => {

@@ -22,6 +22,12 @@ export const validateConfig = (config) => {
   if (typeof config.contentstack !== 'object' || !config.contentstack.apiKey || !config.contentstack.deliveryToken) {
     throw new Error('Config \'contentstack\' should be of type object and have \'apiKey\' and \'token\'')
   }
+
+  if (config.queue) {
+    if (config.queue.resume_threshold >= config.queue.pause_threshold) {
+      throw new Error('Queue resume_threshold cannot be higher or equal to, than queue.pause_threshold!')
+    }
+  }
 }
 
 /**
@@ -42,11 +48,6 @@ export const validateInstances = (assetStore, contentStore, listener) => {
   } else if (typeof assetStore.start !== 'function' || typeof contentStore.start !== 'function' ||
    typeof listener.start !== 'function') {
     throw new Error('Connector and listener instances should have \'start()\' method')
-  } else if (!assetStore.setLogger || !contentStore.setLogger || !listener.setLogger) {
-    throw new Error('Connector and listener instances should have \'setLogger\' method')
-  } else if (typeof assetStore.setLogger !== 'function' ||
-   typeof contentStore.setLogger !== 'function' || typeof listener.setLogger !== 'function') {
-    throw new Error('Connector and listener instances should have \'setLogger()\' method')
   }
 }
 
