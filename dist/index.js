@@ -50,12 +50,6 @@ exports.start = (config = {}) => {
             appConfig.paths = build_paths_1.buildConfigPaths();
             logger_1.setLogger();
             process_1.configure();
-            if (assetStore.setLogger && typeof assetStore.setLogger === 'function') {
-                assetStore.setLogger(logger_1.logger);
-            }
-            if (contentStore.setLogger && typeof contentStore.setLogger === 'function') {
-                contentStore.setLogger(logger_1.logger);
-            }
             return assetStore.start(appConfig).then((assetInstance) => {
                 debug('Asset store instance has returned successfully!');
                 validations_1.validateAssetConnector(assetInstance);

@@ -13,14 +13,22 @@ import { join, resolve } from 'path'
 export const buildConfigPaths = () => {
   const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
 
-  const paths = {
+  const paths: any = {
     baseDir: resolve(join(__dirname, '..', '..')),
     failed: resolve(join(baseDir, 'unprocessible', 'failed')),
     filtered: resolve(join(baseDir, 'unprocessible', 'filtered')),
-    ledger: resolve(join(baseDir, '.ledger')),
     plugin: resolve(join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
-    token: resolve(join(baseDir, '.token')),
     unprocessibleDir: resolve(join(baseDir, 'unprocessible')),
+  }
+
+  if (process.env.TOKEN_PATH && process.env.TOKEN_PATH.length !== 0) {
+    paths.checkpoint = resolve(join(process.env.TOKEN_PATH, '.checkpoint'))
+    paths.ledger = resolve(join(process.env.TOKEN_PATH, '.ledger'))
+    paths.token = resolve(join(process.env.TOKEN_PATH, '.token'))
+  } else {
+    paths.checkpoint = resolve(join(baseDir, '..', '.checkpoint'))
+    paths.ledger = resolve(join(baseDir, '..', '.ledger'))
+    paths.token = resolve(join(baseDir, '..', '.token'))
   }
 
   return paths
