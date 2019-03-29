@@ -108,22 +108,6 @@ describe('validations', () => {
         validateInstances(assetConnector, contentConnector, listenerClone)
       }).toThrowError("Connector and listener instances should have 'start()' method")
     })
-
-    test('listener does not have setLogger() funciton', () => {
-      const listenerClone = cloneDeep(listener)
-      delete listenerClone.setLogger
-      expect(() => {
-        validateInstances(assetConnector, contentConnector, listenerClone)
-      }).toThrowError("Connector and listener instances should have \'setLogger\' method")
-    })
-
-    test('listener setLogger is not a funciton', () => {
-      const listenerClone = cloneDeep(listener)
-      listenerClone.setLogger = ({} as any)
-      expect(() => {
-        validateInstances(assetConnector, contentConnector, listenerClone)
-      }).toThrowError("Connector and listener instances should have \'setLogger()\' method")
-    })
   })
 
   describe('validate instance methods', () => {
