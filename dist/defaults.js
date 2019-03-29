@@ -34,6 +34,10 @@ exports.config = {
         enableContentReferences: true,
         limit: 100,
         maxsize: 2097152,
+        queue: {
+            pause_threshold: 10000,
+            resume_threshold: 5000
+        },
         saveFailedItems: true,
         saveFilteredItems: true,
     },

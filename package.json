@@ -1,13 +1,13 @@
 {
-  "name": "contentstack-sync-manager",
-  "author": "Contentstack Ecosystem",
-  "version": "1.0.0",
-  "description": "Manage sync'ed data from Contentstack",
+  "name": "@contentstack/datasync-manager",
+  "author": "Contentstack LLC <support@contentstack.com>",
+  "version": "0.0.1",
+  "description": "The primary module of Contentstack DataSync that syncs Contentstack data with your server.",
   "main": "dist",
   "dependencies": {
     "debug": "4.1.0",
     "lodash": "4.17.11",
-    "write-file-atomic": "^2.3.0"
+    "write-file-atomic": "2.3.0"
   },
   "devDependencies": {
     "@types/debug": "0.0.31",
@@ -28,7 +28,7 @@
     "typescript": "^3.2.2"
   },
   "scripts": {
-    "clean": "rimraf dist typings coverage .tokens",
+    "clean": "rimraf dist typings coverage .tokens .ledger .checkpoint",
     "build-ts": "npm run clean && tsc",
     "watch-ts": "npm run clean && tsc -w",
     "compile": "tsc",
@@ -38,22 +38,22 @@
     "test": "PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose"
   },
   "engines": {
-    "node": ">=6"
+    "node": ">=8"
   },
   "keywords": [
     "contentstack",
-    "sync",
-    "sync-manager-utility",
+    "datasync",
+    "datasync-manager",
     "utility"
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/contentstack/contentstack-sync-manager.git"
+    "url": "git+https://github.com/contentstack/datasync-manager"
   },
   "types": "./typings",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/contentstack/contentstack-sync-manager/issues"
+    "url": "https://github.com/contentstack/datasync-manager/issues"
   },
-  "homepage": "https://www.contentstack.com/"
+  "homepage": "https://www.contentstack.com/docs/guide/synchronization/contentstack-datasync"
 }
