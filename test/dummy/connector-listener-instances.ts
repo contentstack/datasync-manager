@@ -8,9 +8,6 @@ export const assetConnector = {
   download: () => {
     return Promise.resolve()
   },
-  setLogger: () => {
-    return
-  },
   start: () => {
     return Promise.resolve(assetConnector)
   },
@@ -33,9 +30,6 @@ export const contentConnector = {
   publish: () => {
     return Promise.resolve()
   },
-  setLogger: () => {
-    return
-  },
   start: () => {
     return Promise.resolve(contentConnector)
   },
@@ -52,9 +46,6 @@ export const listener = {
     }
     consumer = fn
 
-    return
-  },
-  setLogger: () => {
     return
   },
   start: () => {

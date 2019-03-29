@@ -22,7 +22,7 @@ export const init = (contentstack) => {
   const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json')))
   Contentstack = contentstack
   Contentstack.headers = {
-    'X-User-Agent': `contentstack-sync-manager/v${packageInfo.version}`,
+    'X-User-Agent': `datasync-manager/v${packageInfo.version}`,
     'access_token': Contentstack.deliveryToken,
     'api_key': Contentstack.apiKey,
   }

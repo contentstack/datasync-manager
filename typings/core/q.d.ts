@@ -7,6 +7,8 @@
 import { EventEmitter } from 'events';
 declare const notifications: EventEmitter;
 export declare class Q extends EventEmitter {
+    private config;
+    private iLock;
     private inProgress;
     private pluginInstances;
     private connectorInstance;
@@ -15,6 +17,7 @@ export declare class Q extends EventEmitter {
     push(data: any): void;
     errorHandler(obj: any): void;
     private next;
+    peek(): any;
     private process;
     private exec;
 }
