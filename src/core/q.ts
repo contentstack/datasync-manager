@@ -8,6 +8,7 @@ import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep } from 'lodash'
 import { buildContentReferences, getOrSetRTEMarkdownAssets } from '../util/core-utilities'
+import { lock, unlock } from '.'
 import { logger } from '../util/logger'
 import { map } from '../util/promise.map'
 import { saveFailedItems } from '../util/unprocessible'
@@ -15,6 +16,8 @@ import { load } from './plugins'
 import { saveToken } from './token-management'
 
 const debug = Debug('q')
+const notifications = new EventEmitter()
+
 let instance = null
 
 /**
@@ -25,6 +28,7 @@ let instance = null
 export class Q extends EventEmitter {
   private config: any
   private detectRteMarkdownAssets: any
+  private iLock: boolean
   private inProgress: boolean
   private pluginInstances: any
   private assetStore: any
@@ -44,6 +48,9 @@ export class Q extends EventEmitter {
       this.pluginInstances = load(config)
       this.contentStore = contentStore
       this.assetStore = assetStore
+      this.config = config
+      this.pluginInstances = load(config)
+      this.iLock = false
       this.inProgress = false
       this.q = []
       this.config = config
@@ -62,6 +69,10 @@ export class Q extends EventEmitter {
    */
   public push(data) {
     this.q.push(data)
+    if (this.q.length > this.config.syncManager.queue.pause_threshold) {
+      this.iLock = true
+      lock()
+    }
     debug(`Content type '${data.content_type_uid}' received for '${data.action}'`)
     this.emit('next')
   }
@@ -71,6 +82,7 @@ export class Q extends EventEmitter {
    * @param {Object} obj - Errorred item
    */
   public errorHandler(obj) {
+    notify('error', obj)
     const self = this
     logger.error(obj)
     debug(`Error handler called with ${JSON.stringify(obj)}`)
@@ -108,6 +120,10 @@ export class Q extends EventEmitter {
    * @description Calls next item in the queue
    */
   private next() {
+    if (this.iLock && this.q.length < this.config.syncManager.queue.resume_threshold) {
+      unlock(true)
+      this.iLock = false
+    }
     const self = this
     debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`)
     if (!this.inProgress && this.q.length) {
@@ -127,6 +143,10 @@ export class Q extends EventEmitter {
     }
   }
 
+  public peek() {
+    return this.q
+  }
+
   /**
    * @description Passes and calls the appropriate methods and hooks for item execution
    * @param {Object} data - Current processing item
@@ -141,6 +161,8 @@ export class Q extends EventEmitter {
       logger.log(
         `${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`)
     }
+
+    notify(data.action, data)
     switch (data.action) {
     case 'publish':
       const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1
@@ -239,6 +261,15 @@ export class Q extends EventEmitter {
         return Promise.all(promisifiedBucket2)
       }).then(() => {
         debug('After action plugins executed successfully!')
+        const { content_type_uid, uid } = data
+        if (content_type_uid === '_content_types') {
+          logger.log(
+            `${action.toUpperCase()}ED: { content_type: '${content_type_uid}', uid: '${uid}'}`)
+        } else {
+          const { locale } = data
+          logger.log(
+            `${action.toUpperCase()}ED: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`)
+        }
         self.inProgress = false
         self.emit('next', data)
       }).catch((error) => {
@@ -255,3 +286,9 @@ export class Q extends EventEmitter {
     }
   }
 }
+
+const notify = (event, obj) => {
+  notifications.emit(event, obj)
+}
+
+export { notifications }

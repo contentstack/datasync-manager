@@ -7,9 +7,12 @@
 import Debug from 'debug'
 import { merge } from 'lodash'
 import { init, poke } from './core'
+import { checkNetConnectivity } from './core/inet'
 import { configure } from './core/process'
+import { notifications } from './core/q'
 import { config as internalConfig } from './defaults'
 import { buildConfigPaths } from './util/build-paths'
+import { formatSyncFilters } from './util/core-utilities'
 import { logger, setLogger } from './util/logger'
 
 import {
@@ -123,6 +126,12 @@ export const getConfig = (): IConfig => {
 export { setLogger } from './util/logger'
 
 /**
+ * @summary Event emitter object, that allows client notifications on event raised by sync-manager queue
+ * @returns an event-emitter object, events raised: publish, unpublish, delete, error
+ */
+export { notifications }
+
+/**
  * @summary
  *  Starts the sync manager utility
  * @description
@@ -152,11 +161,14 @@ export const start = (config: IConfig = {}): Promise<{}> => {
       }).then((contentStoreInstance) => {
         debug('Content store instance has returned successfully!')
         validateContentConnector(contentStoreInstance)
+        appConfig = formatSyncFilters(appConfig)
 
         return init(contentStoreInstance, assetStoreInstance)
       }).then(() => {
         debug('Sync Manager initiated successfully!')
         listener.register(poke)
+        // start checking for inet 10 secs after the app has started
+        setTimeout(checkNetConnectivity, 10 * 1000)
 
         return listener.start(appConfig)
       }).then(() => {

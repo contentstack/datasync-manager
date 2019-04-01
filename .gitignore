@@ -1,21 +1,16 @@
 # Runtime data
 .tokens
+.ledger
+.checkpoint
+_contents
+unprocessible
 
 # IDE config
 .vscode
 
 # Dependency directories
 node_modules
+package-lock.json
 
 # Coverage directories
 coverage
-
-# Data filters
-unprocessible
-
-# Data
-_contents
-
-# Random files
-plugins/sitemap/map.xml
-.vscode

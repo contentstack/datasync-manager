@@ -35,9 +35,23 @@ export const config = {
     enableAssetReferences: true,
     enableContentReferences: true,
     enableRteMarkdownDownload: true,
+    inet: {
+      dns: '8.8.8.8',
+      host: 'contentstack.io',
+      port: 5000,
+      retries: 5,
+      retryTimeout: 10 * 1000,
+      retryIncrement: 10 * 1000,
+      timeout: 60 * 1000,
+      type: 'A',
+    },
     limit: 100,
     // max file sizes in bytes
     maxsize: 2097152,
+    queue: {
+      pause_threshold: 10000,
+      resume_threshold: 5000
+    },
     saveFailedItems: true,
     saveFilteredItems: true,
   },

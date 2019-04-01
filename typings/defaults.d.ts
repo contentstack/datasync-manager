@@ -31,8 +31,22 @@ export declare const config: {
         enableAssetReferences: boolean;
         enableContentReferences: boolean;
         enableRteMarkdownDownload: boolean;
+        inet: {
+            dns: string;
+            host: string;
+            port: number;
+            retries: number;
+            retryTimeout: number;
+            retryIncrement: number;
+            timeout: number;
+            type: string;
+        };
         limit: number;
         maxsize: number;
+        queue: {
+            pause_threshold: number;
+            resume_threshold: number;
+        };
         saveFailedItems: boolean;
         saveFilteredItems: boolean;
     };
