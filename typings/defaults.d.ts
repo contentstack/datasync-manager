@@ -30,6 +30,16 @@ export declare const config: {
         cooloff: number;
         enableAssetReferences: boolean;
         enableContentReferences: boolean;
+        inet: {
+            dns: string;
+            host: string;
+            port: number;
+            retries: number;
+            retryTimeout: number;
+            retryIncrement: number;
+            timeout: number;
+            type: string;
+        };
         limit: number;
         maxsize: number;
         queue: {

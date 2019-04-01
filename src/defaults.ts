@@ -34,6 +34,16 @@ export const config = {
     cooloff: 3000,
     enableAssetReferences: true,
     enableContentReferences: true,
+    inet: {
+      dns: '8.8.8.8',
+      host: 'contentstack.io',
+      port: 5000,
+      retries: 5,
+      retryTimeout: 10 * 1000,
+      retryIncrement: 10 * 1000,
+      timeout: 60 * 1000,
+      type: 'A',
+    },
     limit: 100,
     // max file sizes in bytes
     maxsize: 2097152,

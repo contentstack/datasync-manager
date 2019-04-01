@@ -6,6 +6,7 @@
   "main": "dist",
   "dependencies": {
     "debug": "4.1.0",
+    "dns-socket": "^4.2.0",
     "lodash": "4.17.11",
     "write-file-atomic": "2.3.0"
   },

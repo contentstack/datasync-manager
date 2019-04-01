@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const core_1 = require("./core");
+const inet_1 = require("./core/inet");
 const process_1 = require("./core/process");
 const q_1 = require("./core/q");
 exports.notifications = q_1.notifications;
@@ -63,6 +64,7 @@ exports.start = (config = {}) => {
             }).then(() => {
                 debug('Sync Manager initiated successfully!');
                 listener.register(core_1.poke);
+                setTimeout(inet_1.checkNetConnectivity, 10 * 1000);
                 return listener.start(appConfig);
             }).then(() => {
                 logger_1.logger.info('Contentstack sync utility started successfully!');
