@@ -11,9 +11,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const core_1 = require("./core");
+const inet_1 = require("./core/inet");
 const process_1 = require("./core/process");
+const q_1 = require("./core/q");
+exports.notifications = q_1.notifications;
 const defaults_1 = require("./defaults");
 const build_paths_1 = require("./util/build-paths");
+const core_utilities_1 = require("./util/core-utilities");
 const logger_1 = require("./util/logger");
 const validations_1 = require("./util/validations");
 const debug = debug_1.default('registration');
@@ -57,10 +61,12 @@ exports.start = (config = {}) => {
             }).then((contentStoreInstance) => {
                 debug('Content store instance has returned successfully!');
                 validations_1.validateContentConnector(contentStoreInstance);
+                appConfig = core_utilities_1.formatSyncFilters(appConfig);
                 return core_1.init(contentStoreInstance, assetStoreInstance);
             }).then(() => {
                 debug('Sync Manager initiated successfully!');
                 listener.register(core_1.poke);
+                setTimeout(inet_1.checkNetConnectivity, 10 * 1000);
                 return listener.start(appConfig);
             }).then(() => {
                 logger_1.logger.info('Contentstack sync utility started successfully!');

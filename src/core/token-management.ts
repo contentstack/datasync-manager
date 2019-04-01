@@ -39,9 +39,17 @@ export const getToken = () => {
   return new Promise((resolve, reject) => {
     try {
       const config = getConfig()
-      const path = config.paths.token
-      if (existsSync(path)) {
-        return readFile(path).then((data) => {
+      const checkpoint = config.paths.checkpoint
+      const token = config.paths.token
+
+      if (existsSync(checkpoint)) {
+        debug(`Checkpoint read: ${checkpoint}`)
+        return readFile(checkpoint).then((data) => {
+          return resolve(JSON.parse(data as any))
+        })
+      } else if (existsSync(token)) {
+        debug(`Token read: ${token}`)
+        return readFile(token).then((data) => {
           return resolve(JSON.parse(data as any))
         })
       }
@@ -93,7 +101,6 @@ export const saveToken = (name, token) => {
       if (!existsSync(file)) {
         return writeFile(file, JSON.stringify([obj]))
         .then(resolve)
-        .catch(reject)
       }
 
       return readFile(file).then((ledger) => {
@@ -102,10 +109,31 @@ export const saveToken = (name, token) => {
 
         return writeFile(file, JSON.stringify(ledgerDetails))
           .then(resolve)
-          .catch(reject)
-      }).catch(reject)
-    }).catch((error) => {
-      return reject(error)
-    })
+      })
+    }).catch(reject)
+  })
+}
+
+/**
+ * @description Saves token details
+ * @param {String} name - Name of the token
+ * @param {String} token - Token value
+ * @param {String} type - Token type
+ */
+export const saveCheckpoint = (name, token) => {
+  debug(`Save token invoked with name: ${name}, token: ${token}`)
+
+  return new Promise((resolve, reject) => {
+    const config = getConfig()
+    const path = config.paths.checkpoint
+    const data: IToken = {
+      name,
+      timestamp: new Date().toISOString(),
+      token,
+    }
+
+    return writeFile(path, JSON.stringify(data))
+      .then(resolve)
+      .catch(reject)
   })
 }

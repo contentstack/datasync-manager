@@ -12,12 +12,15 @@ const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
 const core_utilities_1 = require("../util/core-utilities");
+const _1 = require(".");
 const logger_1 = require("../util/logger");
 const promise_map_1 = require("../util/promise.map");
 const unprocessible_1 = require("../util/unprocessible");
 const plugins_1 = require("./plugins");
 const token_management_1 = require("./token-management");
 const debug = debug_1.default('q');
+const notifications = new events_1.EventEmitter();
+exports.notifications = notifications;
 let instance = null;
 class Q extends events_1.EventEmitter {
     constructor(contentStore, assetStore, config) {
@@ -27,6 +30,9 @@ class Q extends events_1.EventEmitter {
             this.pluginInstances = plugins_1.load(config);
             this.contentStore = contentStore;
             this.assetStore = assetStore;
+            this.config = config;
+            this.pluginInstances = plugins_1.load(config);
+            this.iLock = false;
             this.inProgress = false;
             this.q = [];
             this.config = config;
@@ -39,10 +45,15 @@ class Q extends events_1.EventEmitter {
     }
     push(data) {
         this.q.push(data);
+        if (this.q.length > this.config.syncManager.queue.pause_threshold) {
+            this.iLock = true;
+            _1.lock();
+        }
         debug(`Content type '${data.content_type_uid}' received for '${data.action}'`);
         this.emit('next');
     }
     errorHandler(obj) {
+        notify('error', obj);
         const self = this;
         logger_1.logger.error(obj);
         debug(`Error handler called with ${JSON.stringify(obj)}`);
@@ -74,6 +85,10 @@ class Q extends events_1.EventEmitter {
         });
     }
     next() {
+        if (this.iLock && this.q.length < this.config.syncManager.queue.resume_threshold) {
+            _1.unlock(true);
+            this.iLock = false;
+        }
         const self = this;
         debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`);
         if (!this.inProgress && this.q.length) {
@@ -93,6 +108,9 @@ class Q extends events_1.EventEmitter {
             }
         }
     }
+    peek() {
+        return this.q;
+    }
     process(data) {
         const { content_type_uid, uid } = data;
         if (content_type_uid === '_content_types') {
@@ -102,6 +120,7 @@ class Q extends events_1.EventEmitter {
             const { locale } = data;
             logger_1.logger.log(`${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`);
         }
+        notify(data.action, data);
         switch (data.action) {
             case 'publish':
                 const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1;
@@ -186,6 +205,14 @@ class Q extends events_1.EventEmitter {
                 return Promise.all(promisifiedBucket2);
             }).then(() => {
                 debug('After action plugins executed successfully!');
+                const { content_type_uid, uid } = data;
+                if (content_type_uid === '_content_types') {
+                    logger_1.logger.log(`${action.toUpperCase()}ED: { content_type: '${content_type_uid}', uid: '${uid}'}`);
+                }
+                else {
+                    const { locale } = data;
+                    logger_1.logger.log(`${action.toUpperCase()}ED: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`);
+                }
                 self.inProgress = false;
                 self.emit('next', data);
             }).catch((error) => {
@@ -204,3 +231,6 @@ class Q extends events_1.EventEmitter {
     }
 }
 exports.Q = Q;
+const notify = (event, obj) => {
+    notifications.emit(event, obj);
+};

@@ -63,6 +63,25 @@ exports.filterItems = (response, config) => __awaiter(this, void 0, void 0, func
         }
     });
 });
+exports.formatSyncFilters = (config) => {
+    if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
+        const filters = config.syncManager.filters;
+        for (let filter in filters) {
+            if (filters[filter] && filters[filter] instanceof Array && filters[filter].length) {
+                const filtersData = filters[filter];
+                filtersData.forEach((element, index) => {
+                    if (typeof element !== 'string' || element.length === 0) {
+                        filtersData.splice(index, 1);
+                    }
+                });
+                if (filtersData.length === 0) {
+                    delete config.syncManager.filters[filter];
+                }
+            }
+        }
+    }
+    return config;
+};
 exports.groupItems = (items) => {
     const bucket = {};
     items.forEach((item) => {

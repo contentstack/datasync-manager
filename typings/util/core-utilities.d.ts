@@ -4,6 +4,7 @@
 * MIT Licensed
 */
 export declare const filterItems: (response: any, config: any) => Promise<{}>;
+export declare const formatSyncFilters: (config: any) => any;
 export declare const groupItems: (items: any) => {};
 export declare const formatItems: (items: any, config: any) => any;
 export declare const markCheckpoint: (groupedItems: any, syncResponse: any) => any;

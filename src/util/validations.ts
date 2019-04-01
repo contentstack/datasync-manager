@@ -22,6 +22,12 @@ export const validateConfig = (config) => {
   if (typeof config.contentstack !== 'object' || !config.contentstack.apiKey || !config.contentstack.deliveryToken) {
     throw new Error('Config \'contentstack\' should be of type object and have \'apiKey\' and \'token\'')
   }
+
+  if (config.queue) {
+    if (config.queue.resume_threshold >= config.queue.pause_threshold) {
+      throw new Error('Queue resume_threshold cannot be higher or equal to, than queue.pause_threshold!')
+    }
+  }
 }
 
 /**

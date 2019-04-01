@@ -12,6 +12,15 @@ module.exports = {
     }
   },
   contentStore: {
+    dbName: 'filter-syncing',
     collectionName: 'example'
-  }
+  },
+  // filtering now available!
+  // syncManager: {
+  //   filters: {
+  //     content_type_uid: ['authors'],
+  //     locale: ['en-us'],
+  //     action: ['publish']
+  //   }
+  // }
 }

@@ -4,6 +4,7 @@
 * MIT Licensed
 */
 
+import { existsSync } from 'fs'
 import { join, resolve } from 'path'
 
 /**
@@ -12,16 +13,25 @@ import { join, resolve } from 'path'
  */
 export const buildConfigPaths = () => {
   const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
-  const tokenBasePath = process.env.TOKEN_PATH || baseDir
 
-  const paths = {
+  const paths: any = {
     baseDir: resolve(join(__dirname, '..', '..')),
-    failed: resolve(join(baseDir, 'unprocessible', 'failed')),
-    filtered: resolve(join(baseDir, 'unprocessible', 'filtered')),
-    ledger: resolve(join(tokenBasePath, '.ledger')),
     plugin: resolve(join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
-    token: resolve(join(tokenBasePath, '.token')),
     unprocessibleDir: resolve(join(baseDir, 'unprocessible')),
+  }
+
+  if (process.env.TOKEN_PATH && process.env.TOKEN_PATH.length !== 0 && existsSync(process.env.TOKEN_PATH)) {
+    paths.failed = resolve(join(process.env.TOKEN_PATH, 'unprocessible', 'failed'))
+    paths.filtered = resolve(join(process.env.TOKEN_PATH, 'unprocessible', 'filtered'))
+    paths.checkpoint = resolve(join(process.env.TOKEN_PATH, '.checkpoint'))
+    paths.ledger = resolve(join(process.env.TOKEN_PATH, '.ledger'))
+    paths.token = resolve(join(process.env.TOKEN_PATH, '.token'))
+  } else {
+    paths.failed = resolve(join(baseDir, '..', 'unprocessible', 'failed'))
+    paths.filtered = resolve(join(baseDir, '..', 'unprocessible', 'filtered'))
+    paths.checkpoint = resolve(join(baseDir, '..', '.checkpoint'))
+    paths.ledger = resolve(join(baseDir, '..', '.ledger'))
+    paths.token = resolve(join(baseDir, '..', '.token'))
   }
 
   return paths

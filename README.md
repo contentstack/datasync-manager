@@ -1,110 +1,179 @@
 [![Contentstack](https://www.contentstack.com/docs/static/images/contentstack.png)](https://www.contentstack.com/)
 
-## Contentstack sync manager
-
 Contentstack is a headless CMS with an API-first approach. It is a CMS that developers can use to build powerful cross-platform applications in their favorite languages. Build your application frontend, and Contentstack will take care of the rest. [Read More](https://www.contentstack.com/).
 
-The sync manager utility uses [Contentstack's Sync API's](https://www.contentstack.com/docs/apis/content-delivery-api/#synchronization) to sync contents from Contentstack onto your choice of db at your end.
+## Contentstack DataSync Manager
 
-Any publish/unpublish/delete action performed on Contentstack, will be tracked and the data in the db will be synced accordingly.
+Contentstack DataSync lets you sync your Contentstack data with your database, enabling you to save data locally and serve content directly from your database. It is a combination of four powerful modules that is [DataSync Webhook Listener](https://github.com/contentstack/webhook-listener), [DataSync Manager](https://github.com/contentstack/datasync-manager), [DataSync Asset Store Filesystem](https://github.com/contentstack/datasync-asset-store-filesystem), DataSync Content Store — [Filesystem](https://github.com/contentstack/datasync-content-store-filesystem) and [MongoDB](https://github.com/contentstack/datasync-content-store-filesystem).
 
-Currently, Contentstack provides the following databases for storing synced data
-- [contentstack-filesystem-content-store]()
-- [contentstack-mongodb-content-store]()
-- [contentstack-filesystem-asset-store]()
-
-**[contentstack-webhook-listener]()** or your own personalized cron job can be used to invoke the app and sync the data on a regular basis.
+The DataSync Manager is one of the four important components of Contentstack DataSync. When any publish, unpublish, or delete operations are performed on assets or content, the DataSync Manager fetches the data and sends it to Content Store. It uses Contentstack's Sync APIs to sync data from Contentstack with your preferred database — Filesystem and MongoDB in our case.
 
 ### Prerequisite
-
-To run this module, you'd need to have a listener - that acts as a 'notifier'. When the listener fires a notification event, the sync-manager utility uses Contentstack's Sync API to fetch details.
-
-Once the sync-manager fetches the updated details from Contentstack - it needs to pass them down to the connectors.
+- nodejs v8+
 
 ### Usage
 
+This is how DataSync Manager works with DataSync boilerplate:
+
 ```js
-  const assetStore = require('contentstack-asset-store-filesystem')
-  const contentStore = require('contentstack-content-store-mongodb')
-  const listener = require('contentstack-webhook-listener')
+const assetStore = require('@contentstack/datasync-asset-store-filesystem')
+const contentStore = require('@contentstack/datasync-content-store-filesystem')
+const listener = require('@contentstack/webhook-listener')
+const syncManager = require('@contentstack/datasync-manager') // <--
+const config = require('./config')
 
-  const config = require('./config')
-  const syncManager = require('./dist')
+// Set asset, content store, listener and config to Datasync Manager
+syncManager.setAssetStore(assetStore)
+syncManager.setContentStore(contentStore)
+syncManager.setListener(listener)
+syncManager.setConfig(config)
 
-  syncManager.setAssetStore(assetStore)
-  syncManager.setContentStore(contentStore)
-  syncManager.setListener(listener)
-  syncManager.setConfig(config)
-
-  syncManager.start().then((messages) => {
-    console.log(messages.status)
-  }).catch((error) => {
-    console.error(error)
+// start DataSync manager
+syncManager.start()
+  .then(() => {
+    console.log('Contentstack sync started successfully!')
   })
+  .catch(console.error)
 ```
+You can replace [@contentstack/datasync-content-store-filesystem](https://www.npmjs.com/package/@contentstack/datasync-content-store-filesystem) used above, with [@contentstack/datasync-content-store-mongodb](https://www.npmjs.com/package/@contentstack/datasync-content-store-mongodb) and switch content store databases.
 
-### Config
+### Configuration
 
-By default, sync manager uses the following config to get started
+- Here's a list of contentstack's configuration keys
 
+| Key Name | Default | Description |
+| :--- |:---:| :---|
+| apiKey | | **Required**. Your stack's API key |
+| deliveryToken | | **Required**. Your environment's delivery token |
+| sync_token | | Token from where you'd like to start the process |
+| pagination_token | | Token from where you'd like to start the process |
+| MAX_RETRY_LIMIT | 6 | Number of times the API call would retry, if the server fails |
+
+- Here's a list of configuration keys for contentstack datasync-manager:
+
+<table>
+  <thead>
+    <tr>
+      <th>Property</th>
+      <th>Default</th>
+      <th>Description</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>cooloff</td>
+      <td>3000</td>
+      <td>Number of <code>ms</code> the app would wait before making a subsequent <code>Sync API</code> request</td>
+    </tr>
+    <tr>
+      <td>enableAssetReferences</td>
+      <td>true</td>
+      <td>
+        This would map out all the asset fields and modify/map them to the content type they belong to. Ex:
+        <ul>
+          <li><strong>Before</strong></li>
+            <code>"asset_field": "bltassetuid123"</code>
+          <li><strong>After</strong></li>
+            <code>
+              "asset_field": {
+                "reference_to": "_assets",
+                "values": "bltassetuid123"
+              }
+            </code>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>enableContentReferences</td>
+      <td>true</td>
+      <td>
+        This would map out all the reference fields and modify/map them to the content type they belong to. Ex:
+        <ul>
+          <li><strong>Before</strong></li>
+            <code>
+              "categories": "bltcategoryuid123"
+            </code>
+          <li><strong>After</strong></li>
+            <code>
+              "categories": {
+                "reference_to": "category",
+                "values": "bltcategoryuid123"
+              }
+            </code>
+        </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>limit</td>
+      <td>100</td>
+      <td>Number of items fetched in each <code>Sync API</code> request made.</td>
+    </tr>
+    <tr>
+      <td>maxsize</td>
+      <td>2097152</td>
+      <td>Maximum file size of files (ex: .ledger file)</td>
+    </tr>
+    <tr>
+      <td>queue.pause_threshold</td>
+      <td>
+        10000
+      </td>
+      <td>The min-max internal queue size of contentstack-sync-manager. The DataSync manager would pause making <code>Sync API</code> requests once the internal queue size exceeds <code>pause_threshold</code> count.</td>
+    </tr>
+    <tr>
+      <td>queue.resume_threshold</td>
+      <td>
+        5000
+      </td>
+      <td>The min-max internal queue size of contentstack-sync-manager. The DataSync manager will resume <code>Sync API</code> requests once the queue size goes below <code>resume_threshold</code> count.</td>
+    </tr>
+    <tr>
+      <td>saveFilteredItems</td>
+      <td>
+        true
+      </td>
+      <td>
+        When enabled, the app will log items that have been filtered out. Items can be filtered out due to the following:
+        <ul>
+          <li>Missing required keys</li>
+          <li>Language filters applied via config</li>
+        </ul>
+      </td>
+    </tr>
+  </tbody>
+</table>
+
+And here's an example to get you started:
 ```js
-<!-- snippet -->
+{
+  // exmaple to override default values
   contentstack: {
-    // stack api key
-    apiKey: '', // (required)
-    // stack delivery token
-    deliveryToken: '', // (required)
-    // sync token from where data is to synced when app starts
-    sync_token: '',
-    // pagination token from where data is to be synced when app starts
-    pagination_token: '',s
-    // no of times REST API calls are retried before rejecting
-    MAX_RETRY_LIMIT: 6,
-    // default request host
-    host: 'cdn.contentstack.io',
-  },
-  // locales added here will be filtered out
-  locales: [
-    {
-      code: 'hi-in'
+      apiKey: '',
+      deliveryToken: '',
+      sync_token: '',
+      MAX_RETRY_LIMIT: 5
     }
-  ],
-  syncManager: {
-    // milliseconds to wait before firing SYNC API
-    cooloff: 3000,
-    // no of items to be fetched at a time
-    limit: 100,
-    // max file sizes in bytes
-    maxsize: 2097152,
-    // if true, filtered and failed item objects will be saved locally under 'unprocessible' folder
-    saveFailedItems: true,
-    saveFilteredItems: true,
   },
-```
-(Note: All the above config can be overridden!)
-
-Here's a sample config to help you get started!
-
-```json
-  {
-    "contentstack": {
-      "apiKey": "",
-      "token": ""
-    },
-    "locales": [
-      {
-        "code": "en-us",
-        "relative_url_prefix": "/"
-      }
-    ],
-    "plugins": {
-      "myplugin": {
-        "greetings": ["Hello there!", "Ola amigo!"]
-      }
-    },
-    "syncManager": {
-      "cooloff": 3000,
-      "limit": 100,
+  syncManager: {
+      cooloff: 2000,
+      limit: 80,
     }
   }
+}
 ```
+
+### Further Reading
+
+- [Getting started with Contentstack DataSync](https://www.contentstack.com/docs/guide/synchronization/contentstack-datasync)
+- [Contentstack DataSync](https://www.contentstack.com/docs/guide/synchronization/contentstack-datasync/configuration-files-for-contentstack-datasync) doc lists the configuration for different modules
+
+
+### Support and Feature requests
+
+If you have any issues working with the library, please file an issue here at Github.
+You can send us an e-mail at support@contentstack.com if you have any support or feature requests. Our support team is available 24/7 on the intercom. You can always get in touch and give us an opportunity to serve you better!
+
+
+### Licence
+
+This repository is published under the [MIT](LICENSE) license.

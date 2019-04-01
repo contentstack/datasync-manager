@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
+const inet_1 = require("./inet");
 const __1 = require("../");
 const api_1 = require("../api");
 const core_utilities_1 = require("../util/core-utilities");
@@ -19,7 +20,7 @@ const logger_1 = require("../util/logger");
 const promise_map_1 = require("../util/promise.map");
 const q_1 = require("./q");
 const token_management_1 = require("./token-management");
-const debug = debug_1.default('sm:core-sync');
+const debug = debug_1.default('sync-core');
 const emitter = new events_1.EventEmitter();
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
@@ -60,6 +61,12 @@ exports.init = (contentStore, assetStore) => {
             }
             else {
                 request.qs.init = true;
+                if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
+                    const filters = config.syncManager.filters;
+                    for (let filter in filters) {
+                        request.qs[filter] = filters[filter].join(',');
+                    }
+                }
             }
             return fire(request)
                 .then(resolve)
@@ -114,12 +121,20 @@ const sync = () => {
     });
 };
 exports.lock = () => {
-    logger_1.logger.info('Contentstack sync locked..');
+    debug('Contentstack sync locked..');
     flag.lockdown = true;
 };
-exports.unlock = () => {
-    logger_1.logger.info('Contentstack sync unlocked..');
+exports.unlock = (refire) => {
+    debug('Contentstack sync unlocked..', refire);
     flag.lockdown = false;
+    if (typeof refire === 'boolean' && refire) {
+        flag.WQ = true;
+        if (flag.requestCache && Object.keys(flag.requestCache)) {
+            return fire(flag.requestCache.params)
+                .then(flag.requestCache.resolve)
+                .catch(flag.requestCache.reject);
+        }
+    }
     check();
 };
 const fire = (req) => {
@@ -181,6 +196,9 @@ const fire = (req) => {
                                 err.code = 'ICTC';
                                 return mapReject(err);
                             }).catch((error) => {
+                                if (inet_1.netConnectivityIssues(error)) {
+                                    flag.SQ = false;
+                                }
                                 return mapReject(error);
                             });
                         });
@@ -189,6 +207,9 @@ const fire = (req) => {
                             .then(resolve)
                             .catch(reject);
                     }).catch((error) => {
+                        if (inet_1.netConnectivityIssues(error)) {
+                            flag.SQ = false;
+                        }
                         return reject(error);
                     });
                 }).catch((processError) => {
@@ -199,6 +220,9 @@ const fire = (req) => {
                 .then(resolve)
                 .catch(reject);
         }).catch((error) => {
+            if (inet_1.netConnectivityIssues(error)) {
+                flag.SQ = false;
+            }
             return reject(error);
         });
     });
@@ -212,13 +236,27 @@ const postProcess = (req, resp) => {
         else {
             name = 'sync_token';
         }
-        req.qs[name] = resp[name];
-        if (name === 'sync_token') {
-            flag.SQ = false;
-            return resolve();
-        }
-        return fire(req)
-            .then(resolve)
+        return token_management_1.saveCheckpoint(name, resp[name])
+            .then(() => {
+            req.qs[name] = resp[name];
+            if (flag.lockdown) {
+                console.log('Checkpoint: lockdown has been invoked');
+                flag.requestCache = {
+                    params: req,
+                    resolve,
+                    reject
+                };
+            }
+            else {
+                if (name === 'sync_token') {
+                    flag.SQ = false;
+                    return resolve();
+                }
+                return fire(req)
+                    .then(resolve)
+                    .catch(reject);
+            }
+        })
             .catch(reject);
     });
 };
