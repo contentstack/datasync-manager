@@ -1,6 +1,6 @@
 "use strict";
 /*!
-* Contentstack Sync Manager
+* Contentstack DataSync Manager
 * This module saves filtered/failed items
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed

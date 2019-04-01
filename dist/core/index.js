@@ -1,6 +1,6 @@
 "use strict";
 /*!
- * Contentstack Sync Manager
+ * Contentstack DataSync Manager
  * Copyright (c) 2019 Contentstack LLC
  * MIT Licensed
  */
