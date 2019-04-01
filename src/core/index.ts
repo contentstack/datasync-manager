@@ -7,6 +7,7 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep, remove } from 'lodash'
+import { netConnectivityIssues } from './inet'
 import { getConfig } from '../'
 import { get, init as initAPI } from '../api'
 import { filterItems, formatItems, groupItems, markCheckpoint } from '../util/core-utilities'
@@ -146,7 +147,7 @@ const sync = () => {
  * @description Used to lockdown the 'sync' process in case of exceptions
  */
 export const lock = () => {
-  logger.info('Contentstack sync locked..')
+  debug('Contentstack sync locked..')
   flag.lockdown = true
 }
 
@@ -154,7 +155,7 @@ export const lock = () => {
  * @description Used to unlock the 'sync' process in case of errors/exceptions
  */
 export const unlock = (refire ? ) => {
-  logger.info('Contentstack sync unlocked..')
+  debug('Contentstack sync unlocked..', refire)
   flag.lockdown = false
   if (typeof refire === 'boolean' && refire) {
     flag.WQ = true
@@ -241,6 +242,10 @@ const fire = (req) => {
 
                 return mapReject(err)
               }).catch((error) => {
+                if (netConnectivityIssues(error)) {
+                  flag.SQ = false
+                }
+
                 return mapReject(error)
               })
             })
@@ -249,6 +254,9 @@ const fire = (req) => {
               .then(resolve)
               .catch(reject)
           }).catch((error) => {
+            if (netConnectivityIssues(error)) {
+              flag.SQ = false
+            }
             // Errorred while fetching content type schema
 
             return reject(error)
@@ -262,6 +270,9 @@ const fire = (req) => {
         .then(resolve)
         .catch(reject)
     }).catch((error) => {
+      if (netConnectivityIssues(error)) {
+        flag.SQ = false
+      }
       // do something
 
       return reject(error)

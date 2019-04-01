@@ -11,6 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
+const inet_1 = require("./inet");
 const __1 = require("../");
 const api_1 = require("../api");
 const core_utilities_1 = require("../util/core-utilities");
@@ -120,11 +121,11 @@ const sync = () => {
     });
 };
 exports.lock = () => {
-    logger_1.logger.info('Contentstack sync locked..');
+    debug('Contentstack sync locked..');
     flag.lockdown = true;
 };
 exports.unlock = (refire) => {
-    logger_1.logger.info('Contentstack sync unlocked..');
+    debug('Contentstack sync unlocked..', refire);
     flag.lockdown = false;
     if (typeof refire === 'boolean' && refire) {
         flag.WQ = true;
@@ -195,6 +196,9 @@ const fire = (req) => {
                                 err.code = 'ICTC';
                                 return mapReject(err);
                             }).catch((error) => {
+                                if (inet_1.netConnectivityIssues(error)) {
+                                    flag.SQ = false;
+                                }
                                 return mapReject(error);
                             });
                         });
@@ -203,6 +207,9 @@ const fire = (req) => {
                             .then(resolve)
                             .catch(reject);
                     }).catch((error) => {
+                        if (inet_1.netConnectivityIssues(error)) {
+                            flag.SQ = false;
+                        }
                         return reject(error);
                     });
                 }).catch((processError) => {
@@ -213,6 +220,9 @@ const fire = (req) => {
                 .then(resolve)
                 .catch(reject);
         }).catch((error) => {
+            if (inet_1.netConnectivityIssues(error)) {
+                flag.SQ = false;
+            }
             return reject(error);
         });
     });
