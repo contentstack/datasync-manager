@@ -1,6 +1,6 @@
 "use strict";
 /*!
-* Contentstack Sync Manager
+* Contentstack DataSync Manager
 *   - This module overrides nodejs internal 'fs' module functionalities
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
