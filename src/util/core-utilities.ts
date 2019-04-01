@@ -66,6 +66,29 @@ export const filterItems = async (response, config) => {
   })
 }
 
+export const formatSyncFilters = (config) => {
+  if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
+    const filters = config.syncManager.filters
+    for (let filter in filters) {
+      if (filters[filter] && filters[filter] instanceof Array && filters[filter].length) {
+        const filtersData = filters[filter]
+        filtersData.forEach((element, index) => {
+          if (typeof element !== 'string' || element.length === 0) {
+            filtersData.splice(index, 1)
+          }
+        })
+
+        // if length = 0, remove it from filters
+        if (filtersData.length === 0) {
+          delete config.syncManager.filters[filter]
+        }
+      }
+    }
+  }
+
+  return config
+}
+
 /**
  * @description Groups items based on their content type
  * @param {Array} items - An array of SYNC API's item

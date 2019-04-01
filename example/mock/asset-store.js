@@ -1,4 +1,4 @@
-// Build mock asset connector
+// Build mock asset store
 module.exports = {
   delete: function () {
     return Promise.resolve()

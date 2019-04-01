@@ -7,6 +7,7 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep, remove } from 'lodash'
+import { netConnectivityIssues } from './inet'
 import { getConfig } from '../'
 import { get, init as initAPI } from '../api'
 import { filterItems, formatItems, groupItems, markCheckpoint } from '../util/core-utilities'
@@ -14,18 +15,18 @@ import { existsSync, readFileSync } from '../util/fs'
 import { logger } from '../util/logger'
 import { map } from '../util/promise.map'
 import { Q as Queue } from './q'
-import { getToken } from './token-management'
+import { getToken, saveCheckpoint } from './token-management'
 
 interface IToken {
   name: string
   token: string
 }
 
-const debug = Debug('sm:core-sync')
+const debug = Debug('sync-core')
 const emitter = new EventEmitter()
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
-const flag = {
+const flag: any = {
   SQ: false,
   WQ: false,
   lockdown: false,
@@ -66,6 +67,12 @@ export const init = (contentStore, assetStore) => {
         request.qs[token.name] = token.token
       } else {
         request.qs.init = true
+        if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
+          const filters = config.syncManager.filters
+          for (let filter in filters) {
+            request.qs[filter] = filters[filter].join(',')
+          }
+        }
       }
 
       return fire(request)
@@ -140,16 +147,24 @@ const sync = () => {
  * @description Used to lockdown the 'sync' process in case of exceptions
  */
 export const lock = () => {
-  logger.info('Contentstack sync locked..')
+  debug('Contentstack sync locked..')
   flag.lockdown = true
 }
 
 /**
  * @description Used to unlock the 'sync' process in case of errors/exceptions
  */
-export const unlock = () => {
-  logger.info('Contentstack sync unlocked..')
+export const unlock = (refire ? ) => {
+  debug('Contentstack sync unlocked..', refire)
   flag.lockdown = false
+  if (typeof refire === 'boolean' && refire) {
+    flag.WQ = true
+    if (flag.requestCache && Object.keys(flag.requestCache)) {
+      return fire(flag.requestCache.params)
+        .then(flag.requestCache.resolve)
+        .catch(flag.requestCache.reject)
+    }
+  }
   check()
 }
 
@@ -172,8 +187,8 @@ const fire = (req) => {
         return filterItems(syncResponse, config).then(() => {
           if (syncResponse.items.length === 0) {
             return postProcess(req, syncResponse)
-            .then(resolve)
-            .catch(reject)
+              .then(resolve)
+              .catch(reject)
           }
           syncResponse.items = formatItems(syncResponse.items, config)
           let groupedItems = groupItems(syncResponse.items)
@@ -209,7 +224,9 @@ const fire = (req) => {
               return get({
                 path: `${Contentstack.apis.content_types}${uid}`,
               }).then((contentTypeSchemaResponse) => {
-                const schemaResponse: { content_type: any } = (contentTypeSchemaResponse as any)
+                const schemaResponse: {
+                  content_type: any
+                } = (contentTypeSchemaResponse as any)
                 if (schemaResponse.content_type) {
                   const items = groupedItems[uid]
                   items.forEach((entry) => {
@@ -225,6 +242,10 @@ const fire = (req) => {
 
                 return mapReject(err)
               }).catch((error) => {
+                if (netConnectivityIssues(error)) {
+                  flag.SQ = false
+                }
+
                 return mapReject(error)
               })
             })
@@ -233,6 +254,9 @@ const fire = (req) => {
               .then(resolve)
               .catch(reject)
           }).catch((error) => {
+            if (netConnectivityIssues(error)) {
+              flag.SQ = false
+            }
             // Errorred while fetching content type schema
 
             return reject(error)
@@ -246,6 +270,9 @@ const fire = (req) => {
         .then(resolve)
         .catch(reject)
     }).catch((error) => {
+      if (netConnectivityIssues(error)) {
+        flag.SQ = false
+      }
       // do something
 
       return reject(error)
@@ -268,18 +295,31 @@ const postProcess = (req, resp) => {
       name = 'sync_token'
     }
 
-    // re-fire!
-    req.qs[name] = resp[name]
-    if (name === 'sync_token') {
-      flag.SQ = false
+    return saveCheckpoint(name, resp[name])
+    .then(() => {
+      // re-fire!
+      req.qs[name] = resp[name]
 
-      return resolve()
-    }
+      if (flag.lockdown) {
+        console.log('Checkpoint: lockdown has been invoked')
+        flag.requestCache = {
+          params: req,
+          resolve,
+          reject
+        }
+      } else {
+        if (name === 'sync_token') {
+          flag.SQ = false
 
-    return fire(req)
-      .then(resolve)
-      .catch(reject)
+          return resolve()
+        }
 
+        return fire(req)
+          .then(resolve)
+          .catch(reject)
+      }
+    })
+    .catch(reject)
   })
 }
 

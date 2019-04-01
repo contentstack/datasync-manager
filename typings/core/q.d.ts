@@ -5,9 +5,11 @@
 */
 /// <reference types="node" />
 import { EventEmitter } from 'events';
+declare const notifications: EventEmitter;
 export declare class Q extends EventEmitter {
     private config;
     private detectRteMarkdownAssets;
+    private iLock;
     private inProgress;
     private pluginInstances;
     private assetStore;
@@ -17,7 +19,9 @@ export declare class Q extends EventEmitter {
     push(data: any): void;
     errorHandler(obj: any): void;
     private next;
+    peek(): any;
     private process;
     private reStructureAssetObjects;
     private exec;
 }
+export { notifications };

@@ -3,6 +3,7 @@
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
+import { notifications } from './core/q';
 interface IAssetConnector {
     download(): any;
     unpublish(): any;
@@ -37,4 +38,5 @@ export declare const setListener: (instance: ILogger) => void;
 export declare const setConfig: (config: IConfig) => void;
 export declare const getConfig: () => IConfig;
 export { setLogger } from './util/logger';
+export { notifications };
 export declare const start: (config?: IConfig) => Promise<{}>;
