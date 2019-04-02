@@ -130,7 +130,7 @@ class Q extends events_1.EventEmitter {
                 if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
                     let assets = core_utilities_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
                     if (assets.length === 0) {
-                        this.exec(data, data.action, 'beforePublish', 'afterPublish');
+                        this.exec(data, data.action);
                         return;
                     }
                     assets = assets.map((asset) => { return this.reStructureAssetObjects(asset, data.locale); });
@@ -164,13 +164,13 @@ class Q extends events_1.EventEmitter {
                         });
                     });
                 }
-                this.exec(data, data.action, 'beforePublish', 'afterPublish');
+                this.exec(data, data.action);
                 break;
             case 'unpublish':
-                this.exec(data, data.action, 'beforeUnpublish', 'afterUnpublish');
+                this.exec(data, data.action);
                 break;
             default:
-                this.exec(data, data.action, 'beforeDelete', 'afterDelete');
+                this.exec(data, data.action);
                 break;
         }
     }
@@ -183,26 +183,26 @@ class Q extends events_1.EventEmitter {
             uid: asset.uid
         };
     }
-    exec(data, action, beforeAction, afterAction) {
+    exec(data, action) {
         const self = this;
         try {
             debug(`Exec called. Action is ${action}`);
-            const beforeActionPlugins = [];
+            const beforeSyncPlugins = [];
             const clonedData = lodash_1.cloneDeep(data);
-            this.pluginInstances[beforeAction].forEach((action1) => {
-                beforeActionPlugins.push(action1(data));
+            this.pluginInstances.beforeSync.forEach((method) => {
+                beforeSyncPlugins.push(method(data, action));
             });
-            Promise.all(beforeActionPlugins)
+            Promise.all(beforeSyncPlugins)
                 .then(() => {
                 debug('Before action plugins executed successfully!');
                 return self.contentStore[action](clonedData);
             }).then(() => {
                 debug('Connector instance called successfully!');
-                const promisifiedBucket2 = [];
-                self.pluginInstances[afterAction].forEach((action2) => {
-                    promisifiedBucket2.push(action2(clonedData));
+                const afterSyncPlugins = [];
+                self.pluginInstances.afterSync.forEach((method) => {
+                    afterSyncPlugins.push(method(clonedData));
                 });
-                return Promise.all(promisifiedBucket2);
+                return Promise.all(afterSyncPlugins);
             }).then(() => {
                 debug('After action plugins executed successfully!');
                 const { content_type_uid, uid } = data;

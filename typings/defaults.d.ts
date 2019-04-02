@@ -42,6 +42,13 @@ export declare const config: {
             type: string;
         };
         limit: number;
+        markdown: {
+            gfm: boolean;
+            tables: boolean;
+            breaks: boolean;
+            smartLists: boolean;
+            xhtml: boolean;
+        };
         maxsize: number;
         queue: {
             pause_threshold: number;
