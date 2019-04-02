@@ -6,17 +6,20 @@
 
 import Debug from 'debug'
 import { cloneDeep, find, map, remove } from 'lodash'
+import marked from 'marked'
 import { parse } from 'url'
-import { getConfig } from '..'
+import { getConfig } from '../index'
 import { existsSync, mkdirpSync, stat } from './fs'
 import { logger } from './logger'
 import { saveFilteredItems } from './unprocessible'
 import { validateItemStructure } from './validations'
 
 const debug = Debug('core-utilities')
+const config = getConfig()
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
 const assetType = 'sys_assets'
+marked.setOptions(config.syncManager.markdown)
 
 /**
  * @description Utility that filters items based on 'locale'.
@@ -325,14 +328,16 @@ const update = (parent, reference, entry) => {
 }
 
 const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) => {
-  var matches, regexp
+  let matches, regexp, convertedText
   const isMarkdown = (schema.field_metadata.markdown) ? true: false
   if (isMarkdown) {
+    convertedText = marked(entry)
     regexp = new RegExp('(https://(assets|images).contentstack.io/v[\\d]/assets/(.*?)/(.*?)/(.*?)/(.*))', 'g');
   } else {
+    convertedText = entry
     regexp = new RegExp('[\"](https://(assets|images).contentstack.io/v[\\d]/assets/(.*?)/(.*?)/(.*?)/(.*?))[\"]', 'g');
   }
-  while ((matches = regexp.exec(entry)) !== null) {
+  while ((matches = regexp.exec(convertedText)) !== null) {
     if (matches && matches.length) {
       const assetObject: any = {}
       let assetUrl = matches[1]

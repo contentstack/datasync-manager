@@ -13,10 +13,8 @@ const fs_1 = require("fs");
 const lodash_1 = require("lodash");
 const path_1 = require("path");
 const logger_1 = require("../util/logger");
-const debug = debug_1.default('sm:core-plugins');
-const pluginMethods = ['beforePublish', 'beforeUnpublish', 'afterPublish', 'afterUnpublish', 'beforeDelete',
-    'afterDelete',
-];
+const debug = debug_1.default('plugins');
+const pluginMethods = ['beforeSync', 'afterSync'];
 exports.load = (config) => {
     debug('Plugins load called');
     const pluginInstances = {};
@@ -33,6 +31,10 @@ exports.load = (config) => {
             pluginMethods.forEach((pluginMethod) => {
                 if (lodash_1.hasIn(Plugin, pluginMethod)) {
                     pluginInstances[pluginMethod].push(Plugin[pluginMethod]);
+                    debug(`${pluginMethod} loaded from ${pluginName} successfully!`);
+                }
+                else {
+                    debug(`${pluginMethod} not found in ${pluginName}`);
                 }
             });
         }
@@ -40,6 +42,6 @@ exports.load = (config) => {
             logger_1.logger.warn(`Unable to load ${pluginName} plugin since ${pluginPath} was not found!`);
         }
     }
-    debug('Plugins built successfully!');
+    debug('Plugins loaded successfully!');
     return pluginInstances;
 };
