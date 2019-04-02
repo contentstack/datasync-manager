@@ -18,16 +18,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
+const marked_1 = __importDefault(require("marked"));
 const url_1 = require("url");
-const __1 = require("..");
+const index_1 = require("../index");
 const fs_1 = require("./fs");
 const logger_1 = require("./logger");
 const unprocessible_1 = require("./unprocessible");
 const validations_1 = require("./validations");
 const debug = debug_1.default('core-utilities');
+const config = index_1.getConfig();
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
 const assetType = 'sys_assets';
+marked_1.default.setOptions(config.syncManager.markdown);
 exports.filterItems = (response, config) => __awaiter(this, void 0, void 0, function* () {
     return new Promise((resolve, reject) => {
         try {
@@ -185,7 +188,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
 };
 exports.getFile = (file, rotate) => {
     return new Promise((resolve, reject) => {
-        const config = __1.getConfig();
+        const config = index_1.getConfig();
         if (fs_1.existsSync(file)) {
             return fs_1.stat(file, (statError, stats) => {
                 if (statError) {
@@ -209,7 +212,7 @@ exports.getFile = (file, rotate) => {
     });
 };
 exports.buildContentReferences = (schema, entry, parent = []) => {
-    const config = __1.getConfig();
+    const config = index_1.getConfig();
     const enableAssetReferences = config.syncManager.enableAssetReferences;
     const enableContentReferences = config.syncManager.enableContentReferences;
     for (let i = 0, c = schema.length; i < c; i++) {
@@ -292,15 +295,17 @@ const update = (parent, reference, entry) => {
     }
 };
 const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) => {
-    var matches, regexp;
+    let matches, regexp, convertedText;
     const isMarkdown = (schema.field_metadata.markdown) ? true : false;
     if (isMarkdown) {
+        convertedText = marked_1.default(entry);
         regexp = new RegExp('(https://(assets|images).contentstack.io/v[\\d]/assets/(.*?)/(.*?)/(.*?)/(.*))', 'g');
     }
     else {
+        convertedText = entry;
         regexp = new RegExp('[\"](https://(assets|images).contentstack.io/v[\\d]/assets/(.*?)/(.*?)/(.*?)/(.*?))[\"]', 'g');
     }
-    while ((matches = regexp.exec(entry)) !== null) {
+    while ((matches = regexp.exec(convertedText)) !== null) {
         if (matches && matches.length) {
             const assetObject = {};
             let assetUrl = matches[1];

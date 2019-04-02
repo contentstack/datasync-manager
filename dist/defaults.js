@@ -44,6 +44,13 @@ exports.config = {
             type: 'A',
         },
         limit: 100,
+        markdown: {
+            gfm: true,
+            tables: true,
+            breaks: true,
+            smartLists: true,
+            xhtml: false
+        },
         maxsize: 2097152,
         queue: {
             pause_threshold: 10000,
