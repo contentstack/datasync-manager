@@ -1,6 +1,8 @@
 import { writeFileSync } from 'fs'
 import { cloneDeep } from 'lodash'
+import mkdirp from 'mkdirp'
 import { join, resolve } from 'path'
+import rimraf from 'rimraf'
 import { setConfig } from '../../src'
 import { getToken } from '../../src/core/token-management'
 import { buildConfigPaths } from '../../src/util/build-paths'
@@ -20,16 +22,18 @@ describe('token management', () => {
     }
     const configs: any = cloneDeep(config)
     configs.paths = buildConfigPaths()
-    configs.paths.checkpoint = resolve(join(__dirname, '..', '..', '.checkpoint'))
-    configs.paths.ledger = resolve(join(__dirname, '..', '..', '.ledger'))
+    const tknPath = resolve(join(__dirname, '..', 'testing'))
+    mkdirp.sync(tknPath)
+    configs.paths.checkpoint = resolve(join(tknPath, '.checkpoint'))
+    configs.paths.ledger = resolve(join(__dirname, 'testing', '..', '.ledger'))
     setConfig(configs)
 
-    writeFileSync(configs.paths.token, JSON.stringify(tokenData))
+    writeFileSync(configs.paths.checkpoint, JSON.stringify(tokenData))
 
     return getToken().then((tokenDetails) => {
       expect(tokenDetails).toMatchObject(tokenData)
+      rimraf.sync(tknPath)
     }).catch((error) => {
-      console.error(error)
       expect(error).toBeNull()
     })
   })

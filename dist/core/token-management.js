@@ -18,7 +18,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const __1 = require("..");
-const core_utilities_1 = require("../util/core-utilities");
+const index_1 = require("../util/index");
 const fs_1 = require("../util/fs");
 const debug = debug_1.default('token-management');
 let counter = 0;
@@ -27,6 +27,7 @@ exports.getToken = () => {
         try {
             const config = __1.getConfig();
             const checkpoint = config.paths.checkpoint;
+            console.error('@checkpoint', checkpoint);
             const token = config.paths.token;
             if (fs_1.existsSync(checkpoint)) {
                 debug(`Checkpoint read: ${checkpoint}`);
@@ -70,7 +71,7 @@ exports.saveToken = (name, token) => {
             else {
                 filename = `${config.paths.ledger}.${counter}`;
             }
-            const file = yield core_utilities_1.getFile(filename, () => {
+            const file = yield index_1.getFile(filename, () => {
                 counter++;
                 return `${config.paths.ledger}-${counter}`;
             });

@@ -13,23 +13,27 @@ const events_1 = require("events");
 const index_1 = require("../index");
 const index_2 = require("./index");
 const emitter = new events_1.EventEmitter();
-const sm = index_1.getConfig().syncManager;
-const socket = dns_socket_1.default({
-    retries: sm.inet.retries,
-    timeout: sm.inet.timeout
-});
-const query = {
-    questions: [
-        {
-            type: sm.inet.type,
-            name: sm.inet.host
-        }
-    ]
-};
-const port = sm.inet.port;
-const dns = sm.inet.dns;
 let iLock = false;
-let currentTimeout = sm.inet.retryTimeout;
+let socket, sm, query, port, dns, currentTimeout;
+exports.init = () => {
+    sm = index_1.getConfig().syncManager;
+    socket = dns_socket_1.default({
+        retries: sm.inet.retries,
+        timeout: sm.inet.timeout
+    });
+    query = {
+        questions: [
+            {
+                type: sm.inet.type,
+                name: sm.inet.host
+            }
+        ]
+    };
+    port = sm.inet.port;
+    dns = sm.inet.dns;
+    currentTimeout = sm.inet.retryTimeout;
+    setTimeout(exports.checkNetConnectivity, 30 * 1000);
+};
 exports.checkNetConnectivity = () => {
     socket.query(query, port, dns, (err) => {
         if (err) {

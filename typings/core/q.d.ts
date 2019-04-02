@@ -17,7 +17,7 @@ export declare class Q extends EventEmitter {
     private q;
     constructor(contentStore: any, assetStore: any, config: any);
     push(data: any): void;
-    errorHandler(obj: any): void;
+    errorHandler(obj: any): Promise<void>;
     private next;
     peek(): any;
     private process;

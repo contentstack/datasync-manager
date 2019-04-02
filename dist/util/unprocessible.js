@@ -15,7 +15,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const __1 = require("../");
-const core_utilities_1 = require("./core-utilities");
+const index_1 = require("./index");
 const fs_1 = require("./fs");
 const logger_1 = require("./logger");
 const counter = {
@@ -47,7 +47,7 @@ exports.saveFilteredItems = (items, name, token) => {
             else {
                 filename = `${config.paths.filtered}-${counter.filtered}.json`;
             }
-            const file = yield core_utilities_1.getFile(filename, () => {
+            const file = yield index_1.getFile(filename, () => {
                 counter.filtered++;
                 return `${config.paths.filtered}-${counter.filtered}.json`;
             });
