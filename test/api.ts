@@ -1,45 +1,80 @@
+
+import { readFileSync } from 'fs'
 import { cloneDeep, merge } from 'lodash'
 import nock from 'nock'
+import { join } from 'path'
 import { get, init } from '../src/api'
 import { config as internalConfig } from '../src/defaults'
 import { setLogger } from '../src/util/logger'
 import { response as publishResponse } from './dummy/api-responses/publish'
+import { response as emptyResponse } from './dummy/api-responses/empty'
 import { config as mockConfig } from './dummy/config'
+
+const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
 
 beforeEach(() => {
   const configs = cloneDeep(merge({}, internalConfig, mockConfig))
   init(configs.contentstack)
+
   nock('https://api.localhost.io', {
       reqheaders: {
-        'X-User-Agent': 'contentstack-sync-manager/v1.0.0',
+        'x-user-agent': `datasync-manager/v${packageInfo.version}`,
         'access_token': 'dummyDeliveryToken',
         'api_key': 'dummyApiKey',
       },
     })
     .get('/200')
+    // .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
     .reply(200, publishResponse)
+
   nock('https://api.localhost.io', {
       reqheaders: {
-        'X-User-Agent': 'contentstack-sync-manager/v1.0.0',
+        'x-user-agent': `datasync-manager/v${packageInfo.version}`,
+        'access_token': 'dummyDeliveryToken',
+        'api_key': 'dummyApiKey',
+      },
+    })
+    .get('/200')
+    .query({pagination_token: 'publish-token', environment: 'test', limit: 100})
+    .reply(200, emptyResponse)
+
+  nock('https://api.localhost.io', {
+      reqheaders: {
+        'x-user-agent': `datasync-manager/v${packageInfo.version}`,
         'access_token': 'dummyDeliveryToken',
         'api_key': 'dummyApiKey',
       },
     })
     .get('/429')
-    .reply(429, publishResponse)
+    .reply(429, emptyResponse)
+
   nock('https://api.localhost.io', {
       reqheaders: {
-        'X-User-Agent': 'contentstack-sync-manager/v1.0.0',
+        'x-user-agent': `datasync-manager/v${packageInfo.version}`,
         'access_token': 'dummyDeliveryToken',
         'api_key': 'dummyApiKey',
       },
     })
     .get('/500')
     .reply(500, publishResponse)
-  nock('https://api.localhost.io')
+
+  nock('https://api.localhost.io', {
+    reqheaders: {
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
+      'access_token': 'dummyDeliveryToken',
+      'api_key': 'dummyApiKey',
+    },
+  })
     .get('/retry-exceeded')
-    .reply(500, {})
-  nock('https://api.localhost.io')
+    .reply(500, emptyResponse)
+
+  nock('https://api.localhost.io', {
+    reqheaders: {
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
+      'access_token': 'dummyDeliveryToken',
+      'api_key': 'dummyApiKey',
+    },
+  })
     .get('/unknown-status')
     .reply(199, {
       key: 'unknown reject',
@@ -58,7 +93,9 @@ describe('test api - get()', () => {
 
     return get(request).then((response) => {
       expect(response).toHaveProperty('items')
-    }).catch(console.error)
+    }).catch((error) => {
+      expect(error)
+    })
   })
 
   test('status 429: rate limit error', () => {
@@ -81,6 +118,7 @@ describe('test api - get()', () => {
     return get(request).then((response) => {
       expect(response).toBe({})
     }).catch((error) => {
+      console.error(error)
       expect(error)
     })
   })

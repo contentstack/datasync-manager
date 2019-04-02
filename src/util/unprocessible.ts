@@ -6,7 +6,7 @@
 */
 
 import { getConfig } from '../'
-import { getFile } from './core-utilities'
+import { getFile } from './index'
 import { existsSync, readFile, writeFile } from './fs'
 import { logger } from './logger'
 

@@ -14,7 +14,7 @@ const lodash_1 = require("lodash");
 const inet_1 = require("./inet");
 const __1 = require("../");
 const api_1 = require("../api");
-const core_utilities_1 = require("../util/core-utilities");
+const index_1 = require("../util/index");
 const fs_1 = require("../util/fs");
 const logger_1 = require("../util/logger");
 const promise_map_1 = require("../util/promise.map");
@@ -148,15 +148,15 @@ const fire = (req) => {
             delete req.path;
             const syncResponse = response;
             if (syncResponse.items.length) {
-                return core_utilities_1.filterItems(syncResponse, config).then(() => {
+                return index_1.filterItems(syncResponse, config).then(() => {
                     if (syncResponse.items.length === 0) {
                         return postProcess(req, syncResponse)
                             .then(resolve)
                             .catch(reject);
                     }
-                    syncResponse.items = core_utilities_1.formatItems(syncResponse.items, config);
-                    let groupedItems = core_utilities_1.groupItems(syncResponse.items);
-                    groupedItems = core_utilities_1.markCheckpoint(groupedItems, syncResponse);
+                    syncResponse.items = index_1.formatItems(syncResponse.items, config);
+                    let groupedItems = index_1.groupItems(syncResponse.items);
+                    groupedItems = index_1.markCheckpoint(groupedItems, syncResponse);
                     if (groupedItems[formattedAssetType]) {
                         groupedItems[formattedAssetType].forEach((asset) => {
                             Q.push(asset);

@@ -11,7 +11,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
-const core_utilities_1 = require("../util/core-utilities");
+const index_1 = require("../util/index");
 const _1 = require(".");
 const logger_1 = require("../util/logger");
 const promise_map_1 = require("../util/promise.map");
@@ -58,7 +58,7 @@ class Q extends events_1.EventEmitter {
         logger_1.logger.error(obj);
         debug(`Error handler called with ${JSON.stringify(obj)}`);
         if (obj.data.checkpoint) {
-            token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
+            return token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
                 unprocessible_1.saveFailedItems(obj).then(() => {
                     self.inProgress = false;
                     self.emit('next');
@@ -74,7 +74,7 @@ class Q extends events_1.EventEmitter {
                 self.emit('next');
             });
         }
-        unprocessible_1.saveFailedItems(obj).then(() => {
+        return unprocessible_1.saveFailedItems(obj).then(() => {
             self.inProgress = false;
             self.emit('next');
         }).catch((error) => {
@@ -125,10 +125,10 @@ class Q extends events_1.EventEmitter {
             case 'publish':
                 const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1;
                 if (isEntry) {
-                    data.data = core_utilities_1.buildContentReferences(data.content_type.schema, data.data);
+                    data.data = index_1.buildContentReferences(data.content_type.schema, data.data);
                 }
                 if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
-                    let assets = core_utilities_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
+                    let assets = index_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
                     if (assets.length === 0) {
                         this.exec(data, data.action);
                         return;
@@ -146,7 +146,7 @@ class Q extends events_1.EventEmitter {
                         });
                     }, 1)
                         .then(() => {
-                        data.data = core_utilities_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assetBucket, false);
+                        data.data = index_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assetBucket, false);
                         data.pre_processed = true;
                         this.q.unshift(data);
                         assetBucket.forEach((asset) => {

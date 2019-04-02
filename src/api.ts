@@ -93,7 +93,7 @@ export const get = (req, RETRY = 1) => {
                     .catch(reject)
                 }, timeDelay)
               } else {
-                debug(`Request failed\n${JSON.stringify(req)}`)
+                debug(`Request failed\n${JSON.stringify(options)}`)
 
                 return reject(body)
               }

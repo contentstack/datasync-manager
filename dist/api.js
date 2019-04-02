@@ -79,7 +79,7 @@ exports.get = (req, RETRY = 1) => {
                         }, timeDelay);
                     }
                     else {
-                        debug(`Request failed\n${JSON.stringify(req)}`);
+                        debug(`Request failed\n${JSON.stringify(options)}`);
                         return reject(body);
                     }
                 });
