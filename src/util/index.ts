@@ -15,11 +15,11 @@ import { saveFilteredItems } from './unprocessible'
 import { validateItemStructure } from './validations'
 
 const debug = Debug('core-utilities')
-const config = getConfig()
+// const config = getConfig()
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
 const assetType = 'sys_assets'
-marked.setOptions(config.syncManager.markdown)
+// marked.setOptions(config.syncManager.markdown)
 
 /**
  * @description Utility that filters items based on 'locale'.
@@ -332,19 +332,19 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
   const isMarkdown = (schema.field_metadata.markdown) ? true: false
   if (isMarkdown) {
     convertedText = marked(entry)
-    regexp = new RegExp('(https://(assets|images).contentstack.io/v[\\d]/assets/(.*?)/(.*?)/(.*?)/(.*))', 'g');
+    regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)(?=")', 'g');
   } else {
     convertedText = entry
-    regexp = new RegExp('[\"](https://(assets|images).contentstack.io/v[\\d]/assets/(.*?)/(.*?)/(.*?)/(.*?))[\"]', 'g');
+    regexp = new RegExp('(https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)(?="))', 'g');
   }
   while ((matches = regexp.exec(convertedText)) !== null) {
     if (matches && matches.length) {
       const assetObject: any = {}
-      let assetUrl = matches[1]
-      if (matches[5]) {
-        assetObject.uid = matches[5]
+      let assetUrl = matches[0]
+      if (matches[3]) {
+        assetObject.uid = matches[3]
       }
-      if (matches[1]) {
+      if (matches[0]) {
         assetObject.url = assetUrl
         assetObject.download_id = parse(assetUrl).pathname.split('/').slice(4).join('/')
       }
@@ -359,9 +359,9 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
         })
         if (typeof asset !== 'undefined') {
           if (isMarkdown) {
-            parentEntry[key] = entry.replace(assetUrl, `${encodeURI(asset.data._internal_url)}\\n`)
+            parentEntry[key] = parentEntry[key].replace(assetUrl, `${encodeURI(asset.data._internal_url)}\\n`)
           } else {
-            parentEntry[key] = entry.replace(assetUrl, encodeURI(asset.data._internal_url))
+            parentEntry[key] = parentEntry[key].replace(assetUrl, encodeURI(asset.data._internal_url))
           }
         }
       }

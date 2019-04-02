@@ -17,7 +17,7 @@ const q_1 = require("./core/q");
 exports.notifications = q_1.notifications;
 const defaults_1 = require("./defaults");
 const build_paths_1 = require("./util/build-paths");
-const core_utilities_1 = require("./util/core-utilities");
+const index_1 = require("./util/index");
 const logger_1 = require("./util/logger");
 const validations_1 = require("./util/validations");
 const debug = debug_1.default('registration');
@@ -61,12 +61,12 @@ exports.start = (config = {}) => {
             }).then((contentStoreInstance) => {
                 debug('Content store instance has returned successfully!');
                 validations_1.validateContentConnector(contentStoreInstance);
-                appConfig = core_utilities_1.formatSyncFilters(appConfig);
+                appConfig = index_1.formatSyncFilters(appConfig);
                 return core_1.init(contentStoreInstance, assetStoreInstance);
             }).then(() => {
                 debug('Sync Manager initiated successfully!');
                 listener.register(core_1.poke);
-                setTimeout(inet_1.checkNetConnectivity, 10 * 1000);
+                inet_1.init();
                 return listener.start(appConfig);
             }).then(() => {
                 logger_1.logger.info('Contentstack sync utility started successfully!');

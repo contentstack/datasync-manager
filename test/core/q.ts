@@ -1,6 +1,6 @@
 import { cloneDeep, merge } from 'lodash'
 import { setConfig } from '../../src'
-import { Q } from '../../src/core/q'
+import { Q, notifications } from '../../src/core/q'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { setLogger } from '../../src/util/logger'
@@ -28,5 +28,15 @@ test('error handler should work fine', () => {
     },
     error: 'dummyError',
   }
-  expect(q.errorHandler(errorObject)).toBeUndefined()
+  notifications.on('error', (error) => {
+    expect(error).toMatchObject(errorObject)
+  })
+  
+  return q.errorHandler(errorObject)
+    .then((result) => {
+      expect(result).toBeUndefined()
+    })
+    .catch((error) => {
+      expect(error).toBeNull()
+    })
 })

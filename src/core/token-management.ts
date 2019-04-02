@@ -6,7 +6,7 @@
 
 import Debug from 'debug'
 import { getConfig } from '..'
-import { getFile } from '../util/core-utilities'
+import { getFile } from '../util/index'
 import { existsSync, readFile, writeFile } from '../util/fs'
 
 const debug = Debug('token-management')
@@ -40,6 +40,7 @@ export const getToken = () => {
     try {
       const config = getConfig()
       const checkpoint = config.paths.checkpoint
+      console.error('@checkpoint', checkpoint)
       const token = config.paths.token
 
       if (existsSync(checkpoint)) {

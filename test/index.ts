@@ -80,11 +80,9 @@ describe('core', () => {
 
   beforeEach(() => {
     nock('https://api.localhost.io', { reqheaders: {
-      'accept': 'application/json',
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
-      'host': 'api.localhost.io',
-      'x-user-agent': 'contentstack-sync-manager/v1.0.0',
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
     }})
       .get('/v3/stacks/sync/delete-success')
       .query({pagination_token: 'dummyPaginationToken', environment: 'test', limit: 100})
@@ -95,7 +93,7 @@ describe('core', () => {
     nock('https://api.localhost.io', { reqheaders: {
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
-      'x-user-agent': 'contentstack-sync-manager/v1.0.0',
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
     }})
       .get('/v3/stacks/sync')
       .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
@@ -190,7 +188,7 @@ describe('core', () => {
     delete configs.plugins
     const contentstack: any = configs.contentstack
     contentstack.pagination_token = 'dummyPaginationToken'
-    contentstack.cdn = 'api.localhost.io'
+    contentstack.host = 'api.localhost.io'
     contentstack.apis.sync += '/delete-success'
     setContentStore((contentConnector as any))
     setAssetStore((assetConnector as any))
@@ -198,7 +196,7 @@ describe('core', () => {
     delete contentstack.sync_token
     setConfig(configs)
 
-    return start().then((status) => {
+    return start(configs).then((status) => {
       expect(status).toBeUndefined()
     }).catch((error) => {
       expect(error).toBeNull()

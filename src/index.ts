@@ -7,12 +7,12 @@
 import Debug from 'debug'
 import { merge } from 'lodash'
 import { init, poke } from './core'
-import { checkNetConnectivity } from './core/inet'
+import { init as pinger } from './core/inet'
 import { configure } from './core/process'
 import { notifications } from './core/q'
 import { config as internalConfig } from './defaults'
 import { buildConfigPaths } from './util/build-paths'
-import { formatSyncFilters } from './util/core-utilities'
+import { formatSyncFilters } from './util/index'
 import { logger, setLogger } from './util/logger'
 
 import {
@@ -168,7 +168,7 @@ export const start = (config: IConfig = {}): Promise<{}> => {
         debug('Sync Manager initiated successfully!')
         listener.register(poke)
         // start checking for inet 10 secs after the app has started
-        setTimeout(checkNetConnectivity, 10 * 1000)
+        pinger()
 
         return listener.start(appConfig)
       }).then(() => {

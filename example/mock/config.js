@@ -4,16 +4,13 @@ module.exports = {
     deliveryToken: ''
   },
   plugins: {
-    myplugin: {
-      name: 'John doe'
-    },
     sitemap: {
       name: 'sitemap generator'
     }
   },
   contentStore: {
-    dbName: 'filter-syncing',
-    collectionName: 'example'
+    dbName: 'markdown',
+    collectionName: 'development'
   },
   // filtering now available!
   // syncManager: {

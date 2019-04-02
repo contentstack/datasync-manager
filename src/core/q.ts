@@ -7,7 +7,7 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep } from 'lodash'
-import { buildContentReferences, getOrSetRTEMarkdownAssets } from '../util/core-utilities'
+import { buildContentReferences, getOrSetRTEMarkdownAssets } from '../util/index'
 import { lock, unlock } from '.'
 import { logger } from '../util/logger'
 import { map } from '../util/promise.map'
@@ -87,7 +87,7 @@ export class Q extends EventEmitter {
     logger.error(obj)
     debug(`Error handler called with ${JSON.stringify(obj)}`)
     if (obj.data.checkpoint) {
-      saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
+      return saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
         saveFailedItems(obj).then(() => {
           self.inProgress = false
           self.emit('next')
@@ -105,7 +105,7 @@ export class Q extends EventEmitter {
       })
     }
 
-    saveFailedItems(obj).then(() => {
+    return saveFailedItems(obj).then(() => {
       self.inProgress = false
       self.emit('next')
     }).catch((error) => {

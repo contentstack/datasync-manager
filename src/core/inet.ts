@@ -10,25 +10,30 @@ import { getConfig } from '../index'
 import { lock, unlock } from './index'
 
 const emitter = new EventEmitter()
-const sm = getConfig().syncManager
-const socket = dnsSocket({
-	retries: sm.inet.retries,
-	timeout: sm.inet.timeout
-})
- 
-const query = {
-  questions: [
-    {
-      type: sm.inet.type,
-      name: sm.inet.host
-    }
-  ]
-}
 
-const port = sm.inet.port
-const dns = sm.inet.dns
 let iLock = false
-let currentTimeout = sm.inet.retryTimeout
+let socket, sm, query, port, dns, currentTimeout
+
+export const init = () => {
+  sm = getConfig().syncManager
+  socket = dnsSocket({
+    retries: sm.inet.retries,
+    timeout: sm.inet.timeout
+  })
+  query = {
+    questions: [
+      {
+        type: sm.inet.type,
+        name: sm.inet.host
+      }
+    ]
+  }
+  port = sm.inet.port
+  dns = sm.inet.dns
+  currentTimeout = sm.inet.retryTimeout
+  // start checking for net connectivity, 30 seconds after the app has started
+  setTimeout(checkNetConnectivity, 30 * 1000)
+}
 
 export const checkNetConnectivity = () => {
   socket.query(query, port, dns, (err) => {

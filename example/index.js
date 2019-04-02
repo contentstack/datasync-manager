@@ -1,7 +1,8 @@
-const assetStore = require('contentstack-asset-store-filesystem')
-const contentStore = require('contentstack-content-store-filesystem')
-const listener = require('contentstack-webhook-listener')
-const syncManager = require('contentstack-sync-manager')
+const assetStore = require('@contentstack/datasync-asset-store-filesystem')
+// const assetStore = require('./mock/asset-store')
+const contentStore = require('@contentstack/datasync-content-store-mongodb')
+const listener = require('@contentstack/webhook-listener')
+const syncManager = require('../dist/index')
 const config = require('./mock/config')
 
 syncManager.setAssetStore(assetStore)
@@ -15,14 +16,14 @@ syncManager.start().then(() => {
 
 syncManager.notifications
   .on('publish', (obj) => {
-    console.log('SYNC-PUBLISH: ', obj)
+    // console.log('SYNC-PUBLISH: ', obj)
   })
   .on('unpublish', (obj) => {
-    console.log('SYNC-UNPUBLISH: ', obj)
+    // console.log('SYNC-UNPUBLISH: ', obj)
   })
   .on('delete', (obj) => {
-    console.log('SYNC-DELETE: ', obj)
+    // console.log('SYNC-DELETE: ', obj)
   })
   .on('error', (obj) => {
-    console.log('SYNC-ERROR: ', obj)
+    // console.log('SYNC-ERROR: ', obj)
   })
