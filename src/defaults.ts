@@ -46,6 +46,13 @@ export const config = {
       type: 'A',
     },
     limit: 100,
+    markdown: {
+      gfm: true,
+      tables: true,
+      breaks: true,
+      smartLists: true,
+      xhtml: false
+    },
     // max file sizes in bytes
     maxsize: 2097152,
     queue: {
