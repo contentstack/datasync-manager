@@ -1,6 +1,6 @@
-const assetStore = require('@contentstack/datasync-asset-store-filesystem')
+const assetStore = require('../../contentstack-asset-store-filesystem/dist')
 // const assetStore = require('./mock/asset-store')
-const contentStore = require('@contentstack/datasync-content-store-mongodb')
+const contentStore = require('../../contentstack-content-store-mongodb/dist')
 const listener = require('@contentstack/webhook-listener')
 const syncManager = require('../dist/index')
 const config = require('./mock/config')

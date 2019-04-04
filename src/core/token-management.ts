@@ -40,7 +40,6 @@ export const getToken = () => {
     try {
       const config = getConfig()
       const checkpoint = config.paths.checkpoint
-      console.error('@checkpoint', checkpoint)
       const token = config.paths.token
 
       if (existsSync(checkpoint)) {
