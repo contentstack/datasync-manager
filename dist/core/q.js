@@ -153,7 +153,7 @@ class Q extends events_1.EventEmitter {
                 const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1;
                 if (isEntry) {
                     data.data = index_1.buildContentReferences(data.content_type.schema, data.data);
-                    data.content_type.references = index_1.buildReferences(data.content_type);
+                    data.content_type.references = index_1.buildReferences(data.content_type.schema);
                 }
                 if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
                     let assets = index_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
