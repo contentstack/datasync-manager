@@ -31,29 +31,25 @@ let assetStore
 let listener
 
 /**
+ * @public
+ * @interface Asset store interface
  * @summary Asset store instance interface
  */
-interface IAssetConnector {
+interface IAssetStore {
   download(): any,
   unpublish(): any,
   delete(): any,
 }
 
 /**
+ * @public
+ * @interface Content store interface
  * @summary Content store instance interface
  */
-interface IContentConnector {
+interface IContentStore {
   publish(): any,
   unpublish(): any,
   delete(): any,
-}
-
-/**
- * @summary Connector interface
- */
-interface IConnector {
-  start(): Promise<IAssetConnector | IContentConnector>,
-  setLogger(): ILogger
 }
 
 /**
@@ -79,24 +75,30 @@ interface ILogger {
 }
 
 /**
+ * @public
+ * @method setContentStore
  * @summary Register content store
- * @param {Object} instance - Content store instance
+ * @param {object} instance Content store instance
  */
-export const setContentStore = (instance: IConnector) => {
+export const setContentStore = (instance: IContentStore) => {
   contentStore = instance
 }
 
 /**
+ * @public
+ * @method setAssetStore
  * @summary Register asset store
- * @param {Object} instance - Asset store instance
+ * @param {object} instance Asset store instance
  */
-export const setAssetStore = (instance: IConnector) => {
+export const setAssetStore = (instance: IAssetStore) => {
   assetStore = instance
 }
 
 /**
+ * @public
+ * @method setListener
  * @summary Register listener
- * @param {Object} instance - Listener instance
+ * @param {object} instance Listener instance
  */
 export const setListener = (instance: ILogger) => {
   validateListener(instance)
@@ -104,40 +106,50 @@ export const setListener = (instance: ILogger) => {
 }
 
 /**
- * @summary Set the application's config
- * @param {Object} config - Application config
+ * @public
+ * @method setConfig
+ * @summary Sets the application's configuration
+ * @param {object} config Application config
  */
 export const setConfig = (config: IConfig) => {
   appConfig = config
 }
 
 /**
+ * @public
+ * @method getConfig
  * @summary Returns the application's configuration
- * @returns {Object} - Application config
+ * @returns {object} Application config
  */
 export const getConfig = (): IConfig => {
   return appConfig
 }
 
 /**
- * @summary Set custom logger for logging
- * @param {Object} instance - Custom logger instance
+ * @public
+ * @method setLogger
+ * @summary Sets custom logger for logging data sync operations
+ * @param {object} instance Custom logger instance
  */
 export { setLogger } from './util/logger'
 
 /**
+ * @public
+ * @member notifications
  * @summary Event emitter object, that allows client notifications on event raised by sync-manager queue
- * @returns an event-emitter object, events raised: publish, unpublish, delete, error
+ * @returns {EventEmitter} An event-emitter object. Events raised - publish, unpublish, delete, error
  */
 export { notifications }
 
 /**
- * @summary
- *  Starts the sync manager utility
+ * @public
+ * @method start
+ * @summary Starts the sync manager utility
  * @description
- *  Registers, validates asset, content stores and listener instances.
- *  Once done, builds the app's config and logger
- * @param {Object} config - Optional application config.
+ * Registers, validates asset, content stores and listener instances.
+ * Once done, builds the app's config and logger
+ * @param {object} config Optional application config overrides
+ * @returns {Promise} Returns a promise
  */
 export const start = (config: IConfig = {}): Promise<{}> => {
   return new Promise((resolve, reject) => {
@@ -152,7 +164,7 @@ export const start = (config: IConfig = {}): Promise<{}> => {
 
       let assetStoreInstance
 
-      return assetStore.start(appConfig).then((assetInstance: IAssetConnector) => {
+      return assetStore.start(appConfig).then((assetInstance: IAssetStore) => {
         debug('Asset store instance has returned successfully!')
         validateAssetConnector(assetInstance)
         assetStoreInstance = assetInstance

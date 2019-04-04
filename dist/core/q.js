@@ -22,7 +22,18 @@ const debug = debug_1.default('q');
 const notifications = new events_1.EventEmitter();
 exports.notifications = notifications;
 let instance = null;
+/**
+ * @summary Manages sync utilitiy's item queue
+ * @description
+ *  Handles/processes 'sync' items one at a time, firing 'before' and 'after' hooks
+ */
 class Q extends events_1.EventEmitter {
+    /**
+     * 'Q's constructor
+     * @param {Object} connector - Content connector instance
+     * @param {Object} config - Application config
+     * @returns {Object} Returns 'Q's instance
+     */
     constructor(contentStore, assetStore, config) {
         if (!instance && contentStore && assetStore && config) {
             super();
@@ -43,6 +54,10 @@ class Q extends events_1.EventEmitter {
         }
         return instance;
     }
+    /**
+     * @description Enter item into 'Q's queue
+     * @param {Object} data - Formatted item from 'sync api's response
+     */
     push(data) {
         this.q.push(data);
         if (this.q.length > this.config.syncManager.queue.pause_threshold) {
@@ -52,6 +67,10 @@ class Q extends events_1.EventEmitter {
         debug(`Content type '${data.content_type_uid}' received for '${data.action}'`);
         this.emit('next');
     }
+    /**
+     * @description Handles errors in 'Q'
+     * @param {Object} obj - Errorred item
+     */
     errorHandler(obj) {
         notify('error', obj);
         const self = this;
@@ -65,6 +84,7 @@ class Q extends events_1.EventEmitter {
                 }).catch((error) => {
                     debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`);
                     self.inProgress = false;
+                    // fatal error
                     self.emit('next');
                 });
             }).catch((error) => {
@@ -84,6 +104,9 @@ class Q extends events_1.EventEmitter {
             self.emit('next');
         });
     }
+    /**
+     * @description Calls next item in the queue
+     */
     next() {
         if (this.iLock && this.q.length < this.config.syncManager.queue.resume_threshold) {
             _1.unlock(true);
@@ -111,6 +134,10 @@ class Q extends events_1.EventEmitter {
     peek() {
         return this.q;
     }
+    /**
+     * @description Passes and calls the appropriate methods and hooks for item execution
+     * @param {Object} data - Current processing item
+     */
     process(data) {
         const { content_type_uid, uid } = data;
         if (content_type_uid === '_content_types') {
@@ -126,9 +153,11 @@ class Q extends events_1.EventEmitter {
                 const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1;
                 if (isEntry) {
                     data.data = index_1.buildContentReferences(data.content_type.schema, data.data);
+                    data.content_type.references = index_1.buildReferences(data.content_type);
                 }
                 if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
                     let assets = index_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
+                    // if no assets were found in the RTE/Markdown
                     if (assets.length === 0) {
                         this.exec(data, data.action);
                         return;
@@ -183,6 +212,14 @@ class Q extends events_1.EventEmitter {
             uid: asset.uid
         };
     }
+    /**
+     * @description Execute and manager current processing item. Calling 'before' and 'after' hooks appropriately
+     * @param {Object} data - Current processing item
+     * @param {String} action - Action to be performed on the item (publish | unpublish | delete)
+     * @param {String} beforeAction - Name of the hook to execute before the action is performed
+     * @param {String} afterAction - Name of the hook to execute after the action has been performed
+     * @returns {Promise} Returns promise
+     */
     exec(data, action) {
         const self = this;
         try {

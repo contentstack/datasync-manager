@@ -32,6 +32,7 @@ exports.init = () => {
     port = sm.inet.port;
     dns = sm.inet.dns;
     currentTimeout = sm.inet.retryTimeout;
+    // start checking for net connectivity, 30 seconds after the app has started
     setTimeout(exports.checkNetConnectivity, 30 * 1000);
 };
 exports.checkNetConnectivity = () => {

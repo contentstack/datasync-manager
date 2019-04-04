@@ -1,7 +1,7 @@
 {
   "name": "@contentstack/datasync-manager",
   "author": "Contentstack LLC <support@contentstack.com>",
-  "version": "0.0.2",
+  "version": "0.1.0",
   "description": "The primary module of Contentstack DataSync that syncs Contentstack data with your server.",
   "main": "dist/index.js",
   "dependencies": {

@@ -1,0 +1,16 @@
+language: node_js
+node_js:
+  - "8"
+  - "10"
+before_install:
+  - node -v
+  - $SHELL --version 2> /dev/null || dpkg -s $SHELL 2> /dev/null || which $SHELL
+  - nvm --version
+  - nvm install
+install:
+  - npm install
+before_script:
+  - npm run build-ts
+script:
+  - npm run test
+services: mongodb

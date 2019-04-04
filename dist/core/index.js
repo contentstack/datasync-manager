@@ -32,6 +32,11 @@ const flag = {
 let config;
 let Contentstack;
 let Q;
+/**
+ * @description Core's primary. This is where it starts..
+ * @param {Object} connector - Content connector instance
+ * @param {Object} config - Application config
+ */
 exports.init = (contentStore, assetStore) => {
     config = __1.getConfig();
     Q = new q_1.Q(contentStore, assetStore, config);
@@ -77,6 +82,9 @@ exports.init = (contentStore, assetStore) => {
         }
     });
 };
+/**
+ * @description Notifies the sync manager utility to wake up and start syncing..
+ */
 exports.poke = () => {
     logger_1.logger.info('Received \'contentstack sync\' notification');
     if (!flag.lockdown) {
@@ -84,6 +92,10 @@ exports.poke = () => {
         check();
     }
 };
+/**
+ * @description Check's if the status of the app when a new incoming notification is fired
+ * @description Starts processing if the 'SQ: false'
+ */
 const check = () => {
     debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`);
     if (!flag.SQ && flag.WQ) {
@@ -101,6 +113,9 @@ const check = () => {
         });
     }
 };
+/**
+ * @description Gets saved token, builds request object and fires the sync process
+ */
 const sync = () => {
     return new Promise((resolve, reject) => {
         return token_management_1.getToken().then((tokenObject) => {
@@ -120,10 +135,16 @@ const sync = () => {
         });
     });
 };
+/**
+ * @description Used to lockdown the 'sync' process in case of exceptions
+ */
 exports.lock = () => {
     debug('Contentstack sync locked..');
     flag.lockdown = true;
 };
+/**
+ * @description Used to unlock the 'sync' process in case of errors/exceptions
+ */
 exports.unlock = (refire) => {
     debug('Contentstack sync unlocked..', refire);
     flag.lockdown = false;
@@ -137,6 +158,10 @@ exports.unlock = (refire) => {
     }
     check();
 };
+/**
+ * @description Description required
+ * @param {Object} req - Contentstack sync API request object
+ */
 const fire = (req) => {
     debug(`Fire called with: ${JSON.stringify(req)}`);
     flag.SQ = true;
@@ -157,6 +182,7 @@ const fire = (req) => {
                     syncResponse.items = index_1.formatItems(syncResponse.items, config);
                     let groupedItems = index_1.groupItems(syncResponse.items);
                     groupedItems = index_1.markCheckpoint(groupedItems, syncResponse);
+                    // send assets data for processing
                     if (groupedItems[formattedAssetType]) {
                         groupedItems[formattedAssetType].forEach((asset) => {
                             Q.push(asset);
@@ -193,6 +219,7 @@ const fire = (req) => {
                                     return mapResolve();
                                 }
                                 const err = new Error('Content type ${uid} schema not found!');
+                                // Illegal content type call
                                 err.code = 'ICTC';
                                 return mapReject(err);
                             }).catch((error) => {
@@ -210,6 +237,7 @@ const fire = (req) => {
                         if (inet_1.netConnectivityIssues(error)) {
                             flag.SQ = false;
                         }
+                        // Errorred while fetching content type schema
                         return reject(error);
                     });
                 }).catch((processError) => {
@@ -223,10 +251,16 @@ const fire = (req) => {
             if (inet_1.netConnectivityIssues(error)) {
                 flag.SQ = false;
             }
+            // do something
             return reject(error);
         });
     });
 };
+/**
+ * @description Process data once 'sync' data has been fetched
+ * @param {Object} req - Sync API request object
+ * @param {Object} resp - Sync API response object
+ */
 const postProcess = (req, resp) => {
     return new Promise((resolve, reject) => {
         let name;
@@ -238,6 +272,7 @@ const postProcess = (req, resp) => {
         }
         return token_management_1.saveCheckpoint(name, resp[name])
             .then(() => {
+            // re-fire!
             req.qs[name] = resp[name];
             if (flag.lockdown) {
                 console.log('Checkpoint: lockdown has been invoked');
