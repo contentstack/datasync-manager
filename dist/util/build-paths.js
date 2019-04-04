@@ -7,6 +7,10 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const fs_1 = require("fs");
 const path_1 = require("path");
+/**
+ * @description Builds application's config paths where data is stored
+ * @returns {Object} Returns config paths
+ */
 exports.buildConfigPaths = () => {
     const baseDir = path_1.resolve(path_1.join(__dirname, '..', '..', '..', '..'));
     const paths = {

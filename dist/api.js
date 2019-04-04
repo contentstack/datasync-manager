@@ -16,6 +16,10 @@ const fs_1 = require("./util/fs");
 const debug = debug_1.default('api');
 let MAX_RETRY_LIMIT;
 let Contentstack;
+/**
+ * @description Initialize sync utilities API requests
+ * @param {Object} contentstack - Contentstack configuration details
+ */
 exports.init = (contentstack) => {
     const packageInfo = JSON.parse(fs_1.readFileSync(path_1.join(__dirname, '..', 'package.json')));
     Contentstack = contentstack;
@@ -28,6 +32,11 @@ exports.init = (contentstack) => {
         MAX_RETRY_LIMIT = Contentstack.MAX_RETRY_LIMIT;
     }
 };
+/**
+ * @description Make API requests to Contentstack
+ * @param {Object} req - API request object
+ * @param {Number} RETRY - API request retry counter
+ */
 exports.get = (req, RETRY = 1) => {
     return new Promise((resolve, reject) => {
         if (RETRY > MAX_RETRY_LIMIT) {
@@ -69,6 +78,7 @@ exports.get = (req, RETRY = 1) => {
                         }, timeDelay);
                     }
                     else if (response.statusCode >= 500) {
+                        // retry, with delay
                         timeDelay = Math.pow(Math.SQRT2, RETRY) * 200;
                         debug(`Retrying ${options.path} with ${timeDelay} sec delay`);
                         RETRY++;

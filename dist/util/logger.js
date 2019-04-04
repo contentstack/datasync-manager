@@ -6,6 +6,12 @@
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const validations_1 = require("./validations");
+/**
+ * @summary Creates a logger instance
+ * @example
+ *    const log = createLogger(instance)
+ *    log.info('Hello world!')
+ */
 exports.setLogger = (customLogger) => {
     if (exports.logger) {
         return exports.logger;
