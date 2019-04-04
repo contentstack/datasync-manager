@@ -16,6 +16,12 @@ const mkdirp_1 = __importDefault(require("mkdirp"));
 const path_1 = require("path");
 const write_file_atomic_1 = __importDefault(require("write-file-atomic"));
 const debug = Debug('sm:util-fs');
+/**
+ * @description A wrapper around nodejs fs module's 'writeFile()'
+ * @param {String} filePath - Path where the data is to be written
+ * @param {Object} data - Data that's to be written
+ * @returns {Promise} Returns a promise
+ */
 exports.writeFile = (filePath, data) => {
     debug(`Write file called on ${filePath}`);
     return new Promise((resolve, reject) => {
@@ -36,6 +42,11 @@ exports.writeFile = (filePath, data) => {
         }
     });
 };
+/**
+ * @description A wrapper around nodejs fs module's 'readFile()'
+ * @param {String} filePath - Path from where data is to be read
+ * @returns {Promise} Returns a promise
+ */
 exports.readFile = (filePath) => {
     debug(`Read file called on ${filePath}`);
     return new Promise((resolve, reject) => {
@@ -62,6 +73,11 @@ exports.readFile = (filePath) => {
         }
     });
 };
+/**
+ * @description A wrapper around nodejs fs module's 'readFileSync()'
+ * @param filePath - Path from where data is to be read
+ * @returns {String} Returns the data that's been read
+ */
 exports.readFileSync = (filePath) => {
     debug(`Read file sync called on ${filePath}`);
     if (fs_1.existsSync(filePath)) {
@@ -71,6 +87,11 @@ exports.readFileSync = (filePath) => {
     err.code = 'IOORFS';
     throw err;
 };
+/**
+ * @description Safely creats a directory at the specified 'path'
+ * @param filePath - Path from where directory is to be created
+ * @returns {String} Returns a promise
+ */
 exports.mkdir = (path) => {
     debug(`mkdir called on ${path}`);
     return new Promise((resolve, reject) => {
@@ -87,7 +108,13 @@ exports.mkdir = (path) => {
         }
     });
 };
+/**
+ * @description exports fs.stat
+ */
 var fs_2 = require("fs");
 exports.stat = fs_2.stat;
+/**
+ * @description synchnonous way of creating nested folder directory structure
+ */
 var mkdirp_2 = require("mkdirp");
 exports.mkdirpSync = mkdirp_2.sync;

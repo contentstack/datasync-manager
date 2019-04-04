@@ -125,6 +125,8 @@ export const formatItems = (items, config) => {
         item.content_type_uid = formattedAssetType
         item.action = config.contentstack.actions.publish
         item.locale = item.data.publish_details.locale
+        // add locale key into asset.data
+        item.data.locale = item.locale
         item.uid = item.data.uid
         break
       case 'asset_unpublished':

@@ -5,6 +5,9 @@
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+/**
+ * @description Default application's internal config
+ */
 exports.config = {
     assetStore: {},
     contentStore: {},
@@ -51,6 +54,7 @@ exports.config = {
             smartLists: true,
             xhtml: false
         },
+        // max file sizes in bytes
         maxsize: 2097152,
         queue: {
             pause_threshold: 10000,

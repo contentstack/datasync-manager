@@ -3,6 +3,9 @@
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
+/**
+ * @description Default application's internal config
+ */
 export declare const config: {
     assetStore: {};
     contentStore: {};
