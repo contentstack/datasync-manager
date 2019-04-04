@@ -22,6 +22,10 @@ const index_1 = require("../util/index");
 const fs_1 = require("../util/fs");
 const debug = debug_1.default('token-management');
 let counter = 0;
+/**
+ * @description Returns 'token details' based on 'token type'
+ * @param {String} type - Token type (checkpoint | current)
+ */
 exports.getToken = () => {
     return new Promise((resolve, reject) => {
         try {
@@ -48,6 +52,12 @@ exports.getToken = () => {
         }
     });
 };
+/**
+ * @description Saves token details
+ * @param {String} name - Name of the token
+ * @param {String} token - Token value
+ * @param {String} type - Token type
+ */
 exports.saveToken = (name, token) => {
     debug(`Save token invoked with name: ${name}, token: ${token}`);
     return new Promise((resolve, reject) => {
@@ -89,6 +99,12 @@ exports.saveToken = (name, token) => {
         })).catch(reject);
     });
 };
+/**
+ * @description Saves token details
+ * @param {String} name - Name of the token
+ * @param {String} token - Token value
+ * @param {String} type - Token type
+ */
 exports.saveCheckpoint = (name, token) => {
     debug(`Save token invoked with name: ${name}, token: ${token}`);
     return new Promise((resolve, reject) => {

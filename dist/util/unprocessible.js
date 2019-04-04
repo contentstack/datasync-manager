@@ -22,11 +22,26 @@ const counter = {
     failed: 0,
     filtered: 0,
 };
+/**
+ * TODO
+ * This method logs all failed items.
+ * Failed items should be 'retried' when app is started Or after a specific interval
+ * @param {Object} obj - Contains 'error' and 'data' key
+ * @returns {Promise} Returns a promisified object
+ */
 exports.saveFailedItems = (obj) => {
     return new Promise((resolve) => {
+        // const path = getConfig().paths.failedItems
         return resolve(obj);
     });
 };
+/**
+ * @description Saves items filtered from SYNC API response
+ * @param {Object} items - Filtered items
+ * @param {String} name - Page name where items were filtered
+ * @param {String} token - Page token value
+ * @returns {Promise} Returns a promise
+ */
 exports.saveFilteredItems = (items, name, token) => {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         try {
@@ -56,6 +71,7 @@ exports.saveFilteredItems = (items, name, token) => {
                     const loggedItems = JSON.parse(data);
                     loggedItems.push(objDetails);
                     return fs_1.writeFile(file, JSON.stringify(loggedItems)).then(resolve).catch((error) => {
+                        // failed to log failed items
                         logger_1.logger.error(`Failed to write ${JSON.stringify(loggedItems)} at ${error}`);
                         logger_1.logger.error(error);
                         return resolve();

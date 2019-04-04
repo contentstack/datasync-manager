@@ -7,7 +7,7 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep } from 'lodash'
-import { buildContentReferences, getOrSetRTEMarkdownAssets } from '../util/index'
+import { buildReferences, buildContentReferences, getOrSetRTEMarkdownAssets } from '../util/index'
 import { lock, unlock } from '.'
 import { logger } from '../util/logger'
 import { map } from '../util/promise.map'
@@ -168,10 +168,12 @@ export class Q extends EventEmitter {
       const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1
       if (isEntry) {
         data.data = buildContentReferences(data.content_type.schema, data.data)
+        data.content_type.references = buildReferences(data.content_type)
       }
 
       if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
         let assets = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true)
+        // if no assets were found in the RTE/Markdown
         if (assets.length === 0) {
           this.exec(data, data.action)
           return
