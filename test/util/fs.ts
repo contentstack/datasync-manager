@@ -1,5 +1,6 @@
 import { cloneDeep, merge } from 'lodash'
 import { join, resolve } from 'path'
+import rimraf from 'rimraf'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { mkdir, readFile, readFileSync, writeFile } from '../../src/util/fs'
@@ -12,6 +13,11 @@ describe('fs utility', () => {
   beforeAll(() => {
     setLogger()
     configs.paths = buildConfigPaths()
+  })
+
+  afterAll(() => {
+    const fPath = resolve(join(__dirname, '..', '..', 'file.json'))
+    rimraf.sync(fPath)
   })
 
   test('write file should execute without errors', () => {

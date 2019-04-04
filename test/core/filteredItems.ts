@@ -1,6 +1,6 @@
 import { cloneDeep, merge } from 'lodash'
 import { join, resolve} from 'path'
-
+import rimraf from 'rimraf'
 import { setConfig } from '../../src'
 import { config as internalConfig } from '../../src/defaults'
 import { buildConfigPaths } from '../../src/util/build-paths'
@@ -13,6 +13,10 @@ const config = cloneDeep(merge({}, internalConfig, mockConfig))
 describe('filter items', () => {
   beforeAll(() => {
     setLogger()
+  })
+  afterAll(() => {
+    const filteredFilePath = resolve(join(__dirname, '..', '..', 'test-filtered'))
+    rimraf.sync(filteredFilePath)
   })
 
   test('Save filtered items should work without errors', () => {

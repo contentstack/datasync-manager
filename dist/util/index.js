@@ -26,19 +26,30 @@ const logger_1 = require("./logger");
 const unprocessible_1 = require("./unprocessible");
 const validations_1 = require("./validations");
 const debug = debug_1.default('core-utilities');
+// const config = getConfig()
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
 const assetType = 'sys_assets';
+// marked.setOptions(config.syncManager.markdown)
+/**
+ * @description Utility that filters items based on 'locale'.
+ * @param {Object} response - SYNC API's response
+ * @param {Object} config - Application config
+ * @returns {Promise} Returns a promise
+ */
 exports.filterItems = (response, config) => __awaiter(this, void 0, void 0, function* () {
     return new Promise((resolve, reject) => {
         try {
             const locales = lodash_1.map(config.locales, 'code');
             const filteredObjects = lodash_1.remove(response.items, (item) => {
+                // validate item structure. If the structure is not as expected, filter it out
                 if (!(validations_1.validateItemStructure(item))) {
                     return item;
                 }
+                // for published items
                 if (item.data.publish_details) {
                     return locales.indexOf(item.data.publish_details.locale) !== -1;
+                    // for unpublished items || deleted items
                 }
                 else if (item.data.locale) {
                     return locales.indexOf(item.data.locale) !== -1;
@@ -48,6 +59,7 @@ exports.filterItems = (response, config) => __awaiter(this, void 0, void 0, func
             if (filteredObjects.length === 0) {
                 return resolve();
             }
+            // do something with filteredObjects
             let name;
             if (response.pagination_token) {
                 name = 'pagination_token';
@@ -75,6 +87,7 @@ exports.formatSyncFilters = (config) => {
                         filtersData.splice(index, 1);
                     }
                 });
+                // if length = 0, remove it from filters
                 if (filtersData.length === 0) {
                     delete config.syncManager.filters[filter];
                 }
@@ -83,6 +96,11 @@ exports.formatSyncFilters = (config) => {
     }
     return config;
 };
+/**
+ * @description Groups items based on their content type
+ * @param {Array} items - An array of SYNC API's item
+ * @returns {Object} Returns an 'object' who's keys are content type uids
+ */
 exports.groupItems = (items) => {
     const bucket = {};
     items.forEach((item) => {
@@ -98,6 +116,11 @@ exports.groupItems = (items) => {
     });
     return bucket;
 };
+/**
+ * @description Formats SYNC API's items into defined standard
+ * @param {Array} items - SYNC API's items
+ * @param {Object} config - Application config
+ */
 exports.formatItems = (items, config) => {
     items.forEach((item) => {
         switch (item.type) {
@@ -145,6 +168,11 @@ exports.formatItems = (items, config) => {
     });
     return items;
 };
+/**
+ * @description Add's checkpoint data on the last item found on the 'SYNC API items' collection
+ * @param {Object} groupedItems - Grouped items { groupItems(items) - see above } referred by their content type
+ * @param {Object} syncResponse - SYNC API's response
+ */
 exports.markCheckpoint = (groupedItems, syncResponse) => {
     const tokenName = (syncResponse.pagination_token) ? 'pagination_token' : 'sync_token';
     const tokenValue = syncResponse[tokenName];
@@ -152,6 +180,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
     if (contentTypeUids.length === 1 && contentTypeUids[0] === '_assets') {
         debug(`Only assets found in SYNC API response. Last content type is ${contentTypeUids[0]}`);
         const items = groupedItems[contentTypeUids[0]];
+        // find the last item, add checkpoint to it
         items[items.length - 1].checkpoint = {
             name: tokenName,
             token: tokenValue,
@@ -160,6 +189,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
     else if (contentTypeUids.length === 1 && contentTypeUids[0] === '_content_types') {
         debug(`Only content type events found in SYNC API response. Last content type is ${contentTypeUids[0]}`);
         const items = groupedItems[contentTypeUids[0]];
+        // find the last item, add checkpoint to it
         items[items.length - 1].checkpoint = {
             name: tokenName,
             token: tokenValue,
@@ -168,6 +198,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
     else if (contentTypeUids.length === 2 && (contentTypeUids.indexOf('_assets') !== -1 && contentTypeUids.indexOf('_content_types'))) {
         debug(`Assets & content types found found in SYNC API response. Last content type is ${contentTypeUids[1]}`);
         const items = groupedItems[contentTypeUids[1]];
+        // find the last item, add checkpoint to it
         items[items.length - 1].checkpoint = {
             name: tokenName,
             token: tokenValue,
@@ -184,6 +215,12 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
     }
     return groupedItems;
 };
+/**
+ * @description Calcuates filename for ledger and unprocessible files
+ * @param {String} file - File to be calculated on
+ * @param {Function} rotate - File rotation logic (should return a string)
+ * @returns {String} Returns path to a file
+ */
 exports.getFile = (file, rotate) => {
     return new Promise((resolve, reject) => {
         const config = index_1.getConfig();
@@ -315,6 +352,8 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
                 assetObject.download_id = url_1.parse(assetUrl).pathname.split('/').slice(4).join('/');
             }
             if (isFindNotReplace) {
+                // no point in adding an object, that has no 'url'
+                // even if the 'asset' is found, we do not know its version
                 bucket.push(assetObject);
             }
             else {
@@ -391,4 +430,16 @@ exports.getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotReplac
         return bucket;
     }
     return entry;
+};
+exports.buildReferences = (schema, references = {}, parent) => {
+    for (let i = 0, l = schema.length; i < l; i++) {
+        if (schema[i] && schema[i].data_type && schema[i].data_type === 'reference') {
+            const field = ((parent) ? `${parent}.${schema[i].uid}` : schema[i].uid);
+            references[field] = schema[i].reference_to;
+        }
+        else if (schema[i] && schema[i].data_type && schema[i].data_type === 'group' && schema[i].schema) {
+            exports.buildReferences(schema[i].schema, references, ((parent) ? `${parent}.${schema[i].uid}` : schema[i].uid));
+        }
+    }
+    return references;
 };
