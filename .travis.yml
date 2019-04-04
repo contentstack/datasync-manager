@@ -13,4 +13,3 @@ before_script:
   - npm run build-ts
 script:
   - npm run test
-services: mongodb

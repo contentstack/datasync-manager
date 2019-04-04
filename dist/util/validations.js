@@ -6,6 +6,10 @@
 */
 Object.defineProperty(exports, "__esModule", { value: true });
 const lodash_1 = require("lodash");
+/**
+ * @description Check's if the application's config is enough to start the app without errors
+ * @param {Object} config - Application config
+ */
 exports.validateConfig = (config) => {
     const keys = ['listener', 'assetStore', 'contentStore', 'syncManager', 'contentstack',
         'locales',
@@ -24,6 +28,12 @@ exports.validateConfig = (config) => {
         }
     }
 };
+/**
+ * @description Validates registered instances
+ * @param {Object} assetStore - Asset store instance
+ * @param {Object} contentStore - Content store instance
+ * @param {Object} listener - Listener instance
+ */
 exports.validateInstances = (assetStore, contentStore, listener) => {
     if (typeof assetStore === 'undefined') {
         throw new Error('Call \'setAssetStore()\' before calling sync-manager start!');
@@ -42,6 +52,10 @@ exports.validateInstances = (assetStore, contentStore, listener) => {
         throw new Error('Connector and listener instances should have \'start()\' method');
     }
 };
+/**
+ * @description Validates if the registered content store supports required methods
+ * @param {Object} instance - Content store instance
+ */
 exports.validateContentConnector = (instance) => {
     const fns = ['publish', 'unpublish', 'delete'];
     fns.forEach((fn) => {
@@ -50,6 +64,10 @@ exports.validateContentConnector = (instance) => {
         }
     });
 };
+/**
+ * @description Validates if the registered asset store supports required methods
+ * @param {Object} instance - Asset store instance
+ */
 exports.validateAssetConnector = (instance) => {
     const fns = ['delete', 'download', 'unpublish'];
     fns.forEach((fn) => {
@@ -58,6 +76,10 @@ exports.validateAssetConnector = (instance) => {
         }
     });
 };
+/**
+ * @description Validates if the registered listener supports required methods
+ * @param {Object} instance - Listener instance
+ */
 exports.validateListener = (instance) => {
     const fns = ['register'];
     fns.forEach((fn) => {
@@ -66,6 +88,10 @@ exports.validateListener = (instance) => {
         }
     });
 };
+/**
+ * @description Validates if the custom logger set supports required methods
+ * @param {Object} instance - Custom logger instance
+ */
 exports.validateLogger = (instance) => {
     let flag = false;
     if (!instance) {

@@ -15,6 +15,11 @@ const path_1 = require("path");
 const logger_1 = require("../util/logger");
 const debug = debug_1.default('plugins');
 const pluginMethods = ['beforeSync', 'afterSync'];
+/**
+ * @description Load registered plugins
+ * @param {Object} config - Application config
+ * @returns {Object} pluginInstance - An instance of plugins, with valid registered methods
+ */
 exports.load = (config) => {
     debug('Plugins load called');
     const pluginInstances = {};
@@ -22,6 +27,8 @@ exports.load = (config) => {
     pluginMethods.forEach((pluginMethod) => {
         pluginInstances[pluginMethod] = pluginInstances[pluginMethod] || [];
     });
+    // load internal plugins
+    // external plugins
     for (const pluginName of Object.keys(plugins)) {
         const pluginPath = path_1.resolve(path_1.join(config.paths.plugin, pluginName, 'index.js'));
         if (fs_1.existsSync(pluginPath)) {
