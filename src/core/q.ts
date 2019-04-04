@@ -221,6 +221,9 @@ export class Q extends EventEmitter {
   }
 
   private reStructureAssetObjects(asset, locale) {
+    // add locale key to inside of asset
+    asset.locale = locale
+
     return {
       content_type_uid: '_assets',
       data: asset,
