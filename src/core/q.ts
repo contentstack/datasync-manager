@@ -168,7 +168,7 @@ export class Q extends EventEmitter {
       const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1
       if (isEntry) {
         data.data = buildContentReferences(data.content_type.schema, data.data)
-        data.content_type.references = buildReferences(data.content_type)
+        data.content_type.references = buildReferences(data.content_type.schema)
       }
 
       if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {

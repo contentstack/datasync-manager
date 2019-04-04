@@ -31,7 +31,6 @@ exports.getToken = () => {
         try {
             const config = __1.getConfig();
             const checkpoint = config.paths.checkpoint;
-            console.error('@checkpoint', checkpoint);
             const token = config.paths.token;
             if (fs_1.existsSync(checkpoint)) {
                 debug(`Checkpoint read: ${checkpoint}`);

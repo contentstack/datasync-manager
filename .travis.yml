@@ -4,8 +4,6 @@ node_js:
   - "10"
 before_install:
   - node -v
-  - $SHELL --version 2> /dev/null || dpkg -s $SHELL 2> /dev/null || which $SHELL
-  - nvm --version
   - nvm install
 install:
   - npm install
