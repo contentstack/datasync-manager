@@ -1,7 +1,7 @@
 module.exports = {
   contentstack: {
-    apiKey: '***REMOVED***',
-    deliveryToken: '***REMOVED***'
+    apiKey: '',
+    deliveryToken: ''
   },
   plugins: {
     sitemap: {
