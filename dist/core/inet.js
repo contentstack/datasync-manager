@@ -8,19 +8,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+const debug_1 = __importDefault(require("debug"));
 const dns_socket_1 = __importDefault(require("dns-socket"));
 const events_1 = require("events");
 const index_1 = require("../index");
 const index_2 = require("./index");
+const logger_1 = require("../util/logger");
 const emitter = new events_1.EventEmitter();
+const debug = debug_1.default('inet');
 let iLock = false;
-let socket, sm, query, port, dns, currentTimeout;
+let sm, query, port, dns, currentTimeout;
 exports.init = () => {
     sm = index_1.getConfig().syncManager;
-    socket = dns_socket_1.default({
-        retries: sm.inet.retries,
-        timeout: sm.inet.timeout
-    });
     query = {
         questions: [
             {
@@ -32,21 +31,36 @@ exports.init = () => {
     port = sm.inet.port;
     dns = sm.inet.dns;
     currentTimeout = sm.inet.retryTimeout;
+    debug(`inet initiated - waiting ${currentTimeout} before checking connectivity.`);
     // start checking for net connectivity, 30 seconds after the app has started
-    setTimeout(exports.checkNetConnectivity, 30 * 1000);
+    setTimeout(exports.checkNetConnectivity, currentTimeout);
 };
 exports.checkNetConnectivity = () => {
-    socket.query(query, port, dns, (err) => {
+    const socket = dns_socket_1.default({
+        retries: sm.inet.retries,
+        timeout: sm.inet.timeout
+    });
+    debug('checking network connectivity');
+    return socket.query(query, port, dns, (err) => {
         if (err) {
+            debug(`errorred.. ${err}`);
             index_2.lock();
             iLock = true;
-            emitter.emit('disconnected', currentTimeout += sm.inet.retryIncrement);
+            return socket.destroy(() => {
+                debug('socket destroyed');
+                emitter.emit('disconnected', currentTimeout += sm.inet.retryIncrement);
+                return;
+            });
         }
         else if (iLock) {
-            emitter.emit('ok');
             index_2.unlock(true);
+            iLock = false;
         }
-        socket.destroy();
+        return socket.destroy(() => {
+            debug('socket destroyed');
+            emitter.emit('ok');
+            return;
+        });
     });
 };
 exports.netConnectivityIssues = (error) => {
@@ -60,8 +74,11 @@ exports.netConnectivityIssues = (error) => {
 };
 emitter.on('ok', () => {
     currentTimeout = sm.inet.retryTimeout;
+    debug(`pinging ${sm.inet.host} in ${sm.inet.timeout} ms`);
     setTimeout(exports.checkNetConnectivity, sm.inet.timeout);
 });
 emitter.on('disconnected', (timeout) => {
+    logger_1.logger.warn('Network disconnected');
+    debug(`pinging ${sm.inet.host} in ${timeout} ms`);
     setTimeout(exports.checkNetConnectivity, timeout);
 });
