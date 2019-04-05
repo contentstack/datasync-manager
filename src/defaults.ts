@@ -38,7 +38,7 @@ export const config = {
     inet: {
       dns: '8.8.8.8',
       host: 'contentstack.io',
-      port: 5000,
+      port: 53,
       retries: 5,
       retryTimeout: 20 * 1000,
       retryIncrement: 5 * 1000,
