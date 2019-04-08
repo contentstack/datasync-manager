@@ -19,8 +19,8 @@ describe('core-utilities', () => {
     conf.paths = buildConfigPaths()
   })
 
-  describe('format items', () => {
-    test('asset publish should work without errors', () => {
+  describe('# Format items', () => {
+    test('format items: asset publish', () => {
       const items = [
         {
           data: {
@@ -38,6 +38,7 @@ describe('core-utilities', () => {
           action: configs.contentstack.actions.publish,
           content_type_uid:  formattedAssetType,
           data: {
+            locale: 'en-us',
             publish_details: {
               locale: 'en-us',
             },
