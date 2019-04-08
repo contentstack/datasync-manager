@@ -182,9 +182,10 @@ export class Q extends EventEmitter {
         const assetBucket = []
         return map(assets, (asset) => {
           return new Promise((resolve, reject) => {
-            return this.assetStore.download(asset)
+            return this.assetStore.download(asset.data)
               .then((updatedAsset) => {
-                assetBucket.push(updatedAsset)
+                asset.data = updatedAsset
+                assetBucket.push(asset)
                 return resolve()
               })
               .catch(reject)
