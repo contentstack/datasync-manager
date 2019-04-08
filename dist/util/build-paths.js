@@ -33,10 +33,10 @@ exports.buildConfigPaths = () => {
         baseDir: path_1.resolve(path_1.join(__dirname, '..', '..')),
         plugin: path_1.resolve(path_1.join((pluginPath || baseDir), 'plugins')),
         unprocessibleDir: path_1.resolve(path_1.join(tokenPath || baseDir, 'unprocessible')),
-        failed: path_1.resolve(path_1.join(tokenPath || baseDir, '..', 'unprocessible', 'failed')),
-        filtered: path_1.resolve(path_1.join(tokenPath || baseDir, '..', 'unprocessible', 'filtered')),
-        checkpoint: path_1.resolve(path_1.join(tokenPath || baseDir, '..', '.checkpoint')), ledger: path_1.resolve(path_1.join(tokenPath || baseDir, '..', '.ledger')),
-        token: path_1.resolve(path_1.join(tokenPath || baseDir, '..', '.token'))
+        failed: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), 'unprocessible', 'failed')),
+        filtered: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), 'unprocessible', 'filtered')),
+        checkpoint: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.checkpoint')), ledger: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.ledger')),
+        token: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.token'))
     };
     return paths;
 };

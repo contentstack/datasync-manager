@@ -7,7 +7,6 @@
 import Debug from 'debug'
 import { cloneDeep, find, map, remove } from 'lodash'
 import marked from 'marked'
-import { parse } from 'url'
 import { getConfig } from '../index'
 import { existsSync, mkdirpSync, stat } from './fs'
 import { logger } from './logger'
@@ -342,14 +341,9 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
   while ((matches = regexp.exec(convertedText)) !== null) {
     if (matches && matches.length) {
       const assetObject: any = {}
-      let assetUrl = matches[0]
-      if (matches[3]) {
-        assetObject.uid = matches[3]
-      }
-      if (matches[0]) {
-        assetObject.url = assetUrl
-        assetObject.download_id = parse(assetUrl).pathname.split('/').slice(4).join('/')
-      }
+      assetObject.url = matches[0]
+      assetObject.uid = matches[3]
+      assetObject.download_id = matches[4]
 
       if (isFindNotReplace) {
         // no point in adding an object, that has no 'url'
@@ -361,9 +355,9 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
         })
         if (typeof asset !== 'undefined') {
           if (isMarkdown) {
-            parentEntry[key] = parentEntry[key].replace(assetUrl, `${encodeURI(asset.data._internal_url)}\\n`)
+            parentEntry[key] = parentEntry[key].replace(assetObject.url, `${encodeURI(asset.data._internal_url)}\\n`)
           } else {
-            parentEntry[key] = parentEntry[key].replace(assetUrl, encodeURI(asset.data._internal_url))
+            parentEntry[key] = parentEntry[key].replace(assetObject.url, encodeURI(asset.data._internal_url))
           }
         }
       }

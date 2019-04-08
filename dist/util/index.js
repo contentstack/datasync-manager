@@ -19,7 +19,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const marked_1 = __importDefault(require("marked"));
-const url_1 = require("url");
 const index_1 = require("../index");
 const fs_1 = require("./fs");
 const logger_1 = require("./logger");
@@ -345,14 +344,9 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
     while ((matches = regexp.exec(convertedText)) !== null) {
         if (matches && matches.length) {
             const assetObject = {};
-            let assetUrl = matches[0];
-            if (matches[3]) {
-                assetObject.uid = matches[3];
-            }
-            if (matches[0]) {
-                assetObject.url = assetUrl;
-                assetObject.download_id = url_1.parse(assetUrl).pathname.split('/').slice(4).join('/');
-            }
+            assetObject.url = matches[0];
+            assetObject.uid = matches[3];
+            assetObject.download_id = matches[4];
             if (isFindNotReplace) {
                 // no point in adding an object, that has no 'url'
                 // even if the 'asset' is found, we do not know its version
@@ -364,10 +358,10 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
                 });
                 if (typeof asset !== 'undefined') {
                     if (isMarkdown) {
-                        parentEntry[key] = parentEntry[key].replace(assetUrl, `${encodeURI(asset.data._internal_url)}\\n`);
+                        parentEntry[key] = parentEntry[key].replace(assetObject.url, `${encodeURI(asset.data._internal_url)}\\n`);
                     }
                     else {
-                        parentEntry[key] = parentEntry[key].replace(assetUrl, encodeURI(asset.data._internal_url));
+                        parentEntry[key] = parentEntry[key].replace(assetObject.url, encodeURI(asset.data._internal_url));
                     }
                 }
             }

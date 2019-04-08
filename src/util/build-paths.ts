@@ -34,10 +34,10 @@ export const buildConfigPaths = () => {
     baseDir: resolve(join(__dirname, '..', '..')),
     plugin: resolve(join((pluginPath || baseDir), 'plugins')),
     unprocessibleDir: resolve(join(tokenPath || baseDir, 'unprocessible')),
-    failed: resolve(join(tokenPath || baseDir, '..', 'unprocessible', 'failed')),
-    filtered: resolve(join(tokenPath || baseDir, '..', 'unprocessible', 'filtered')),
-    checkpoint: resolve(join(tokenPath || baseDir, '..', '.checkpoint')),ledger: resolve(join(tokenPath || baseDir, '..', '.ledger')),
-    token: resolve(join(tokenPath || baseDir, '..', '.token'))
+    failed: resolve(join(tokenPath || join(baseDir, '..'), 'unprocessible', 'failed')),
+    filtered: resolve(join(tokenPath || join(baseDir, '..'), 'unprocessible', 'filtered')),
+    checkpoint: resolve(join(tokenPath || join(baseDir, '..'), '.checkpoint')),ledger: resolve(join(tokenPath || join(baseDir, '..'), '.ledger')),
+    token: resolve(join(tokenPath || join(baseDir, '..'), '.token'))
   }
 
   return paths

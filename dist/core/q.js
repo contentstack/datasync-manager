@@ -166,9 +166,10 @@ class Q extends events_1.EventEmitter {
                     const assetBucket = [];
                     return promise_map_1.map(assets, (asset) => {
                         return new Promise((resolve, reject) => {
-                            return this.assetStore.download(asset)
+                            return this.assetStore.download(asset.data)
                                 .then((updatedAsset) => {
-                                assetBucket.push(updatedAsset);
+                                asset.data = updatedAsset;
+                                assetBucket.push(asset);
                                 return resolve();
                             })
                                 .catch(reject);
