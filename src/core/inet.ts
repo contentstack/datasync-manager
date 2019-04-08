@@ -8,12 +8,12 @@ import Debug from 'debug'
 import dnsSocket from 'dns-socket'
 import { EventEmitter } from 'events'
 import { getConfig } from '../index'
-import { lock, unlock } from './index'
+import { poke } from './index'
 import { logger } from '../util/logger'
 
 const emitter = new EventEmitter()
 const debug = Debug('inet')
-let iLock = false
+let disconnected = false
 let sm, query, port, dns, currentTimeout
 
 export const init = () => {
@@ -40,27 +40,21 @@ export const checkNetConnectivity = () => {
     timeout: sm.inet.timeout
   })
   debug('checking network connectivity')
-  return socket.query(query, port, dns, (err) => {
+  socket.query(query, port, dns, (err) => {
     if (err) {
       debug(`errorred.. ${err}`)
-      lock()
-      iLock = true
-      return socket.destroy(() => {
+      disconnected = true
+      socket.destroy(() => {
         debug('socket destroyed')
         emitter.emit('disconnected', currentTimeout += sm.inet.retryIncrement)
-
-        return
       })
-    } else if (iLock) {
-      unlock(true)
-      iLock = false
+    } else if (disconnected) {
+      poke()
     }
     
-    return socket.destroy(() => {
+    socket.destroy(() => {
       debug('socket destroyed')
       emitter.emit('ok')
-
-      return
     })
   })
 }

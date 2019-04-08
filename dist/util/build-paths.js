@@ -5,7 +5,6 @@
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
-const fs_1 = require("fs");
 const path_1 = require("path");
 /**
  * @description Builds application's config paths where data is stored
@@ -13,24 +12,31 @@ const path_1 = require("path");
  */
 exports.buildConfigPaths = () => {
     const baseDir = path_1.resolve(path_1.join(__dirname, '..', '..', '..', '..'));
+    let pluginPath, tokenPath;
+    if (process.env.PLUGIN_PATH) {
+        if (!path_1.isAbsolute(process.env.PLUGIN_PATH)) {
+            pluginPath = path_1.join(baseDir, process.env.PLUGIN_PATH);
+        }
+        else {
+            pluginPath = process.env.PLUGIN_PATH;
+        }
+    }
+    if (process.env.TOKEN_PATH) {
+        if (!path_1.isAbsolute(process.env.TOKEN_PATH)) {
+            tokenPath = path_1.join(baseDir, process.env.TOKEN_PATH);
+        }
+        else {
+            tokenPath = process.env.TOKEN_PATH;
+        }
+    }
     const paths = {
         baseDir: path_1.resolve(path_1.join(__dirname, '..', '..')),
-        plugin: path_1.resolve(path_1.join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
-        unprocessibleDir: path_1.resolve(path_1.join(baseDir, 'unprocessible')),
+        plugin: path_1.resolve(path_1.join((pluginPath || baseDir), 'plugins')),
+        unprocessibleDir: path_1.resolve(path_1.join(tokenPath || baseDir, 'unprocessible')),
+        failed: path_1.resolve(path_1.join(tokenPath || baseDir, '..', 'unprocessible', 'failed')),
+        filtered: path_1.resolve(path_1.join(tokenPath || baseDir, '..', 'unprocessible', 'filtered')),
+        checkpoint: path_1.resolve(path_1.join(tokenPath || baseDir, '..', '.checkpoint')), ledger: path_1.resolve(path_1.join(tokenPath || baseDir, '..', '.ledger')),
+        token: path_1.resolve(path_1.join(tokenPath || baseDir, '..', '.token'))
     };
-    if (process.env.TOKEN_PATH && process.env.TOKEN_PATH.length !== 0 && fs_1.existsSync(process.env.TOKEN_PATH)) {
-        paths.failed = path_1.resolve(path_1.join(process.env.TOKEN_PATH, 'unprocessible', 'failed'));
-        paths.filtered = path_1.resolve(path_1.join(process.env.TOKEN_PATH, 'unprocessible', 'filtered'));
-        paths.checkpoint = path_1.resolve(path_1.join(process.env.TOKEN_PATH, '.checkpoint'));
-        paths.ledger = path_1.resolve(path_1.join(process.env.TOKEN_PATH, '.ledger'));
-        paths.token = path_1.resolve(path_1.join(process.env.TOKEN_PATH, '.token'));
-    }
-    else {
-        paths.failed = path_1.resolve(path_1.join(baseDir, '..', 'unprocessible', 'failed'));
-        paths.filtered = path_1.resolve(path_1.join(baseDir, '..', 'unprocessible', 'filtered'));
-        paths.checkpoint = path_1.resolve(path_1.join(baseDir, '..', '.checkpoint'));
-        paths.ledger = path_1.resolve(path_1.join(baseDir, '..', '.ledger'));
-        paths.token = path_1.resolve(path_1.join(baseDir, '..', '.token'));
-    }
     return paths;
 };

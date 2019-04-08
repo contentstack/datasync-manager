@@ -16,7 +16,7 @@ const index_2 = require("./index");
 const logger_1 = require("../util/logger");
 const emitter = new events_1.EventEmitter();
 const debug = debug_1.default('inet');
-let iLock = false;
+let disconnected = false;
 let sm, query, port, dns, currentTimeout;
 exports.init = () => {
     sm = index_1.getConfig().syncManager;
@@ -41,25 +41,21 @@ exports.checkNetConnectivity = () => {
         timeout: sm.inet.timeout
     });
     debug('checking network connectivity');
-    return socket.query(query, port, dns, (err) => {
+    socket.query(query, port, dns, (err) => {
         if (err) {
             debug(`errorred.. ${err}`);
-            index_2.lock();
-            iLock = true;
-            return socket.destroy(() => {
+            disconnected = true;
+            socket.destroy(() => {
                 debug('socket destroyed');
                 emitter.emit('disconnected', currentTimeout += sm.inet.retryIncrement);
-                return;
             });
         }
-        else if (iLock) {
-            index_2.unlock(true);
-            iLock = false;
+        else if (disconnected) {
+            index_2.poke();
         }
-        return socket.destroy(() => {
+        socket.destroy(() => {
             debug('socket destroyed');
             emitter.emit('ok');
-            return;
         });
     });
 };

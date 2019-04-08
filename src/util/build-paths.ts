@@ -4,8 +4,7 @@
 * MIT Licensed
 */
 
-import { existsSync } from 'fs'
-import { join, resolve } from 'path'
+import { isAbsolute, join, resolve } from 'path'
 
 /**
  * @description Builds application's config paths where data is stored
@@ -13,25 +12,32 @@ import { join, resolve } from 'path'
  */
 export const buildConfigPaths = () => {
   const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
+  let pluginPath, tokenPath
+
+  if (process.env.PLUGIN_PATH) {
+    if (!isAbsolute(process.env.PLUGIN_PATH)) {
+      pluginPath = join(baseDir, process.env.PLUGIN_PATH)
+    } else {
+      pluginPath = process.env.PLUGIN_PATH
+    }
+  }
+
+  if (process.env.TOKEN_PATH) {
+    if (!isAbsolute(process.env.TOKEN_PATH)) {
+      tokenPath = join(baseDir, process.env.TOKEN_PATH)
+    } else {
+      tokenPath = process.env.TOKEN_PATH
+    }
+  }
 
   const paths: any = {
     baseDir: resolve(join(__dirname, '..', '..')),
-    plugin: resolve(join((process.env.PLUGIN_PATH || baseDir), 'plugins')),
-    unprocessibleDir: resolve(join(baseDir, 'unprocessible')),
-  }
-
-  if (process.env.TOKEN_PATH && process.env.TOKEN_PATH.length !== 0 && existsSync(process.env.TOKEN_PATH)) {
-    paths.failed = resolve(join(process.env.TOKEN_PATH, 'unprocessible', 'failed'))
-    paths.filtered = resolve(join(process.env.TOKEN_PATH, 'unprocessible', 'filtered'))
-    paths.checkpoint = resolve(join(process.env.TOKEN_PATH, '.checkpoint'))
-    paths.ledger = resolve(join(process.env.TOKEN_PATH, '.ledger'))
-    paths.token = resolve(join(process.env.TOKEN_PATH, '.token'))
-  } else {
-    paths.failed = resolve(join(baseDir, '..', 'unprocessible', 'failed'))
-    paths.filtered = resolve(join(baseDir, '..', 'unprocessible', 'filtered'))
-    paths.checkpoint = resolve(join(baseDir, '..', '.checkpoint'))
-    paths.ledger = resolve(join(baseDir, '..', '.ledger'))
-    paths.token = resolve(join(baseDir, '..', '.token'))
+    plugin: resolve(join((pluginPath || baseDir), 'plugins')),
+    unprocessibleDir: resolve(join(tokenPath || baseDir, 'unprocessible')),
+    failed: resolve(join(tokenPath || baseDir, '..', 'unprocessible', 'failed')),
+    filtered: resolve(join(tokenPath || baseDir, '..', 'unprocessible', 'filtered')),
+    checkpoint: resolve(join(tokenPath || baseDir, '..', '.checkpoint')),ledger: resolve(join(tokenPath || baseDir, '..', '.ledger')),
+    token: resolve(join(tokenPath || baseDir, '..', '.token'))
   }
 
   return paths
