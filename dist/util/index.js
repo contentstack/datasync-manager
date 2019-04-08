@@ -331,16 +331,15 @@ const update = (parent, reference, entry) => {
     }
 };
 const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) => {
-    let matches, regexp, convertedText;
+    let matches, convertedText;
     const isMarkdown = (schema.field_metadata.markdown) ? true : false;
     if (isMarkdown) {
         convertedText = marked_1.default(entry);
-        regexp = new RegExp('(https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)(?="))', 'g');
     }
     else {
         convertedText = entry;
-        regexp = new RegExp('(https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)(?="))', 'g');
     }
+    const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g');
     while ((matches = regexp.exec(convertedText)) !== null) {
         if (matches && matches.length) {
             const assetObject = {};
