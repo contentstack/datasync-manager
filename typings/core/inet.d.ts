@@ -4,5 +4,5 @@
  * MIT Licensed
  */
 export declare const init: () => void;
-export declare const checkNetConnectivity: () => any;
+export declare const checkNetConnectivity: () => void;
 export declare const netConnectivityIssues: (error: any) => boolean;

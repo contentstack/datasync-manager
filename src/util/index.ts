@@ -334,7 +334,7 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
   const isMarkdown = (schema.field_metadata.markdown) ? true: false
   if (isMarkdown) {
     convertedText = marked(entry)
-    regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)(?=")', 'g');
+    regexp = new RegExp('(https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)(?="))', 'g');
   } else {
     convertedText = entry
     regexp = new RegExp('(https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)(?="))', 'g');
