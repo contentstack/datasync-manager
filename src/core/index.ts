@@ -107,14 +107,14 @@ const check = () => {
     sync().then(() => {
       debug(`Sync completed and SQ flag updated. Cooloff duration is ${config.syncManager.cooloff}`)
 
-      return setTimeout(() => {
+      setTimeout(() => {
         flag.SQ = false
         emitter.emit('check')
       }, config.syncManager.cooloff)
     }).catch((error) => {
       logger.error(error)
 
-      return check()
+      check()
     })
   }
 }
@@ -301,7 +301,7 @@ const postProcess = (req, resp) => {
       req.qs[name] = resp[name]
 
       if (flag.lockdown) {
-        console.log('Checkpoint: lockdown has been invoked')
+        logger.log('Checkpoint: lockdown has been invoked')
         flag.requestCache = {
           params: req,
           resolve,
