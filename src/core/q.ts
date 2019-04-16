@@ -173,6 +173,7 @@ export class Q extends EventEmitter {
 
       if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
         let assets = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true)
+        
         // if no assets were found in the RTE/Markdown
         if (assets.length === 0) {
           this.exec(data, data.action)

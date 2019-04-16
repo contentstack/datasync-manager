@@ -51,6 +51,7 @@ export const checkNetConnectivity = () => {
     } else if (disconnected) {
       poke()
     }
+    disconnected = false
     
     socket.destroy(() => {
       debug('socket destroyed')
