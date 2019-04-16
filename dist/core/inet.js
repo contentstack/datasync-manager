@@ -53,6 +53,7 @@ exports.checkNetConnectivity = () => {
         else if (disconnected) {
             index_2.poke();
         }
+        disconnected = false;
         socket.destroy(() => {
             debug('socket destroyed');
             emitter.emit('ok');

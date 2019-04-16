@@ -20,11 +20,12 @@ const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const marked_1 = __importDefault(require("marked"));
 const index_1 = require("../index");
+const debug_2 = require("./debug");
 const fs_1 = require("./fs");
 const logger_1 = require("./logger");
 const unprocessible_1 = require("./unprocessible");
 const validations_1 = require("./validations");
-const debug = debug_1.default('core-utilities');
+const debug = debug_1.default('util:index');
 // const config = getConfig()
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
@@ -331,91 +332,106 @@ const update = (parent, reference, entry) => {
     }
 };
 const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) => {
-    let matches, convertedText;
-    const isMarkdown = (schema.field_metadata.markdown) ? true : false;
-    if (isMarkdown) {
-        convertedText = marked_1.default(entry);
-    }
-    else {
-        convertedText = entry;
-    }
-    const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g');
-    while ((matches = regexp.exec(convertedText)) !== null) {
-        if (matches && matches.length) {
-            const assetObject = {};
-            assetObject.url = matches[0];
-            assetObject.uid = matches[3];
-            assetObject.download_id = matches[4];
-            if (isFindNotReplace) {
-                // no point in adding an object, that has no 'url'
-                // even if the 'asset' is found, we do not know its version
-                bucket.push(assetObject);
-            }
-            else {
-                const asset = lodash_1.find(bucket, (item) => {
-                    return item.data.download_id === assetObject.download_id;
-                });
-                if (typeof asset !== 'undefined') {
-                    if (isMarkdown) {
-                        parentEntry[key] = parentEntry[key].replace(assetObject.url, `${encodeURI(asset.data._internal_url)}\\n`);
-                    }
-                    else {
-                        parentEntry[key] = parentEntry[key].replace(assetObject.url, encodeURI(asset.data._internal_url));
-                    }
-                }
-            }
-        }
-    }
-};
-const get = (parent, schema, entry, bucket, isFindNotReplace) => {
     try {
-        const len = parent.length;
-        for (let j = 0; j < len; j++) {
-            const subEntry = entry[parent[j]];
-            if (j === (len - 1) && subEntry) {
-                if (subEntry instanceof Array) {
-                    for (let i = 0, _i = subEntry.length; i < _i; i++) {
-                        findAssets(entry, parent[j], schema, subEntry[i], bucket, isFindNotReplace);
-                    }
+        let matches, convertedText;
+        const isMarkdown = (schema.field_metadata.markdown) ? true : false;
+        if (isMarkdown) {
+            convertedText = marked_1.default(entry);
+        }
+        else {
+            convertedText = entry;
+        }
+        const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g');
+        while ((matches = regexp.exec(convertedText)) !== null) {
+            if (matches && matches.length) {
+                const assetObject = {};
+                assetObject.url = matches[0];
+                assetObject.uid = matches[3];
+                assetObject.download_id = matches[4];
+                if (isFindNotReplace) {
+                    // no point in adding an object, that has no 'url'
+                    // even if the 'asset' is found, we do not know its version
+                    bucket.push(assetObject);
                 }
                 else {
-                    findAssets(entry, parent[j], schema, subEntry, bucket, isFindNotReplace);
-                }
-            }
-            else {
-                const keys = lodash_1.cloneDeep(parent).splice((j + 1), len);
-                if (subEntry instanceof Array) {
-                    for (let m = 0, _m = subEntry.length; m < _m; m++) {
-                        get(keys, schema, subEntry[m], bucket, isFindNotReplace);
+                    const asset = lodash_1.find(bucket, (item) => {
+                        return item.data.download_id === assetObject.download_id;
+                    });
+                    if (typeof asset !== 'undefined') {
+                        if (isMarkdown) {
+                            parentEntry[key] = parentEntry[key].replace(assetObject.url, `${encodeURI(asset.data._internal_url)}\\n`);
+                        }
+                        else {
+                            parentEntry[key] = parentEntry[key].replace(assetObject.url, encodeURI(asset.data._internal_url));
+                        }
                     }
-                }
-                else if (typeof subEntry !== 'object') {
-                    break;
                 }
             }
         }
     }
     catch (error) {
+        debug_2.debugErrors(`Find assets error. Input arguments are\nParent Entry: ${JSON.stringify(parentEntry)}\nKey: ${key}\nSchema: ${JSON.stringify(schema)}\nEntry: ${JSON.stringify(entry)}\nBucket: ${JSON.stringify(bucket)}`);
+        logger_1.logger.error(error);
+    }
+};
+const iterate = (schema, entry, bucket, findNoteReplace, parentKeys) => {
+    try {
+        for (let index = 0; index < parentKeys.length; index++) {
+            const parentKey = parentKeys[index];
+            const subEntry = entry[parentKey];
+            if (subEntry && !(lodash_1.isEmpty(subEntry)) && index === (parentKeys.length - 1)) {
+                if (subEntry && subEntry instanceof Array && subEntry.length) {
+                    subEntry.forEach((subEntryItem, idx) => {
+                        // tricky!
+                        if (!(lodash_1.isEmpty(subEntryItem))) {
+                            findAssets(subEntry, idx, schema, subEntryItem, bucket, findNoteReplace);
+                        }
+                        // iterate(schema, subEntryItem, bucket, findNoteReplace, parentKeys)
+                    });
+                    return;
+                }
+                else if (entry !== undefined) {
+                    findAssets(entry, parentKey, schema, subEntry, bucket, findNoteReplace);
+                    return;
+                }
+            }
+            else if (subEntry !== undefined) {
+                const subKeys = lodash_1.cloneDeep(parentKeys).splice(index);
+                if (subEntry && subEntry instanceof Array && subEntry.length) {
+                    subEntry.forEach((subEntryItem) => {
+                        iterate(schema, subEntryItem, bucket, findNoteReplace, lodash_1.cloneDeep(subKeys));
+                    });
+                    return;
+                }
+                else {
+                    iterate(schema, subEntry, bucket, findNoteReplace, subKeys);
+                    return;
+                }
+            }
+        }
+    }
+    catch (error) {
+        debug_2.debugErrors(`Iterate error. Input args were\nSchema: ${JSON.stringify(schema)}\nEntry: ${JSON.stringify(entry)}\nBucket: ${JSON.stringify(bucket)}\nParent Keys: ${JSON.stringify(parentKeys)}`);
         logger_1.logger.error(error);
     }
 };
 exports.getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotReplace, parent = []) => {
     for (let i = 0, _i = schema.length; i < _i; i++) {
-        if (schema[i].data_type === 'text' && (schema[i].field_metadata.markdown) || schema[i].field_metadata.rich_text_type) {
+        if (schema[i].data_type === 'text' && schema[i].field_metadata && (schema[i].field_metadata.allow_rich_text || schema[i].field_metadata.markdown)) {
             parent.push(schema[i].uid);
-            get(parent, schema[i], entry, bucket, isFindNotReplace);
+            iterate(schema[i], entry, bucket, isFindNotReplace, parent);
             parent.pop();
         }
         else if (schema[i].data_type === 'group') {
             parent.push(schema[i].uid);
-            entry = exports.getOrSetRTEMarkdownAssets(schema[i].schema, entry, bucket, isFindNotReplace, parent);
+            exports.getOrSetRTEMarkdownAssets(schema[i].schema, entry, bucket, isFindNotReplace, parent);
             parent.pop();
         }
         else if (schema[i].data_type === 'blocks') {
             for (let j = 0, _j = schema[i].blocks.length; j < _j; j++) {
                 parent.push(schema[i].uid);
                 parent.push(schema[i].blocks[j].uid);
-                entry = exports.getOrSetRTEMarkdownAssets(schema[i].blocks[j].schema, entry, isFindNotReplace, bucket, parent);
+                exports.getOrSetRTEMarkdownAssets(schema[i].blocks[j].schema, entry, bucket, isFindNotReplace, parent);
                 parent.pop();
                 parent.pop();
             }
