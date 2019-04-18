@@ -17,3 +17,8 @@ package-lock.json
 
 # IDE config
 .vscode
+
+# Private examples
+example
+!example/mock/**/*
+!example/index.js
