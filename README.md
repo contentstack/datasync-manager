@@ -140,6 +140,21 @@ You can replace [@contentstack/datasync-content-store-filesystem](https://www.np
         </ul>
       </td>
     </tr>
+    <tr>
+      <td>filters</td>
+      <td>
+        <ul>
+          <li>content_type_uid</li>
+          <li>locale</li>
+          <li>action</li>
+        </ul>
+      </td>
+      <td>
+        Filters allow you to narrow down the items that'd be returned by the SYNC API response.
+        Ex:
+        <code>{filters: {content_type_uid: ['blogs']}, locale: ['en-us'], action: ['publish']}</code>
+      </td>
+    </tr>
   </tbody>
 </table>
 
@@ -157,6 +172,11 @@ And here's an example to get you started:
   syncManager: {
       cooloff: 2000,
       limit: 80,
+      filters: {
+        content_type_uid: ['blogs'],
+        locale: ['es-es', 'en-us'],
+        action: ['publish', 'unpublish']
+      }
     }
   }
 }
