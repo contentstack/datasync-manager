@@ -12,6 +12,9 @@ module.exports = {
     dbName: 'markdown',
     collectionName: 'development'
   },
+  assetStore: {
+    baseDir: '_mongo_assets'
+  },
   syncManager: {
     inet: {
       dns: '8.8.8.8',
