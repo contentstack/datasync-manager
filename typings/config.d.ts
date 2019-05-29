@@ -29,6 +29,19 @@ export declare const config: {
     };
     listener: {};
     locales: any[];
+    plugins: {
+        _cs_internal_transform_entries: {
+            disabled: boolean;
+        };
+        _cs_internal_transform_assets: {
+            disabled: boolean;
+        };
+        _cs_internal_transform_schemas: {
+            disabled: boolean;
+            assets: boolean;
+            entries: boolean;
+        };
+    };
     syncManager: {
         cooloff: number;
         enableAssetReferences: boolean;

@@ -1,10 +1,11 @@
 {
   "compileOnSave": true,
   "compilerOptions": {
+    "allowJs": true,
     "alwaysStrict": true,
     "baseUrl": ".",
-    "declarationDir": "typings",
-    "declaration": true,
+    // "declarationDir": "typings",
+    // "declaration": true,
     "downlevelIteration": true,
     "experimentalDecorators": true,
     "importHelpers": false,
@@ -19,7 +20,6 @@
         "src/types/*"
       ]
     },
-
     "typeRoots": [
       "node_modules/@types"
     ],

@@ -37,7 +37,7 @@ class Q extends events_1.EventEmitter {
     constructor(contentStore, assetStore, config) {
         if (!instance && contentStore && assetStore && config) {
             super();
-            this.detectRteMarkdownAssets = (config.contentStore && typeof config.contentStore.enableRteMarkdownDownload === 'boolean') ? config.contentStore.enableRteMarkdownDownload : true;
+            this.downloadEmbeddedAssets = (config.contentStore && typeof config.contentStore.enableRteMarkdownDownload === 'boolean') ? config.contentStore.enableRteMarkdownDownload : true;
             this.pluginInstances = plugins_1.load(config);
             this.contentStore = contentStore;
             this.assetStore = assetStore;
@@ -73,35 +73,29 @@ class Q extends events_1.EventEmitter {
      */
     errorHandler(obj) {
         notify('error', obj);
-        const self = this;
         logger_1.logger.error(obj);
         debug(`Error handler called with ${JSON.stringify(obj)}`);
         if (obj.data.checkpoint) {
             return token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
-                unprocessible_1.saveFailedItems(obj).then(() => {
-                    self.inProgress = false;
-                    self.emit('next');
-                }).catch((error) => {
-                    debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`);
-                    self.inProgress = false;
-                    // fatal error
-                    self.emit('next');
+                return unprocessible_1.saveFailedItems(obj).then(() => {
+                    this.inProgress = false;
+                    this.emit('next');
                 });
             }).catch((error) => {
                 logger_1.logger.error('Errorred while saving token');
                 logger_1.logger.error(error);
-                self.inProgress = false;
-                self.emit('next');
+                this.inProgress = false;
+                this.emit('next');
             });
         }
         return unprocessible_1.saveFailedItems(obj).then(() => {
-            self.inProgress = false;
-            self.emit('next');
+            this.inProgress = false;
+            this.emit('next');
         }).catch((error) => {
             logger_1.logger.error('Errorred while saving failed items');
             logger_1.logger.error(error);
-            self.inProgress = false;
-            self.emit('next');
+            this.inProgress = false;
+            this.emit('next');
         });
     }
     /**
@@ -139,23 +133,11 @@ class Q extends events_1.EventEmitter {
      * @param {Object} data - Current processing item
      */
     process(data) {
-        const { content_type_uid, uid } = data;
-        if (content_type_uid === '_content_types') {
-            logger_1.logger.log(`${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', uid: '${uid}'}`);
-        }
-        else {
-            const { locale } = data;
-            logger_1.logger.log(`${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`);
-        }
+        logger_1.logger.log(`${data.action.toUpperCase()}ING: { content_type: '${data.content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'}`);
         notify(data.action, data);
         switch (data.action) {
             case 'publish':
-                const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1;
-                if (isEntry) {
-                    data.data = index_1.buildContentReferences(data.content_type.schema, data.data);
-                    data.content_type.references = index_1.buildReferences(data.content_type.schema);
-                }
-                if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
+                if (data.content_type_uid !== '_assets' && this.downloadEmbeddedAssets && (!data.pre_processed)) {
                     let assets = index_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
                     // if no assets were found in the RTE/Markdown
                     if (assets.length === 0) {
@@ -178,6 +160,7 @@ class Q extends events_1.EventEmitter {
                         .then(() => {
                         data.data = index_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assetBucket, false);
                         data.pre_processed = true;
+                        // putting the entry back inside
                         this.q.unshift(data);
                         assetBucket.forEach((asset) => {
                             if (asset && typeof asset === 'object' && asset.data) {
@@ -224,46 +207,50 @@ class Q extends events_1.EventEmitter {
      * @returns {Promise} Returns promise
      */
     exec(data, action) {
-        const self = this;
         try {
-            debug(`Exec called. Action is ${action}`);
-            const beforeSyncPlugins = [];
-            const clonedData = lodash_1.cloneDeep(data);
-            this.pluginInstances.beforeSync.forEach((method) => {
-                beforeSyncPlugins.push(method(data, action));
+            debug(`Exec: ${action}`);
+            const beforeSyncInternalPlugins = [];
+            this.pluginInstances.internal.beforeSync.forEach((method) => {
+                beforeSyncInternalPlugins.push(method(data, action));
             });
-            Promise.all(beforeSyncPlugins)
+            // cloned after transformations
+            const clonedData = lodash_1.cloneDeep(data);
+            Promise.all(beforeSyncInternalPlugins)
+                .then(() => {
+                // re-initializing everytime with const.. avoids memory leaks
+                const beforeSyncPlugins = [];
+                this.pluginInstances.external.beforeSync.forEach((method) => {
+                    beforeSyncPlugins.push(method(clonedData, action));
+                });
+                return Promise.all(beforeSyncPlugins);
+            })
                 .then(() => {
                 debug('Before action plugins executed successfully!');
-                return self.contentStore[action](clonedData);
-            }).then(() => {
+                return this.contentStore[action](clonedData);
+            })
+                .then(() => {
                 debug('Connector instance called successfully!');
                 const afterSyncPlugins = [];
-                self.pluginInstances.afterSync.forEach((method) => {
+                this.pluginInstances.external.afterSync.forEach((method) => {
                     afterSyncPlugins.push(method(clonedData));
                 });
                 return Promise.all(afterSyncPlugins);
-            }).then(() => {
+            })
+                .then(() => {
                 debug('After action plugins executed successfully!');
-                const { content_type_uid, uid } = data;
-                if (content_type_uid === '_content_types') {
-                    logger_1.logger.log(`${action.toUpperCase()}ED: { content_type: '${content_type_uid}', uid: '${uid}'}`);
-                }
-                else {
-                    const { locale } = data;
-                    logger_1.logger.log(`${action.toUpperCase()}ED: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`);
-                }
-                self.inProgress = false;
-                self.emit('next', data);
-            }).catch((error) => {
-                self.emit('error', {
+                logger_1.logger.log(`${action.toUpperCase()}ING: { content_type: '${data.content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'}`);
+                this.inProgress = false;
+                this.emit('next', data);
+            })
+                .catch((error) => {
+                this.emit('error', {
                     data,
                     error,
                 });
             });
         }
         catch (error) {
-            self.emit('error', {
+            this.emit('error', {
                 data,
                 error,
             });

@@ -20,17 +20,14 @@ const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const marked_1 = __importDefault(require("marked"));
 const index_1 = require("../index");
-const debug_2 = require("./debug");
 const fs_1 = require("./fs");
 const logger_1 = require("./logger");
 const unprocessible_1 = require("./unprocessible");
 const validations_1 = require("./validations");
 const debug = debug_1.default('util:index');
-// const config = getConfig()
 const formattedAssetType = '_assets';
 const formattedContentType = '_content_types';
 const assetType = 'sys_assets';
-// marked.setOptions(config.syncManager.markdown)
 /**
  * @description Utility that filters items based on 'locale'.
  * @param {Object} response - SYNC API's response
@@ -122,12 +119,16 @@ exports.groupItems = (items) => {
  * @param {Object} config - Application config
  */
 exports.formatItems = (items, config) => {
+    const time = new Date().toISOString();
     items.forEach((item) => {
         switch (item.type) {
             case 'asset_published':
                 item.content_type_uid = formattedAssetType;
                 item.action = config.contentstack.actions.publish;
                 item.locale = item.data.publish_details.locale;
+                // extra keys
+                item.event_at = item.data.publish_details.time;
+                item.synced_at = time;
                 // add locale key into asset.data
                 item.data.locale = item.locale;
                 item.uid = item.data.uid;
@@ -148,6 +149,9 @@ exports.formatItems = (items, config) => {
                 item.action = config.contentstack.actions.publish;
                 item.locale = item.data.publish_details.locale;
                 item.uid = item.data.uid;
+                // extra keys
+                item.event_at = item.data.publish_details.time;
+                item.synced_at = time;
                 break;
             case 'entry_unpublished':
                 item.action = config.contentstack.actions.unpublish;
@@ -248,89 +252,6 @@ exports.getFile = (file, rotate) => {
         }
     });
 };
-exports.buildContentReferences = (schema, entry, parent = []) => {
-    const config = index_1.getConfig();
-    const enableAssetReferences = config.syncManager.enableAssetReferences;
-    const enableContentReferences = config.syncManager.enableContentReferences;
-    for (let i = 0, c = schema.length; i < c; i++) {
-        switch (schema[i].data_type) {
-            case 'reference':
-                if (enableAssetReferences) {
-                    parent.push(schema[i].uid);
-                    update(parent, schema[i].reference_to, entry);
-                    parent.pop();
-                }
-                break;
-            case 'file':
-                if (enableContentReferences) {
-                    parent.push(schema[i].uid);
-                    update(parent, '_assets', entry);
-                    parent.pop();
-                }
-                break;
-            case 'group':
-                parent.push(schema[i].uid);
-                exports.buildContentReferences(schema[i].schema, entry, parent);
-                parent.pop();
-                break;
-            case 'blocks':
-                for (let j = 0, d = schema[i].blocks.length; j < d; j++) {
-                    parent.push(schema[i].uid);
-                    parent.push(schema[i].blocks[j].uid);
-                    exports.buildContentReferences(schema[i].blocks[j].schema, entry, parent);
-                    parent.pop();
-                    parent.pop();
-                }
-                break;
-        }
-    }
-    return entry;
-};
-const update = (parent, reference, entry) => {
-    const len = parent.length;
-    for (let j = 0; j < len; j++) {
-        if (entry && parent[j]) {
-            if (j === (len - 1) && entry[parent[j]]) {
-                if (reference !== '_assets') {
-                    entry[parent[j]] = {
-                        reference_to: reference,
-                        values: entry[parent[j]],
-                    };
-                }
-                else {
-                    if (Array.isArray(entry[parent[j]])) {
-                        const assetIds = [];
-                        for (let k = 0; k < entry[parent[j]].length; k++) {
-                            assetIds.push(entry[parent[j]][k]);
-                        }
-                        entry[parent[j]] = {
-                            reference_to: reference,
-                            values: assetIds,
-                        };
-                    }
-                    else {
-                        entry[parent[j]] = {
-                            reference_to: reference,
-                            values: entry[parent[j]],
-                        };
-                    }
-                }
-            }
-            else {
-                entry = entry[parent[j]];
-                const keys = lodash_1.cloneDeep(parent).splice((j + 1), len);
-                if (Array.isArray(entry)) {
-                    for (let i = 0, l = entry.length; i < l; i++) {
-                        update(keys, reference, entry[i]);
-                    }
-                }
-                else if (typeof entry !== 'object') {
-                    break;
-                }
-            }
-        }
-    }
-};
 const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) => {
     try {
         let matches, convertedText;
@@ -370,7 +291,6 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
         }
     }
     catch (error) {
-        debug_2.debugErrors(`Find assets error. Input arguments are\nParent Entry: ${JSON.stringify(parentEntry)}\nKey: ${key}\nSchema: ${JSON.stringify(schema)}\nEntry: ${JSON.stringify(entry)}\nBucket: ${JSON.stringify(bucket)}`);
         logger_1.logger.error(error);
     }
 };
@@ -411,7 +331,6 @@ const iterate = (schema, entry, bucket, findNoteReplace, parentKeys) => {
         }
     }
     catch (error) {
-        debug_2.debugErrors(`Iterate error. Input args were\nSchema: ${JSON.stringify(schema)}\nEntry: ${JSON.stringify(entry)}\nBucket: ${JSON.stringify(bucket)}\nParent Keys: ${JSON.stringify(parentKeys)}`);
         logger_1.logger.error(error);
     }
 };
@@ -441,16 +360,4 @@ exports.getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotReplac
         return bucket;
     }
     return entry;
-};
-exports.buildReferences = (schema, references = {}, parent) => {
-    for (let i = 0, l = schema.length; i < l; i++) {
-        if (schema[i] && schema[i].data_type && schema[i].data_type === 'reference') {
-            const field = ((parent) ? `${parent}.${schema[i].uid}` : schema[i].uid);
-            references[field] = schema[i].reference_to;
-        }
-        else if (schema[i] && schema[i].data_type && schema[i].data_type === 'group' && schema[i].schema) {
-            exports.buildReferences(schema[i].schema, references, ((parent) ? `${parent}.${schema[i].uid}` : schema[i].uid));
-        }
-    }
-    return references;
 };

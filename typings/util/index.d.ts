@@ -36,6 +36,4 @@ export declare const markCheckpoint: (groupedItems: any, syncResponse: any) => a
  * @returns {String} Returns path to a file
  */
 export declare const getFile: (file: any, rotate: any) => Promise<{}>;
-export declare const buildContentReferences: (schema: any[], entry: any, parent?: string[]) => any;
 export declare const getOrSetRTEMarkdownAssets: (schema: any, entry: any, bucket: any[], isFindNotReplace: any, parent?: any[]) => any;
-export declare const buildReferences: (schema: any, references?: {}, parent?: any) => {};

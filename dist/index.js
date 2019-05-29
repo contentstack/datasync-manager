@@ -15,7 +15,7 @@ const inet_1 = require("./core/inet");
 const process_1 = require("./core/process");
 const q_1 = require("./core/q");
 exports.notifications = q_1.notifications;
-const defaults_1 = require("./defaults");
+const config_1 = require("./config");
 const build_paths_1 = require("./util/build-paths");
 const index_1 = require("./util/index");
 const logger_1 = require("./util/logger");
@@ -93,7 +93,7 @@ exports.start = (config = {}) => {
     return new Promise((resolve, reject) => {
         try {
             validations_1.validateInstances(assetStore, contentStore, listener);
-            appConfig = lodash_1.merge({}, defaults_1.config, appConfig, config);
+            appConfig = lodash_1.merge({}, config_1.config, appConfig, config);
             validations_1.validateConfig(appConfig);
             appConfig.paths = build_paths_1.buildConfigPaths();
             // since logger is singleton, if previously set, it'll return that isnstance!

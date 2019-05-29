@@ -13,7 +13,7 @@ declare const notifications: EventEmitter;
  */
 export declare class Q extends EventEmitter {
     private config;
-    private detectRteMarkdownAssets;
+    private downloadEmbeddedAssets;
     private iLock;
     private inProgress;
     private pluginInstances;

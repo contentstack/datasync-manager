@@ -7,7 +7,7 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep } from 'lodash'
-import { buildReferences, buildContentReferences, getOrSetRTEMarkdownAssets } from '../util/index'
+import { getOrSetRTEMarkdownAssets } from '../util/index'
 import { lock, unlock } from '.'
 import { logger } from '../util/logger'
 import { map } from '../util/promise.map'
@@ -27,7 +27,7 @@ let instance = null
  */
 export class Q extends EventEmitter {
   private config: any
-  private detectRteMarkdownAssets: any
+  private downloadEmbeddedAssets: any
   private iLock: boolean
   private inProgress: boolean
   private pluginInstances: any
@@ -44,7 +44,7 @@ export class Q extends EventEmitter {
   constructor(contentStore, assetStore, config) {
     if (!instance && contentStore && assetStore && config) {
       super()
-      this.detectRteMarkdownAssets = (config.contentStore && typeof config.contentStore.enableRteMarkdownDownload === 'boolean') ? config.contentStore.enableRteMarkdownDownload: true
+      this.downloadEmbeddedAssets = (config.contentStore && typeof config.contentStore.enableRteMarkdownDownload === 'boolean') ? config.contentStore.enableRteMarkdownDownload: true
       this.pluginInstances = load(config)
       this.contentStore = contentStore
       this.assetStore = assetStore
@@ -83,36 +83,30 @@ export class Q extends EventEmitter {
    */
   public errorHandler(obj) {
     notify('error', obj)
-    const self = this
     logger.error(obj)
     debug(`Error handler called with ${JSON.stringify(obj)}`)
     if (obj.data.checkpoint) {
       return saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
-        saveFailedItems(obj).then(() => {
-          self.inProgress = false
-          self.emit('next')
-        }).catch((error) => {
-          debug(`Save failed items failed after saving token!\n${JSON.stringify(error)}`)
-          self.inProgress = false
-          // fatal error
-          self.emit('next')
+        return saveFailedItems(obj).then(() => {
+          this.inProgress = false
+          this.emit('next')
         })
       }).catch((error) => {
         logger.error('Errorred while saving token')
         logger.error(error)
-        self.inProgress = false
-        self.emit('next')
+        this.inProgress = false
+        this.emit('next')
       })
     }
 
     return saveFailedItems(obj).then(() => {
-      self.inProgress = false
-      self.emit('next')
+      this.inProgress = false
+      this.emit('next')
     }).catch((error) => {
       logger.error('Errorred while saving failed items')
       logger.error(error)
-      self.inProgress = false
-      self.emit('next')
+      this.inProgress = false
+      this.emit('next')
     })
   }
 
@@ -152,26 +146,13 @@ export class Q extends EventEmitter {
    * @param {Object} data - Current processing item
    */
   private process(data) {
-    const { content_type_uid, uid } = data
-    if (content_type_uid === '_content_types') {
-      logger.log(
-        `${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', uid: '${uid}'}`)
-    } else {
-      const { locale } = data
-      logger.log(
-        `${data.action.toUpperCase()}ING: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`)
-    }
+    logger.log(
+      `${data.action.toUpperCase()}ING: { content_type: '${data.content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'}`)
 
     notify(data.action, data)
     switch (data.action) {
     case 'publish':
-      const isEntry = ['_assets', '_content_types'].indexOf(data.content_type_uid) === -1
-      if (isEntry) {
-        data.data = buildContentReferences(data.content_type.schema, data.data)
-        data.content_type.references = buildReferences(data.content_type.schema)
-      }
-
-      if (isEntry && this.detectRteMarkdownAssets && (!data.pre_processed)) {
+      if (data.content_type_uid !== '_assets' && this.downloadEmbeddedAssets && (!data.pre_processed)) {
         let assets = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true)
         
         // if no assets were found in the RTE/Markdown
@@ -195,6 +176,7 @@ export class Q extends EventEmitter {
         .then(() => {
           data.data = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assetBucket, false)
           data.pre_processed = true
+          // putting the entry back inside
           this.q.unshift(data)
           assetBucket.forEach((asset) => {
             if (asset && typeof asset === 'object' && asset.data) {
@@ -244,49 +226,55 @@ export class Q extends EventEmitter {
    * @returns {Promise} Returns promise
    */
   private exec(data, action) {
-    const self = this
     try {
-      debug(`Exec called. Action is ${action}`)
-      const beforeSyncPlugins = []
+      debug(`Exec: ${action}`)
+      const beforeSyncInternalPlugins = []
+
+      this.pluginInstances.internal.beforeSync.forEach((method) => {
+        beforeSyncInternalPlugins.push(method(data, action))
+      })
+      // cloned after transformations
       const clonedData = cloneDeep(data)
-      this.pluginInstances.beforeSync.forEach((method) => {
-        beforeSyncPlugins.push(method(data, action))
-      })
 
-      Promise.all(beforeSyncPlugins)
-      .then(() => {
-        debug('Before action plugins executed successfully!')
+      Promise.all(beforeSyncInternalPlugins)
+        .then(() => {
+          // re-initializing everytime with const.. avoids memory leaks
+          const beforeSyncPlugins = []
+          this.pluginInstances.external.beforeSync.forEach((method) => {
+            beforeSyncPlugins.push(method(clonedData, action))
+          })
 
-        return self.contentStore[action](clonedData)
-      }).then(() => {
-        debug('Connector instance called successfully!')
-        const afterSyncPlugins = []
-        self.pluginInstances.afterSync.forEach((method) => {
-          afterSyncPlugins.push(method(clonedData))
+          return Promise.all(beforeSyncPlugins)
         })
+        .then(() => {
+          debug('Before action plugins executed successfully!')
 
-        return Promise.all(afterSyncPlugins)
-      }).then(() => {
-        debug('After action plugins executed successfully!')
-        const { content_type_uid, uid } = data
-        if (content_type_uid === '_content_types') {
-          logger.log(
-            `${action.toUpperCase()}ED: { content_type: '${content_type_uid}', uid: '${uid}'}`)
-        } else {
-          const { locale } = data
-          logger.log(
-            `${action.toUpperCase()}ED: { content_type: '${content_type_uid}', locale: '${locale}', uid: '${uid}'}`)
-        }
-        self.inProgress = false
-        self.emit('next', data)
-      }).catch((error) => {
-        self.emit('error', {
-          data,
-          error,
+          return this.contentStore[action](clonedData)
         })
-      })
+        .then(() => {
+          debug('Connector instance called successfully!')
+          const afterSyncPlugins = []
+          this.pluginInstances.external.afterSync.forEach((method) => {
+            afterSyncPlugins.push(method(clonedData))
+          })
+
+          return Promise.all(afterSyncPlugins)
+        })
+        .then(() => {
+          debug('After action plugins executed successfully!')
+          logger.log(
+            `${action.toUpperCase()}ING: { content_type: '${data.content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'}`)
+          this.inProgress = false
+          this.emit('next', data)
+        })
+        .catch((error) => {
+          this.emit('error', {
+            data,
+            error,
+          })
+        })
     } catch (error) {
-      self.emit('error', {
+      this.emit('error', {
         data,
         error,
       })

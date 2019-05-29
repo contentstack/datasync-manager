@@ -44,7 +44,7 @@ export const checkNetConnectivity = () => {
     if (err) {
       debug(`errorred.. ${err}`)
       disconnected = true
-      socket.destroy(() => {
+      return socket.destroy(() => {
         debug('socket destroyed')
         emitter.emit('disconnected', currentTimeout += sm.inet.retryIncrement)
       })
@@ -53,7 +53,7 @@ export const checkNetConnectivity = () => {
     }
     disconnected = false
     
-    socket.destroy(() => {
+    return socket.destroy(() => {
       debug('socket destroyed')
       emitter.emit('ok')
     })

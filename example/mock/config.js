@@ -9,7 +9,7 @@ module.exports = {
     }
   },
   contentStore: {
-    dbName: 'markdown',
+    dbName: 'references',
     collectionName: 'development'
   },
   assetStore: {

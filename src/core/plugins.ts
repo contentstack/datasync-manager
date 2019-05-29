@@ -20,24 +20,42 @@ const pluginMethods = ['beforeSync', 'afterSync']
  */
 export const load = (config) => {
   debug('Plugins load called')
-  const pluginInstances = {}
+  const pluginInstances = {
+    internal: {},
+    external: {}
+  }
   const plugins = config.plugins || {}
   pluginMethods.forEach((pluginMethod) => {
-    pluginInstances[pluginMethod] = pluginInstances[pluginMethod] || []
+    pluginInstances.external[pluginMethod] = pluginInstances[pluginMethod] || []
+    pluginInstances.internal[pluginMethod] = pluginInstances[pluginMethod] || []
   })
 
-  // load internal plugins
-
-  // external plugins
   for (const pluginName of Object.keys(plugins)) {
-    const pluginPath = resolve(join(config.paths.plugin, pluginName, 'index.js'))
+    const slicedName = pluginName.slice(0, 13)
+    let pluginPath
+    if (slicedName === '_cs_internal_') {
+      // load internal plugins
+      pluginPath = join(__dirname, '..', 'plugins', pluginName.slice(13), 'index.js')
+    } else {
+      // external plugins
+      pluginPath = resolve(join(config.paths.plugin, pluginName, 'index.js'))
+    }
+
     if (existsSync(pluginPath)) {
       const Plugin = require(pluginPath)
       const pluginConfig = plugins[pluginName]
+      // execute/initiate plugin
       Plugin(pluginConfig)
+      
       pluginMethods.forEach((pluginMethod) => {
         if (hasIn(Plugin, pluginMethod)) {
-          pluginInstances[pluginMethod].push(Plugin[pluginMethod])
+          if (slicedName === '_cs_internal_') {
+            if (!(pluginConfig.disabled)) {
+              pluginInstances.internal[pluginMethod].push(Plugin[pluginMethod])
+            }
+          } else {
+            pluginInstances.external[pluginMethod].push(Plugin[pluginMethod])
+          }
           debug(`${pluginMethod} loaded from ${pluginName} successfully!`)
         } else {
           debug(`${pluginMethod} not found in ${pluginName}`)

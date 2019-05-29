@@ -45,7 +45,7 @@ exports.checkNetConnectivity = () => {
         if (err) {
             debug(`errorred.. ${err}`);
             disconnected = true;
-            socket.destroy(() => {
+            return socket.destroy(() => {
                 debug('socket destroyed');
                 emitter.emit('disconnected', currentTimeout += sm.inet.retryIncrement);
             });
@@ -54,7 +54,7 @@ exports.checkNetConnectivity = () => {
             index_2.poke();
         }
         disconnected = false;
-        socket.destroy(() => {
+        return socket.destroy(() => {
             debug('socket destroyed');
             emitter.emit('ok');
         });
