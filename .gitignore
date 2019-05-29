@@ -4,6 +4,7 @@
 .checkpoint
 _contents
 unprocessible
+_mongo_assets
 
 # IDE config
 .vscode
