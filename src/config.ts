@@ -30,6 +30,22 @@ export const config = {
   },
   listener: {},
   locales: [],
+  plugins: {
+    _cs_internal_transform_entries: {
+      disabled: false,
+      // other overrides...
+    },
+    _cs_internal_transform_assets: {
+      disabled: false,
+      // other overrides...
+    },
+    _cs_internal_transform_schemas: {
+      disabled: false,
+      logAssetPaths: true,
+      logReferencePaths: true,
+      // other overrides...
+    },
+  },
   syncManager: {
     cooloff: 3000,
     enableAssetReferences: true,
@@ -38,6 +54,7 @@ export const config = {
     inet: {
       dns: '8.8.8.8',
       host: 'contentstack.io',
+      // DNS port
       port: 53,
       retries: 5,
       retryTimeout: 20 * 1000,

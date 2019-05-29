@@ -5,7 +5,7 @@
 * MIT Licensed
 */
 
-import { getConfig } from '../'
+import { getConfig } from '../index'
 import { getFile } from './index'
 import { existsSync, readFile, writeFile } from './fs'
 import { logger } from './logger'

@@ -14,8 +14,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const __1 = require("../");
-const index_1 = require("./index");
+const index_1 = require("../index");
+const index_2 = require("./index");
 const fs_1 = require("./fs");
 const logger_1 = require("./logger");
 const counter = {
@@ -45,7 +45,7 @@ exports.saveFailedItems = (obj) => {
 exports.saveFilteredItems = (items, name, token) => {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
         try {
-            const config = __1.getConfig();
+            const config = index_1.getConfig();
             if (!config.syncManager.saveFilteredItems) {
                 return resolve();
             }
@@ -62,7 +62,7 @@ exports.saveFilteredItems = (items, name, token) => {
             else {
                 filename = `${config.paths.filtered}-${counter.filtered}.json`;
             }
-            const file = yield index_1.getFile(filename, () => {
+            const file = yield index_2.getFile(filename, () => {
                 counter.filtered++;
                 return `${config.paths.filtered}-${counter.filtered}.json`;
             });
