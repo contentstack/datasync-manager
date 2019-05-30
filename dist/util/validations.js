@@ -88,6 +88,21 @@ exports.validateListener = (instance) => {
         }
     });
 };
+exports.validateExternalInput = (data) => {
+    if (typeof data._content_type_uid !== 'string' || data._content_type_uid.length === 0) {
+        throw new Error('data._content_type_uid should be of type string and not empty!');
+    }
+    if (typeof data.uid !== 'string' || data.uid.length === 0) {
+        throw new Error('data.uid should be of type string and not empty!');
+    }
+    if (typeof data.locale !== 'string' || data.locale.length === 0) {
+        throw new Error('data.locale should be of type string and not empty!');
+    }
+    if (!(lodash_1.isPlainObject(data.data)) || lodash_1.isEmpty(data.data)) {
+        throw new Error('data.data should be of type object and not empty!');
+    }
+    return data;
+};
 /**
  * @description Validates if the custom logger set supports required methods
  * @param {Object} instance - Custom logger instance

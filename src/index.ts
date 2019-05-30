@@ -9,7 +9,7 @@ import { merge } from 'lodash'
 import { init, poke } from './core'
 import { init as pinger } from './core/inet'
 import { configure } from './core/process'
-import { notifications } from './core/q'
+import { notifications, Q } from './core/q'
 import { config as internalConfig } from './config'
 import { buildConfigPaths } from './util/build-paths'
 import { formatSyncFilters } from './util/index'
@@ -20,15 +20,18 @@ import {
   validateConfig,
   validateContentConnector,
   validateInstances,
+  validateExternalInput,
   validateListener,
 } from './util/validations'
 
 const debug = Debug('registration')
 
+let assetStoreInstance
 let appConfig: any = {}
 let contentStore
 let assetStore
 let listener
+let q
 
 /**
  * @public
@@ -72,6 +75,26 @@ interface ILogger {
   info(): any,
   log(): any,
   error(): any,
+}
+
+export const push = (data: any) => {
+  validateExternalInput(data)
+
+  q.emit('push', data)
+}
+
+export const unshift = (data: any) => {
+  validateExternalInput(data)
+
+  q.emit('unshift', data)
+}
+
+export const pop = () => {
+  q.emit('pop')
+}
+
+export const getAssetLocation = (asset) => {
+  return assetStoreInstance.getAssetLocation(asset)
 }
 
 /**
@@ -162,8 +185,6 @@ export const start = (config: IConfig = {}): Promise<{}> => {
       setLogger()
       configure()
 
-      let assetStoreInstance
-
       return assetStore.start(appConfig).then((assetInstance: IAssetStore) => {
         debug('Asset store instance has returned successfully!')
         validateAssetConnector(assetInstance)
@@ -181,6 +202,7 @@ export const start = (config: IConfig = {}): Promise<{}> => {
         listener.register(poke)
         // start checking for inet 10 secs after the app has started
         pinger()
+        q = new Q({}, {}, {})
 
         return listener.start(appConfig)
       }).then(() => {

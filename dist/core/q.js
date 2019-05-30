@@ -11,10 +11,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
-const index_1 = require("../util/index");
 const _1 = require(".");
 const logger_1 = require("../util/logger");
-const promise_map_1 = require("../util/promise.map");
+const series_1 = require("../util/series");
 const unprocessible_1 = require("../util/unprocessible");
 const plugins_1 = require("./plugins");
 const token_management_1 = require("./token-management");
@@ -37,22 +36,29 @@ class Q extends events_1.EventEmitter {
     constructor(contentStore, assetStore, config) {
         if (!instance && contentStore && assetStore && config) {
             super();
-            this.downloadEmbeddedAssets = (config.contentStore && typeof config.contentStore.enableRteMarkdownDownload === 'boolean') ? config.contentStore.enableRteMarkdownDownload : true;
-            this.pluginInstances = plugins_1.load(config);
+            this.pluginInstances = plugins_1.load(config.plugins);
             this.contentStore = contentStore;
-            this.assetStore = assetStore;
-            this.config = config;
-            this.pluginInstances = plugins_1.load(config);
+            this.config = config.syncManager;
             this.iLock = false;
             this.inProgress = false;
             this.q = [];
-            this.config = config;
             this.on('next', this.next);
             this.on('error', this.errorHandler);
+            this.on('push', this.push);
+            this.on('unshift', this.unshift);
             instance = this;
             debug('Core \'Q\' constructor initiated');
         }
         return instance;
+    }
+    unshift(data) {
+        this.q.unshift(data);
+        if (this.q.length > this.config.queue.pause_threshold) {
+            this.iLock = true;
+            _1.lock();
+        }
+        debug(`Content type '${data.content_type_uid}' received for '${data.action}'`);
+        this.emit('next');
     }
     /**
      * @description Enter item into 'Q's queue
@@ -60,7 +66,7 @@ class Q extends events_1.EventEmitter {
      */
     push(data) {
         this.q.push(data);
-        if (this.q.length > this.config.syncManager.queue.pause_threshold) {
+        if (this.q.length > this.config.queue.pause_threshold) {
             this.iLock = true;
             _1.lock();
         }
@@ -102,22 +108,21 @@ class Q extends events_1.EventEmitter {
      * @description Calls next item in the queue
      */
     next() {
-        if (this.iLock && this.q.length < this.config.syncManager.queue.resume_threshold) {
+        if (this.iLock && this.q.length < this.config.queue.resume_threshold) {
             _1.unlock(true);
             this.iLock = false;
         }
-        const self = this;
         debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`);
         if (!this.inProgress && this.q.length) {
             this.inProgress = true;
             const item = this.q.shift();
             if (item.checkpoint) {
                 token_management_1.saveToken(item.checkpoint.name, item.checkpoint.token).then(() => {
-                    self.process(item);
+                    this.process(item);
                 }).catch((error) => {
                     logger_1.logger.error('Save token failed to save a checkpoint!');
                     logger_1.logger.error(error);
-                    self.process(item);
+                    this.process(item);
                 });
             }
             else {
@@ -137,46 +142,6 @@ class Q extends events_1.EventEmitter {
         notify(data.action, data);
         switch (data.action) {
             case 'publish':
-                if (data.content_type_uid !== '_assets' && this.downloadEmbeddedAssets && (!data.pre_processed)) {
-                    let assets = index_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
-                    // if no assets were found in the RTE/Markdown
-                    if (assets.length === 0) {
-                        this.exec(data, data.action);
-                        return;
-                    }
-                    assets = assets.map((asset) => { return this.reStructureAssetObjects(asset, data.locale); });
-                    const assetBucket = [];
-                    return promise_map_1.map(assets, (asset) => {
-                        return new Promise((resolve, reject) => {
-                            return this.assetStore.download(asset.data)
-                                .then((updatedAsset) => {
-                                asset.data = updatedAsset;
-                                assetBucket.push(asset);
-                                return resolve();
-                            })
-                                .catch(reject);
-                        });
-                    }, 1)
-                        .then(() => {
-                        data.data = index_1.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assetBucket, false);
-                        data.pre_processed = true;
-                        // putting the entry back inside
-                        this.q.unshift(data);
-                        assetBucket.forEach((asset) => {
-                            if (asset && typeof asset === 'object' && asset.data) {
-                                this.q.unshift(asset);
-                            }
-                        });
-                        this.inProgress = false;
-                        this.emit('next');
-                    })
-                        .catch((error) => {
-                        this.emit('error', {
-                            data,
-                            error
-                        });
-                    });
-                }
                 this.exec(data, data.action);
                 break;
             case 'unpublish':
@@ -186,17 +151,6 @@ class Q extends events_1.EventEmitter {
                 this.exec(data, data.action);
                 break;
         }
-    }
-    reStructureAssetObjects(asset, locale) {
-        // add locale key to inside of asset
-        asset.locale = locale;
-        return {
-            content_type_uid: '_assets',
-            data: asset,
-            action: this.config.contentstack.actions.publish,
-            locale,
-            uid: asset.uid
-        };
     }
     /**
      * @description Execute and manager current processing item. Calling 'before' and 'after' hooks appropriately
@@ -210,31 +164,55 @@ class Q extends events_1.EventEmitter {
         try {
             debug(`Exec: ${action}`);
             const beforeSyncInternalPlugins = [];
+            let transformedItem;
+            let originalItem;
             this.pluginInstances.internal.beforeSync.forEach((method) => {
-                beforeSyncInternalPlugins.push(method(data, action));
+                beforeSyncInternalPlugins.push(() => { return method(data, action); });
             });
-            // cloned after transformations
-            const clonedData = lodash_1.cloneDeep(data);
-            Promise.all(beforeSyncInternalPlugins)
-                .then(() => {
+            series_1.series(beforeSyncInternalPlugins)
+                .then((item) => {
+                originalItem = item;
+                if (this.config.pluginTransformations) {
+                    transformedItem = item;
+                }
+                else {
+                    transformedItem = lodash_1.cloneDeep(item);
+                }
                 // re-initializing everytime with const.. avoids memory leaks
                 const beforeSyncPlugins = [];
-                this.pluginInstances.external.beforeSync.forEach((method) => {
-                    beforeSyncPlugins.push(method(clonedData, action));
-                });
-                return Promise.all(beforeSyncPlugins);
+                if (this.config.serializePlugins) {
+                    this.pluginInstances.external.beforeSync.forEach((method) => {
+                        beforeSyncPlugins.push(() => { return method(transformedItem, action); });
+                    });
+                    return series_1.series(beforeSyncPlugins);
+                }
+                else {
+                    this.pluginInstances.external.beforeSync.forEach((method) => {
+                        beforeSyncPlugins.push(method(transformedItem, action));
+                    });
+                    return Promise.all(beforeSyncPlugins);
+                }
             })
                 .then(() => {
                 debug('Before action plugins executed successfully!');
-                return this.contentStore[action](clonedData);
+                return this.contentStore[action](originalItem);
             })
                 .then(() => {
                 debug('Connector instance called successfully!');
+                // re-initializing everytime with const.. avoids memory leaks
                 const afterSyncPlugins = [];
-                this.pluginInstances.external.afterSync.forEach((method) => {
-                    afterSyncPlugins.push(method(clonedData));
-                });
-                return Promise.all(afterSyncPlugins);
+                if (this.config.serializePlugins) {
+                    this.pluginInstances.external.afterSync.forEach((method) => {
+                        afterSyncPlugins.push(() => { return method(transformedItem, action); });
+                    });
+                    return series_1.series(afterSyncPlugins);
+                }
+                else {
+                    this.pluginInstances.external.afterSync.forEach((method) => {
+                        afterSyncPlugins.push(method(transformedItem, action));
+                    });
+                    return Promise.all(afterSyncPlugins);
+                }
             })
                 .then(() => {
                 debug('After action plugins executed successfully!');
