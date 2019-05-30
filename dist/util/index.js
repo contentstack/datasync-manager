@@ -276,7 +276,10 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
                 }
                 else {
                     const asset = lodash_1.find(bucket, (item) => {
-                        return item.data.download_id === assetObject.download_id;
+                        const newRegexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g');
+                        const urlparts = newRegexp.exec(item.data.url);
+                        console.log('@url parts', urlparts);
+                        return item.data.download_id === urlparts[4];
                     });
                     if (typeof asset !== 'undefined') {
                         if (isMarkdown) {

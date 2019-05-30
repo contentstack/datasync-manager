@@ -169,3 +169,14 @@ const checkReferences = (schema, key) => {
         return false;
     }
 };
+exports.buildAssetObject = (asset, locale) => {
+    // add locale key to inside of asset
+    asset.locale = locale;
+    return {
+        content_type_uid: '_assets',
+        data: asset,
+        action: 'publish',
+        locale,
+        uid: asset.uid
+    };
+};

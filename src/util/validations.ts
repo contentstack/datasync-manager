@@ -4,7 +4,7 @@
 * MIT Licensed
 */
 
-import { hasIn } from 'lodash'
+import { hasIn, isEmpty, isPlainObject } from 'lodash'
 
 /**
  * @description Check's if the application's config is enough to start the app without errors
@@ -88,6 +88,26 @@ export const validateListener = (instance) => {
       throw new Error(`${instance} listener does not support '${fn}()'`)
     }
   })
+}
+
+export const validateExternalInput = (data) => {
+  if (typeof data._content_type_uid !== 'string' || data._content_type_uid.length === 0) {
+    throw new Error('data._content_type_uid should be of type string and not empty!')
+  }
+
+  if (typeof data.uid !== 'string' || data.uid.length === 0) {
+    throw new Error('data.uid should be of type string and not empty!')
+  }
+
+  if (typeof data.locale !== 'string' || data.locale.length === 0) {
+    throw new Error('data.locale should be of type string and not empty!')
+  }
+
+  if (!(isPlainObject(data.data)) || isEmpty(data.data)) {
+    throw new Error('data.data should be of type object and not empty!')
+  }
+
+  return data
 }
 
 /**

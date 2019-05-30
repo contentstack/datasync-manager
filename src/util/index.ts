@@ -260,7 +260,7 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
     } else {
       convertedText = entry
     }
-    const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g');
+    const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g')
     while ((matches = regexp.exec(convertedText)) !== null) {
       if (matches && matches.length) {
         const assetObject: any = {}
@@ -274,7 +274,11 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
           bucket.push(assetObject)
         } else {
           const asset: any = find(bucket, (item) => {
-            return item.data.download_id === assetObject.download_id
+            const newRegexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g');
+            const urlparts = newRegexp.exec(item.data.url)
+            console.log('@url parts', urlparts)
+
+            return item.data.download_id === urlparts[4]
           })
           if (typeof asset !== 'undefined') {
             if (isMarkdown) {

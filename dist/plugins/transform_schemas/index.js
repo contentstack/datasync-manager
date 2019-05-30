@@ -2,10 +2,10 @@
 const helper = require('../helper');
 module.exports = function TransformSchemas() {
     const options = TransformSchemas.options;
-    TransformSchemas.beforeSync = (data) => {
+    TransformSchemas.beforeSync = (data, action) => {
         return new Promise((resolve, reject) => {
             try {
-                if (data.content_type_uid === '_assets' || !(helper.hasAssetsOrReferences(data.content_type.schema))) {
+                if (action !== 'publish' || data.content_type_uid === '_assets' || !(helper.hasAssetsOrReferences(data.content_type.schema))) {
                     return resolve(data);
                 }
                 const transformations = helper.buildReferences(data.content_type.schema);

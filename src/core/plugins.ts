@@ -24,7 +24,7 @@ export const load = (config) => {
     internal: {},
     external: {}
   }
-  const plugins = config.plugins || {}
+  const plugins = config || {}
   pluginMethods.forEach((pluginMethod) => {
     pluginInstances.external[pluginMethod] = pluginInstances[pluginMethod] || []
     pluginInstances.internal[pluginMethod] = pluginInstances[pluginMethod] || []
