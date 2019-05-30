@@ -7,10 +7,9 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep } from 'lodash'
-import { getOrSetRTEMarkdownAssets } from '../util/index'
 import { lock, unlock } from '.'
 import { logger } from '../util/logger'
-import { map } from '../util/promise.map'
+import { series } from '../util/series'
 import { saveFailedItems } from '../util/unprocessible'
 import { load } from './plugins'
 import { saveToken } from './token-management'
@@ -27,11 +26,9 @@ let instance = null
  */
 export class Q extends EventEmitter {
   private config: any
-  private downloadEmbeddedAssets: any
   private iLock: boolean
   private inProgress: boolean
   private pluginInstances: any
-  private assetStore: any
   private contentStore: any
   private q: any
 
@@ -44,23 +41,31 @@ export class Q extends EventEmitter {
   constructor(contentStore, assetStore, config) {
     if (!instance && contentStore && assetStore && config) {
       super()
-      this.downloadEmbeddedAssets = (config.contentStore && typeof config.contentStore.enableRteMarkdownDownload === 'boolean') ? config.contentStore.enableRteMarkdownDownload: true
-      this.pluginInstances = load(config)
+      this.pluginInstances = load(config.plugins)
       this.contentStore = contentStore
-      this.assetStore = assetStore
-      this.config = config
-      this.pluginInstances = load(config)
+      this.config = config.syncManager
       this.iLock = false
       this.inProgress = false
       this.q = []
-      this.config = config
       this.on('next', this.next)
       this.on('error', this.errorHandler)
+      this.on('push', this.push)
+      this.on('unshift', this.unshift)
       instance = this
       debug('Core \'Q\' constructor initiated')
     }
 
     return instance
+  }
+
+  public unshift(data) {
+    this.q.unshift(data)
+    if (this.q.length > this.config.queue.pause_threshold) {
+      this.iLock = true
+      lock()
+    }
+    debug(`Content type '${data.content_type_uid}' received for '${data.action}'`)
+    this.emit('next')
   }
 
   /**
@@ -69,7 +74,7 @@ export class Q extends EventEmitter {
    */
   public push(data) {
     this.q.push(data)
-    if (this.q.length > this.config.syncManager.queue.pause_threshold) {
+    if (this.q.length > this.config.queue.pause_threshold) {
       this.iLock = true
       lock()
     }
@@ -114,22 +119,21 @@ export class Q extends EventEmitter {
    * @description Calls next item in the queue
    */
   private next() {
-    if (this.iLock && this.q.length < this.config.syncManager.queue.resume_threshold) {
+    if (this.iLock && this.q.length < this.config.queue.resume_threshold) {
       unlock(true)
       this.iLock = false
     }
-    const self = this
     debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`)
     if (!this.inProgress && this.q.length) {
       this.inProgress = true
       const item = this.q.shift()
       if (item.checkpoint) {
         saveToken(item.checkpoint.name, item.checkpoint.token).then(() => {
-          self.process(item)
+          this.process(item)
         }).catch((error) => {
           logger.error('Save token failed to save a checkpoint!')
           logger.error(error)
-          self.process(item)
+          this.process(item)
         })
       } else {
         this.process(item)
@@ -152,47 +156,6 @@ export class Q extends EventEmitter {
     notify(data.action, data)
     switch (data.action) {
     case 'publish':
-      if (data.content_type_uid !== '_assets' && this.downloadEmbeddedAssets && (!data.pre_processed)) {
-        let assets = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true)
-        
-        // if no assets were found in the RTE/Markdown
-        if (assets.length === 0) {
-          this.exec(data, data.action)
-          return
-        }
-        assets = assets.map((asset) => { return this.reStructureAssetObjects(asset, data.locale) })
-        const assetBucket = []
-        return map(assets, (asset) => {
-          return new Promise((resolve, reject) => {
-            return this.assetStore.download(asset.data)
-              .then((updatedAsset) => {
-                asset.data = updatedAsset
-                assetBucket.push(asset)
-                return resolve()
-              })
-              .catch(reject)
-          })
-        }, 1)
-        .then(() => {
-          data.data = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assetBucket, false)
-          data.pre_processed = true
-          // putting the entry back inside
-          this.q.unshift(data)
-          assetBucket.forEach((asset) => {
-            if (asset && typeof asset === 'object' && asset.data) {
-              this.q.unshift(asset)
-            }
-          })
-          this.inProgress = false
-          this.emit('next')
-        })
-        .catch((error) => {
-          this.emit('error', {
-            data,
-            error
-          })
-        })
-      }
       this.exec(data, data.action)
       break
     case 'unpublish':
@@ -201,19 +164,6 @@ export class Q extends EventEmitter {
     default:
       this.exec(data, data.action)
       break
-    }
-  }
-
-  private reStructureAssetObjects(asset, locale) {
-    // add locale key to inside of asset
-    asset.locale = locale
-
-    return {
-      content_type_uid: '_assets',
-      data: asset,
-      action: this.config.contentstack.actions.publish,
-      locale,
-      uid: asset.uid
     }
   }
 
@@ -229,36 +179,62 @@ export class Q extends EventEmitter {
     try {
       debug(`Exec: ${action}`)
       const beforeSyncInternalPlugins = []
+      let transformedItem
+      let originalItem
 
       this.pluginInstances.internal.beforeSync.forEach((method) => {
-        beforeSyncInternalPlugins.push(method(data, action))
+        beforeSyncInternalPlugins.push(() => { return method(data, action) })
       })
-      // cloned after transformations
-      const clonedData = cloneDeep(data)
 
-      Promise.all(beforeSyncInternalPlugins)
-        .then(() => {
+      series(beforeSyncInternalPlugins)
+        .then((item) => {
+          originalItem = item
+          if (this.config.pluginTransformations) {
+            transformedItem = item
+          } else {
+            transformedItem = cloneDeep(item)
+          }
+
           // re-initializing everytime with const.. avoids memory leaks
           const beforeSyncPlugins = []
-          this.pluginInstances.external.beforeSync.forEach((method) => {
-            beforeSyncPlugins.push(method(clonedData, action))
-          })
 
-          return Promise.all(beforeSyncPlugins)
+          if (this.config.serializePlugins) {
+            this.pluginInstances.external.beforeSync.forEach((method) => {
+              beforeSyncPlugins.push(() => { return method(transformedItem, action) })
+            })
+
+            return series(beforeSyncPlugins)
+          } else {
+            this.pluginInstances.external.beforeSync.forEach((method) => {
+              beforeSyncPlugins.push(method(transformedItem, action))
+            })
+
+            return Promise.all(beforeSyncPlugins)
+          }
         })
         .then(() => {
           debug('Before action plugins executed successfully!')
 
-          return this.contentStore[action](clonedData)
+          return this.contentStore[action](originalItem)
         })
         .then(() => {
           debug('Connector instance called successfully!')
+          // re-initializing everytime with const.. avoids memory leaks
           const afterSyncPlugins = []
-          this.pluginInstances.external.afterSync.forEach((method) => {
-            afterSyncPlugins.push(method(clonedData))
-          })
 
-          return Promise.all(afterSyncPlugins)
+          if (this.config.serializePlugins) {
+            this.pluginInstances.external.afterSync.forEach((method) => {
+              afterSyncPlugins.push(() => { return method(transformedItem, action) })
+            })
+
+            return series(afterSyncPlugins)
+          } else {
+            this.pluginInstances.external.afterSync.forEach((method) => {
+              afterSyncPlugins.push(method(transformedItem, action))
+            })
+
+            return Promise.all(afterSyncPlugins)
+          }
         })
         .then(() => {
           debug('After action plugins executed successfully!')

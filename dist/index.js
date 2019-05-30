@@ -21,10 +21,26 @@ const index_1 = require("./util/index");
 const logger_1 = require("./util/logger");
 const validations_1 = require("./util/validations");
 const debug = debug_1.default('registration');
+let assetStoreInstance;
 let appConfig = {};
 let contentStore;
 let assetStore;
 let listener;
+let q;
+exports.push = (data) => {
+    validations_1.validateExternalInput(data);
+    q.emit('push', data);
+};
+exports.unshift = (data) => {
+    validations_1.validateExternalInput(data);
+    q.emit('unshift', data);
+};
+exports.pop = () => {
+    q.emit('pop');
+};
+exports.getAssetLocation = (asset) => {
+    return assetStoreInstance.getAssetLocation(asset);
+};
 /**
  * @public
  * @method setContentStore
@@ -99,7 +115,6 @@ exports.start = (config = {}) => {
             // since logger is singleton, if previously set, it'll return that isnstance!
             logger_1.setLogger();
             process_1.configure();
-            let assetStoreInstance;
             return assetStore.start(appConfig).then((assetInstance) => {
                 debug('Asset store instance has returned successfully!');
                 validations_1.validateAssetConnector(assetInstance);
@@ -115,6 +130,7 @@ exports.start = (config = {}) => {
                 listener.register(core_1.poke);
                 // start checking for inet 10 secs after the app has started
                 inet_1.init();
+                q = new q_1.Q({}, {}, {});
                 return listener.start(appConfig);
             }).then(() => {
                 logger_1.logger.info('Contentstack sync utility started successfully!');

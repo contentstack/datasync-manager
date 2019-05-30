@@ -3,10 +3,10 @@ const helper = require('../helper')
 module.exports = function TransformEntries () {
   const options = TransformEntries.options
 
-  TransformEntries.beforeSync = (data) => {
+  TransformEntries.beforeSync = (data, action) => {
     return new Promise((resolve, reject) => {
       try {
-        if (data.content_type_uid === '_assets' || !(helper.hasReferences(data.content_type.schema))) {
+        if (action !== 'publish' || data.content_type_uid === '_assets' || !(helper.hasReferences(data.content_type.schema))) {
           return resolve(data)
         }
 
