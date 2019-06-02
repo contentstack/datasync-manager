@@ -124,6 +124,7 @@ exports.formatItems = (items, config) => {
         switch (item.type) {
             case 'asset_published':
                 item.content_type_uid = formattedAssetType;
+                item._content_type_uid = formattedAssetType;
                 item.action = config.contentstack.actions.publish;
                 item.locale = item.data.publish_details.locale;
                 // extra keys
@@ -147,6 +148,7 @@ exports.formatItems = (items, config) => {
                 break;
             case 'entry_published':
                 item.action = config.contentstack.actions.publish;
+                item._content_type_uid = item.content_type_uid;
                 item.locale = item.data.publish_details.locale;
                 item.uid = item.data.uid;
                 // extra keys
@@ -276,10 +278,12 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
                 }
                 else {
                     const asset = lodash_1.find(bucket, (item) => {
-                        const newRegexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g');
-                        const urlparts = newRegexp.exec(item.data.url);
-                        console.log('@url parts', urlparts);
-                        return item.data.download_id === urlparts[4];
+                        const newRegexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)', 'g');
+                        let urlparts;
+                        while ((urlparts = newRegexp.exec(item.data.url)) !== null) {
+                            return item.data.download_id === urlparts[4];
+                        }
+                        return undefined;
                     });
                     if (typeof asset !== 'undefined') {
                         if (isMarkdown) {

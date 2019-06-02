@@ -36,7 +36,7 @@ class Q extends events_1.EventEmitter {
     constructor(contentStore, assetStore, config) {
         if (!instance && contentStore && assetStore && config) {
             super();
-            this.pluginInstances = plugins_1.load(config.plugins);
+            this.pluginInstances = plugins_1.load(config);
             this.contentStore = contentStore;
             this.config = config.syncManager;
             this.iLock = false;
@@ -165,18 +165,16 @@ class Q extends events_1.EventEmitter {
             debug(`Exec: ${action}`);
             const beforeSyncInternalPlugins = [];
             let transformedItem;
-            let originalItem;
             this.pluginInstances.internal.beforeSync.forEach((method) => {
                 beforeSyncInternalPlugins.push(() => { return method(data, action); });
             });
             series_1.series(beforeSyncInternalPlugins)
-                .then((item) => {
-                originalItem = item;
+                .then(() => {
                 if (this.config.pluginTransformations) {
-                    transformedItem = item;
+                    transformedItem = data;
                 }
                 else {
-                    transformedItem = lodash_1.cloneDeep(item);
+                    transformedItem = lodash_1.cloneDeep(data);
                 }
                 // re-initializing everytime with const.. avoids memory leaks
                 const beforeSyncPlugins = [];
@@ -195,7 +193,7 @@ class Q extends events_1.EventEmitter {
             })
                 .then(() => {
                 debug('Before action plugins executed successfully!');
-                return this.contentStore[action](originalItem);
+                return this.contentStore[action](data);
             })
                 .then(() => {
                 debug('Connector instance called successfully!');

@@ -121,6 +121,7 @@ export const formatItems = (items, config) => {
     switch (item.type) {
       case 'asset_published':
         item.content_type_uid = formattedAssetType
+        item._content_type_uid = formattedAssetType
         item.action = config.contentstack.actions.publish
         item.locale = item.data.publish_details.locale
         // extra keys
@@ -144,6 +145,7 @@ export const formatItems = (items, config) => {
         break
       case 'entry_published':
         item.action = config.contentstack.actions.publish
+        item._content_type_uid = item.content_type_uid
         item.locale = item.data.publish_details.locale
         item.uid = item.data.uid
         // extra keys
@@ -274,11 +276,13 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
           bucket.push(assetObject)
         } else {
           const asset: any = find(bucket, (item) => {
-            const newRegexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g');
-            const urlparts = newRegexp.exec(item.data.url)
-            console.log('@url parts', urlparts)
+            const newRegexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)', 'g')
+            let urlparts
+            while ((urlparts = newRegexp.exec(item.data.url)) !== null) {
 
-            return item.data.download_id === urlparts[4]
+              return item.data.download_id === urlparts[4]
+            }
+            return undefined
           })
           if (typeof asset !== 'undefined') {
             if (isMarkdown) {

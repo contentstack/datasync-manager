@@ -4,6 +4,14 @@
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -39,7 +47,18 @@ exports.pop = () => {
     q.emit('pop');
 };
 exports.getAssetLocation = (asset) => {
-    return assetStoreInstance.getAssetLocation(asset);
+    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            const assetStoreConfig = assetStore.getConfig();
+            const assetConfig = (assetStoreConfig.assetStore) ? assetStoreConfig.assetStore : assetStoreConfig;
+            const data = (asset.data) ? asset.data : asset;
+            const location = yield assetStore.getAssetLocation(data, assetConfig);
+            return resolve(location);
+        }
+        catch (error) {
+            return reject(error);
+        }
+    }));
 };
 /**
  * @public
@@ -108,7 +127,9 @@ exports.setLogger = logger_2.setLogger;
 exports.start = (config = {}) => {
     return new Promise((resolve, reject) => {
         try {
-            validations_1.validateInstances(assetStore, contentStore, listener);
+            validations_1.validateAssetStore(assetStore);
+            validations_1.validateContentStore(contentStore);
+            validations_1.validateListener(listener);
             appConfig = lodash_1.merge({}, config_1.config, appConfig, config);
             validations_1.validateConfig(appConfig);
             appConfig.paths = build_paths_1.buildConfigPaths();
@@ -117,12 +138,12 @@ exports.start = (config = {}) => {
             process_1.configure();
             return assetStore.start(appConfig).then((assetInstance) => {
                 debug('Asset store instance has returned successfully!');
-                validations_1.validateAssetConnector(assetInstance);
+                validations_1.validateAssetStoreInstance(assetInstance);
                 assetStoreInstance = assetInstance;
                 return contentStore.start(assetInstance, appConfig);
             }).then((contentStoreInstance) => {
                 debug('Content store instance has returned successfully!');
-                validations_1.validateContentConnector(contentStoreInstance);
+                validations_1.validateContentStoreInstance(contentStoreInstance);
                 appConfig = index_1.formatSyncFilters(appConfig);
                 return core_1.init(contentStoreInstance, assetStoreInstance);
             }).then(() => {

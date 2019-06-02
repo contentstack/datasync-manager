@@ -16,10 +16,11 @@ import { formatSyncFilters } from './util/index'
 import { logger, setLogger } from './util/logger'
 
 import {
-  validateAssetConnector,
+  validateAssetStore,
+  validateAssetStoreInstance,
   validateConfig,
-  validateContentConnector,
-  validateInstances,
+  validateContentStore,
+  validateContentStoreInstance,
   validateExternalInput,
   validateListener,
 } from './util/validations'
@@ -94,7 +95,17 @@ export const pop = () => {
 }
 
 export const getAssetLocation = (asset) => {
-  return assetStoreInstance.getAssetLocation(asset)
+  return new Promise(async (resolve, reject) => {
+    try {
+      const assetStoreConfig = assetStore.getConfig()
+      const assetConfig = (assetStoreConfig.assetStore) ? assetStoreConfig.assetStore: assetStoreConfig
+      const data = (asset.data) ? asset.data : asset
+      const location = await assetStore.getAssetLocation(data, assetConfig)
+      return resolve(location)
+    } catch (error) {
+      return reject(error)
+    }
+  })
 }
 
 /**
@@ -177,7 +188,10 @@ export { notifications }
 export const start = (config: IConfig = {}): Promise<{}> => {
   return new Promise((resolve, reject) => {
     try {
-      validateInstances(assetStore, contentStore, listener)
+      validateAssetStore(assetStore)
+      validateContentStore(contentStore)
+      validateListener(listener)
+
       appConfig = merge({}, internalConfig, appConfig, config)
       validateConfig(appConfig)
       appConfig.paths = buildConfigPaths()
@@ -187,13 +201,13 @@ export const start = (config: IConfig = {}): Promise<{}> => {
 
       return assetStore.start(appConfig).then((assetInstance: IAssetStore) => {
         debug('Asset store instance has returned successfully!')
-        validateAssetConnector(assetInstance)
+        validateAssetStoreInstance(assetInstance)
         assetStoreInstance = assetInstance
 
         return contentStore.start(assetInstance, appConfig)
       }).then((contentStoreInstance) => {
         debug('Content store instance has returned successfully!')
-        validateContentConnector(contentStoreInstance)
+        validateContentStoreInstance(contentStoreInstance)
         appConfig = formatSyncFilters(appConfig)
 
         return init(contentStoreInstance, assetStoreInstance)

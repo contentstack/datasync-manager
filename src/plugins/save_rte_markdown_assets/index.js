@@ -8,7 +8,8 @@ module.exports = function SaveRteMarkdownAssets () {
   SaveRteMarkdownAssets.beforeSync = (data, action) => {
     return new Promise((resolve, reject) => {
       try {
-        if (action !== 'publish' || data.content_type_uid === '_assets' || !(helper.hasAssets(data.content_type.schema))) {
+        if (action !== 'publish' || data.content_type_uid === '_assets' || !(helper.hasRteOrMarkdown(data.content_type.schema))) {
+
           return resolve(data)
         }
 
@@ -16,11 +17,12 @@ module.exports = function SaveRteMarkdownAssets () {
 
         // if no assets were found in the RTE/Markdown
         if (assets.length === 0) {
+
           return resolve(data)
         }
 
         assets = assets.map((asset) => { 
-          return helper.buildAssetObjects(asset, data.locale)
+          return helper.buildAssetObject(asset, data.locale)
         })
 
         const assetBucket = []
@@ -33,10 +35,10 @@ module.exports = function SaveRteMarkdownAssets () {
 
         return Promise.all(assetBucket)
           .then(() => {
-            data.data = getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assetBucket, false)
+            data.data = util.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assets, false)
             // unshift the entry back into 'Q'
-            index.unshift(data)
-            assetBucket.forEach((asset) => {
+            // index.unshift(data)
+            assets.forEach((asset) => {
               if (asset && typeof asset === 'object' && asset.data) {
                 // unshift all assets into the 'Q'
                 index.unshift(asset)
