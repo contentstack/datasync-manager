@@ -130,6 +130,36 @@ exports.hasAssets = (schema) => {
   return checkReferences(schema, 'asset')
 }
 
+exports.hasRteOrMarkdown = (schema) => {
+  try {
+    if (typeof schema === 'object' && Array.isArray(schema)) {
+      for (let i = 0, j = schema.length; i < j; i++) {
+        const field = schema[i]
+        if (field && field.field_metadata && field.field_metadata.markdown) {
+          return true
+        } else if (field && field.field_metadata && field.field_metadata.allow_rich_text) {
+          return true
+        } else if (field && field.data_type === 'group' && field.schema) {
+          if (this.hasRteOrMarkdown(field.schema, key)) {
+            return true
+          }
+          continue
+        } else if (field && field.data_type === 'blocks' && field.blocks) {
+          for (let x = 0, y = field.blocks; x < y; x++) {
+            if (this.hasRteOrMarkdown(field.blocks[x].schema, key)) {
+              return true
+            }
+          }
+        }
+      }
+    }
+    return false
+  } catch (error) {
+    console.error(error)
+    return false
+  }
+}
+
 exports.hasReferences = (schema) => {
   return checkReferences(schema, 'entry')
 }
@@ -171,9 +201,17 @@ const checkReferences = (schema, key) => {
 exports.buildAssetObject = (asset, locale) => {
   // add locale key to inside of asset
   asset.locale = locale
+  const regexp = new RegExp('https://(assets|images).contentstack.io/(v[\\d])/assets/(.*?)/(.*?)/(.*?)/(.*)', 'g')
+  const matches = regexp.exec(asset.url)
+
+  if (!(matches[5]) || matches[5].length === 0) {
+    throw new Error('Unable to determine fine name.\n' + JSON.stringify(matches))
+  }
+  asset.filename = matches[5]
 
   return {
     content_type_uid: '_assets',
+    _content_type_uid: '_assets',
     data: asset,
     action: 'publish',
     locale,

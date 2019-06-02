@@ -43,6 +43,9 @@ exports.config = {
             logAssetPaths: true,
             logReferencePaths: true,
         },
+        _cs_internal_save_rte_markdown_assets: {
+            disabled: false,
+        },
     },
     syncManager: {
         cooloff: 3000,
