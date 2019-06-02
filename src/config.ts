@@ -45,6 +45,10 @@ export const config = {
       logReferencePaths: true,
       // other overrides...
     },
+    _cs_internal_save_rte_markdown_assets: {
+      disabled: false,
+      // other overrides...
+    },
   },
   syncManager: {
     cooloff: 3000,

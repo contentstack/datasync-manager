@@ -10,7 +10,11 @@ module.exports = {
   },
   contentStore: {
     dbName: 'references',
-    collectionName: 'development'
+    collection: {
+      entry: 'development',
+      asset: 'development',
+      schema: 'development'
+    }
   },
   assetStore: {
     baseDir: '_mongo_assets'

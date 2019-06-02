@@ -24,7 +24,7 @@ export const load = (config) => {
     internal: {},
     external: {}
   }
-  const plugins = config || {}
+  const plugins = config.plugins || {}
   pluginMethods.forEach((pluginMethod) => {
     pluginInstances.external[pluginMethod] = pluginInstances[pluginMethod] || []
     pluginInstances.internal[pluginMethod] = pluginInstances[pluginMethod] || []
@@ -44,8 +44,10 @@ export const load = (config) => {
     if (existsSync(pluginPath)) {
       const Plugin = require(pluginPath)
       const pluginConfig = plugins[pluginName]
+      Plugin.options = pluginConfig
+      
       // execute/initiate plugin
-      Plugin(pluginConfig)
+      Plugin()
       
       pluginMethods.forEach((pluginMethod) => {
         if (hasIn(Plugin, pluginMethod)) {

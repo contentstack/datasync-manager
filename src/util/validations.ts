@@ -7,6 +7,8 @@
 import { hasIn, isEmpty, isPlainObject } from 'lodash'
 
 /**
+ * @public
+ * @method validateConfig
  * @description Check's if the application's config is enough to start the app without errors
  * @param {Object} config - Application config
  */
@@ -31,65 +33,96 @@ export const validateConfig = (config) => {
 }
 
 /**
- * @description Validates registered instances
- * @param {Object} assetStore - Asset store instance
- * @param {Object} contentStore - Content store instance
- * @param {Object} listener - Listener instance
+ * @public
+ * @method validateAssetStore
+ * @description Validates if provided asset store has required methods
+ * @param {Object} assetStore - Asset store 
  */
-export const validateInstances = (assetStore, contentStore, listener) => {
-  if (typeof assetStore === 'undefined') {
-    throw new Error('Call \'setAssetStore()\' before calling sync-manager start!')
-  } else if (typeof contentStore === 'undefined') {
-    throw new Error('Call \'setContentStore()\' before calling sync-manager start!')
-  } else if (typeof listener === 'undefined') {
-    throw new Error('Call \'setListener()\' before calling sync-manager start!')
-  } else if (!assetStore.start || !contentStore.start || !listener.start) {
-    throw new Error('Connector and listener instances should have \'start()\' method')
-  } else if (typeof assetStore.start !== 'function' || typeof contentStore.start !== 'function' ||
-   typeof listener.start !== 'function') {
-    throw new Error('Connector and listener instances should have \'start()\' method')
+export const validateAssetStore = (assetStore) => {
+  if (typeof assetStore !== 'object' && typeof assetStore !== 'function') {
+    throw new Error('Invalid Type! Asset store is of neither \'object\' or \'function\'!')
   }
+  const methods = ['getConfig', 'getAssetLocation', 'setConfig', 'start']
+  methods.forEach((method) => {
+    if (!(hasIn(assetStore, method)) && typeof assetStore[method] === 'function') {
+      throw new Error(`Missing required methods! Asset store is missing '${method}()'!`)
+    }
+  })
 }
 
 /**
+ * @public
+ * @method validateContentStore
+ * @description Validates if provided content store has required methods
+ * @param {Object} contentStore - Content store 
+ */
+export const validateContentStore = (contentStore) => {
+  if (typeof contentStore !== 'object' && typeof contentStore !== 'function') {
+    throw new Error('Invalid Type! Content store is of neither \'object\' or \'function\'!')
+  }
+  const methods = ['getConfig', 'setConfig', 'setAssetStore', 'start']
+  methods.forEach((method) => {
+    if (!(hasIn(contentStore, method)) && typeof contentStore[method] === 'function') {
+      throw new Error(`Missing required methods! Content store is missing '${method}()'!`)
+    }
+  })
+}
+
+/**
+ * @public
+ * @method validateListener
+ * @description Validates if the provided listener supports required methods
+ * @param {Object} listener - Listener instance
+ */
+export const validateListener = (listener) => {
+  if (typeof listener !== 'object' && typeof listener !== 'function') {
+    console.log('typeof listener', typeof listener, JSON.stringify(listener))
+    throw new Error('Invalid Type! Listener is of neither \'object\' or \'function\'!')
+  }
+  const methods = ['getConfig', 'setConfig', 'start', 'register']
+  methods.forEach((method) => {
+    if (!(hasIn(listener, method)) && typeof listener[method] === 'function') {
+      throw new Error(`Missing required methods! Listener is missing '${method}()'!`)
+    }
+  })
+}
+
+/**
+ * @public
+ * @method validateContentStoreInstance
  * @description Validates if the registered content store supports required methods
  * @param {Object} instance - Content store instance
  */
-export const validateContentConnector = (instance) => {
+export const validateContentStoreInstance = (instance) => {
   const fns = ['publish', 'unpublish', 'delete']
   fns.forEach((fn) => {
-    if (!(hasIn(instance, fn))) {
+    if (!(hasIn(instance, fn)) && typeof instance[fn] === 'function') {
       throw new Error(`${instance} content store does not support '${fn}()'`)
     }
   })
 }
 
 /**
+ * @public
+ * @method validateAssetStoreInstance
  * @description Validates if the registered asset store supports required methods
  * @param {Object} instance - Asset store instance
  */
-export const validateAssetConnector = (instance) => {
+export const validateAssetStoreInstance = (instance) => {
   const fns = ['delete', 'download', 'unpublish']
   fns.forEach((fn) => {
-    if (!(hasIn(instance, fn))) {
+    if (!(hasIn(instance, fn)) && typeof instance[fn] === 'function') {
       throw new Error(`${instance} asset store does not support '${fn}()'`)
     }
   })
 }
 
 /**
- * @description Validates if the registered listener supports required methods
- * @param {Object} instance - Listener instance
+ * @public
+ * @method validateExternalInput
+ * @description Validates if the input provided by external method into 'Q' conforms standards
+ * @param {Object} data - Input data
  */
-export const validateListener = (instance) => {
-  const fns = ['register']
-  fns.forEach((fn) => {
-    if (!(hasIn(instance, fn))) {
-      throw new Error(`${instance} listener does not support '${fn}()'`)
-    }
-  })
-}
-
 export const validateExternalInput = (data) => {
   if (typeof data._content_type_uid !== 'string' || data._content_type_uid.length === 0) {
     throw new Error('data._content_type_uid should be of type string and not empty!')
@@ -106,8 +139,6 @@ export const validateExternalInput = (data) => {
   if (!(isPlainObject(data.data)) || isEmpty(data.data)) {
     throw new Error('data.data should be of type object and not empty!')
   }
-
-  return data
 }
 
 /**
