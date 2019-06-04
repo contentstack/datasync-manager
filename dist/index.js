@@ -51,8 +51,7 @@ exports.getAssetLocation = (asset) => {
         try {
             const assetStoreConfig = assetStore.getConfig();
             const assetConfig = (assetStoreConfig.assetStore) ? assetStoreConfig.assetStore : assetStoreConfig;
-            const data = (asset.data) ? asset.data : asset;
-            const location = yield assetStore.getAssetLocation(data, assetConfig);
+            const location = yield assetStore.getAssetLocation(asset, assetConfig);
             return resolve(location);
         }
         catch (error) {

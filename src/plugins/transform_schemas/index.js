@@ -6,17 +6,17 @@ module.exports = function TransformSchemas () {
   TransformSchemas.beforeSync = (data, action) => {
     return new Promise((resolve, reject) => {
       try {
-        if (action !== 'publish' || data.content_type_uid === '_assets' || !(helper.hasAssetsOrReferences(data.content_type.schema))) {
+        if (action !== 'publish' || data._content_type_uid === '_assets' || !(helper.hasAssetsOrReferences(data._content_type.schema))) {
           return resolve(data)
         }
 
-        const transformations = helper.buildReferences(data.content_type.schema)
+        const transformations = helper.buildReferences(data._content_type.schema)
 
         if (options.logAssetPaths) {
-          data.content_type.assetReferences = transformations.assetReferences
+          data._content_type._assets = transformations.assetReferences
         }
         if (options.logReferencePaths) {
-          data.content_type.entryReferences = transformations.entryReferences
+          data._content_type._references = transformations.entryReferences
         }
 
         return resolve(data)
