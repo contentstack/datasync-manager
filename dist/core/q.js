@@ -57,7 +57,7 @@ class Q extends events_1.EventEmitter {
             this.iLock = true;
             _1.lock();
         }
-        debug(`Content type '${data.content_type_uid}' received for '${data.action}'`);
+        debug(`Content type '${data._content_type_uid}' received for '${data.type}'`);
         this.emit('next');
     }
     /**
@@ -70,7 +70,7 @@ class Q extends events_1.EventEmitter {
             this.iLock = true;
             _1.lock();
         }
-        debug(`Content type '${data.content_type_uid}' received for '${data.action}'`);
+        debug(`Content type '${data._content_type_uid}' received for '${data.type}'`);
         this.emit('next');
     }
     /**
@@ -81,8 +81,8 @@ class Q extends events_1.EventEmitter {
         notify('error', obj);
         logger_1.logger.error(obj);
         debug(`Error handler called with ${JSON.stringify(obj)}`);
-        if (obj.data.checkpoint) {
-            return token_management_1.saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
+        if (obj.checkpoint) {
+            return token_management_1.saveToken(obj.checkpoint.name, obj.checkpoint.token).then(() => {
                 return unprocessible_1.saveFailedItems(obj).then(() => {
                     this.inProgress = false;
                     this.emit('next');
@@ -138,17 +138,17 @@ class Q extends events_1.EventEmitter {
      * @param {Object} data - Current processing item
      */
     process(data) {
-        logger_1.logger.log(`${data.action.toUpperCase()}ING: { content_type: '${data.content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'}`);
-        notify(data.action, data);
-        switch (data.action) {
+        logger_1.logger.log(`${data.type.toUpperCase()}ING: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'}`);
+        notify(data.type, data);
+        switch (data.type) {
             case 'publish':
-                this.exec(data, data.action);
+                this.exec(data, data.type);
                 break;
             case 'unpublish':
-                this.exec(data, data.action);
+                this.exec(data, data.type);
                 break;
             default:
-                this.exec(data, data.action);
+                this.exec(data, data.type);
                 break;
         }
     }
@@ -214,7 +214,7 @@ class Q extends events_1.EventEmitter {
             })
                 .then(() => {
                 debug('After action plugins executed successfully!');
-                logger_1.logger.log(`${action.toUpperCase()}ING: { content_type: '${data.content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'}`);
+                logger_1.logger.log(`${action.toUpperCase()}ING: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'}`);
                 this.inProgress = false;
                 this.emit('next', data);
             })

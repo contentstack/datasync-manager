@@ -101,14 +101,14 @@ exports.formatSyncFilters = (config) => {
 exports.groupItems = (items) => {
     const bucket = {};
     items.forEach((item) => {
-        if (item.content_type_uid === assetType) {
-            item.content_type_uid = formattedAssetType;
+        if (item._content_type_uid === assetType) {
+            item._content_type_uid = formattedAssetType;
         }
-        if (bucket.hasOwnProperty(item.content_type_uid)) {
-            bucket[item.content_type_uid].push(item);
+        if (bucket.hasOwnProperty(item._content_type_uid)) {
+            bucket[item._content_type_uid].push(item);
         }
         else {
-            bucket[item.content_type_uid] = [item];
+            bucket[item._content_type_uid] = [item];
         }
     });
     return bucket;
@@ -123,52 +123,60 @@ exports.formatItems = (items, config) => {
     items.forEach((item) => {
         switch (item.type) {
             case 'asset_published':
-                item.content_type_uid = formattedAssetType;
                 item._content_type_uid = formattedAssetType;
-                item.action = config.contentstack.actions.publish;
-                item.locale = item.data.publish_details.locale;
+                item.type = config.contentstack.actions.publish;
+                item._locale = item.data.publish_details.locale;
                 // extra keys
-                item.event_at = item.data.publish_details.time;
-                item.synced_at = time;
-                // add locale key into asset.data
-                item.data.locale = item.locale;
-                item.uid = item.data.uid;
+                item._event_at = item.data.publish_details.time;
+                item._synced_at = time;
+                item = lodash_1.merge(item, item.data);
+                delete item.data;
+                delete item.content_type_uid;
                 break;
             case 'asset_unpublished':
-                item.content_type_uid = formattedAssetType;
-                item.action = config.contentstack.actions.unpublish;
-                item.locale = item.data.locale;
-                item.uid = item.data.uid;
+                item._content_type_uid = formattedAssetType;
+                item.type = config.contentstack.actions.unpublish;
+                item = lodash_1.merge(item, item.data);
+                delete item.data;
+                delete item.content_type_uid;
                 break;
             case 'asset_deleted':
-                item.content_type_uid = formattedAssetType;
-                item.action = config.contentstack.actions.delete;
-                item.locale = item.data.locale;
-                item.uid = item.data.uid;
+                item._content_type_uid = formattedAssetType;
+                item.type = config.contentstack.actions.delete;
+                item = lodash_1.merge(item, item.data);
+                delete item.data;
+                delete item.content_type_uid;
                 break;
             case 'entry_published':
-                item.action = config.contentstack.actions.publish;
+                item.type = config.contentstack.actions.publish;
                 item._content_type_uid = item.content_type_uid;
-                item.locale = item.data.publish_details.locale;
-                item.uid = item.data.uid;
+                item._locale = item.data.publish_details.locale;
                 // extra keys
-                item.event_at = item.data.publish_details.time;
-                item.synced_at = time;
+                item._event_at = item.data.publish_details.time;
+                item._synced_at = time;
+                item = lodash_1.merge(item, item.data);
+                delete item.data;
+                delete item.content_type_uid;
                 break;
             case 'entry_unpublished':
-                item.action = config.contentstack.actions.unpublish;
-                item.locale = item.data.locale;
-                item.uid = item.data.uid;
+                item._content_type_uid = item.content_type_uid;
+                item.type = config.contentstack.actions.unpublish;
+                item = lodash_1.merge(item, item.data);
+                delete item.data;
+                delete item.content_type_uid;
                 break;
             case 'entry_deleted':
-                item.action = config.contentstack.actions.delete;
-                item.locale = item.data.locale;
-                item.uid = item.data.uid;
+                item._content_type_uid = item.content_type_uid;
+                item.type = config.contentstack.actions.delete;
+                item = lodash_1.merge(item, item.data);
+                delete item.data;
+                delete item.content_type_uid;
                 break;
             case 'content_type_deleted':
-                item.action = config.contentstack.actions.delete;
+                item.type = config.contentstack.actions.delete;
                 item.uid = item.content_type_uid;
-                item.content_type_uid = formattedContentType;
+                item._content_type_uid = formattedContentType;
+                delete item.content_type_uid;
                 break;
             default:
                 break;
@@ -280,17 +288,17 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
                     const asset = lodash_1.find(bucket, (item) => {
                         const newRegexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)', 'g');
                         let urlparts;
-                        while ((urlparts = newRegexp.exec(item.data.url)) !== null) {
-                            return item.data.download_id === urlparts[4];
+                        while ((urlparts = newRegexp.exec(item.url)) !== null) {
+                            return item.download_id === urlparts[4];
                         }
                         return undefined;
                     });
                     if (typeof asset !== 'undefined') {
                         if (isMarkdown) {
-                            parentEntry[key] = parentEntry[key].replace(assetObject.url, `${encodeURI(asset.data._internal_url)}\\n`);
+                            parentEntry[key] = parentEntry[key].replace(assetObject.url, `${encodeURI(asset._internal_url)}\\n`);
                         }
                         else {
-                            parentEntry[key] = parentEntry[key].replace(assetObject.url, encodeURI(asset.data._internal_url));
+                            parentEntry[key] = parentEntry[key].replace(assetObject.url, encodeURI(asset._internal_url));
                         }
                     }
                 }

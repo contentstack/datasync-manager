@@ -209,7 +209,7 @@ const fire = (req) => {
           const contentTypeUids = Object.keys(groupedItems)
           remove(contentTypeUids, (contentTypeUid) => {
             const contentType = groupedItems[contentTypeUid]
-            if (contentType.length === 1 && !contentType[0].data.publish_details) {
+            if (contentType.length === 1 && !contentType[0].publish_details) {
               Q.push(contentType[0])
 
               return true
@@ -230,7 +230,7 @@ const fire = (req) => {
                 if (schemaResponse.content_type) {
                   const items = groupedItems[uid]
                   items.forEach((entry) => {
-                    entry.content_type = cloneDeep(schemaResponse.content_type)
+                    entry._content_type = cloneDeep(schemaResponse.content_type)
                     Q.push(entry)
                   })
 

@@ -1,14 +1,36 @@
 const { cloneDeep } = require('lodash')
 
-exports.buildAssetReferences = (entry, schema) => {
-  return buildContentReferences(entry, schema, [], true)
+exports.buildReferences = (entry, schema) => {
+  for (let i = 0, c = schema.length; i < c; i++) {
+    switch (schema[i].data_type) {
+    case 'reference':
+      if (!(schema[i].reference_to instanceof Array)) {
+        parent.push(schema[i].uid)
+        update(parent, schema[i].reference_to, entry)
+        parent.pop()
+      }
+      break
+    case 'group':
+      parent.push(schema[i].uid)
+      this.buildReferences(entry, schema[i].schema, parent)
+      parent.pop()
+      break
+    case 'blocks':
+      for (let j = 0, d = schema[i].blocks.length; j < d; j++) {
+        parent.push(schema[i].uid)
+        parent.push(schema[i].blocks[j].uid)
+        this.buildReferences(entry, schema[i].blocks[j].schema, parent)
+        parent.pop()
+        parent.pop()
+      }
+      break
+    }
+  }
+
+  return entry
 }
 
-exports.buildEntryReferences = (entry, schema) => {
-  return buildContentReferences(entry, schema, [], false)
-}
-
-exports.buildReferences = (schema, entryReferences = {}, assetReferences = {}, parent) => {
+exports.buildReferencePaths = (schema, entryReferences = {}, assetReferences = {}, parent) => {
   for (let i = 0, l = schema.length; i < l; i++) {
     const field = schema[i]
     if (field && field.data_type) {
@@ -19,13 +41,13 @@ exports.buildReferences = (schema, entryReferences = {}, assetReferences = {}, p
         const fieldPath = ((parent) ? `${parent}.${field.uid}`: field.uid)
         assetReferences[fieldPath] = '_assets'
       } else if (field.data_type === 'group' && field.schema) {
-        this.buildReferences(field.schema, entryReferences, assetReferences, ((parent) ? `${parent}.${field.uid}`: field.uid))
+        this.buildReferencePaths(field.schema, entryReferences, assetReferences, ((parent) ? `${parent}.${field.uid}`: field.uid))
       } else if (field.data_type === 'blocks' && Array.isArray(field.blocks)) {
         const blockParent = ((parent)) ? `${parent}.${field.uid}`: `${field.uid}`
         field.blocks.forEach((block) => {
           if (block && block.schema && Array.isArray(block.schema)) {
             let subBlockParent = `${blockParent}.${block.uid}`
-            this.buildReferences(block.schema, entryReferences, assetReferences, subBlockParent)
+            this.buildReferencePaths(block.schema, entryReferences, assetReferences, subBlockParent)
           }
         })
       }
@@ -33,43 +55,6 @@ exports.buildReferences = (schema, entryReferences = {}, assetReferences = {}, p
   }
 
   return { entryReferences, assetReferences }
-}
-
-const buildContentReferences = (entry, schema, parent = [], isAsset) => {
-  for (let i = 0, c = schema.length; i < c; i++) {
-    switch (schema[i].data_type) {
-    case 'reference':
-      if (!(isAsset) && !(schema[i].reference_to instanceof Array)) {
-        parent.push(schema[i].uid)
-        update(parent, schema[i].reference_to, entry)
-        parent.pop()
-      }
-      break
-    case 'file':
-      if (isAsset) {
-        parent.push(schema[i].uid)
-        update(parent, '_assets', entry)
-        parent.pop()
-      }
-      break
-    case 'group':
-      parent.push(schema[i].uid)
-      buildContentReferences(entry, schema[i].schema, parent, isAsset)
-      parent.pop()
-      break
-    case 'blocks':
-      for (let j = 0, d = schema[i].blocks.length; j < d; j++) {
-        parent.push(schema[i].uid)
-        parent.push(schema[i].blocks[j].uid)
-        buildContentReferences(entry, schema[i].blocks[j].schema, parent, isAsset)
-        parent.pop()
-        parent.pop()
-      }
-      break
-    }
-  }
-
-  return entry
 }
 
 const update = (parent, reference, entry) => {
@@ -91,23 +76,7 @@ const update = (parent, reference, entry) => {
           } else {
             entry[parent[j]] = {
               _content_type_uid: reference,
-              uid: entry[parent[j]],
-            }
-          }
-        } else {
-          if (Array.isArray(entry[parent[j]])) {
-            const assetsArr = []
-            for (let k = 0; k < entry[parent[j]].length; k++) {
-              assetsArr.push({
-                _content_type_uid: '_assets',
-                uid: entry[parent[j]][k]
-              })
-            }
-            entry[parent[j]] = assetsArr
-          } else {
-            entry[parent[j]] = {
-              _content_type_uid: reference,
-              uid: entry[parent[j]],
+              uid: [entry[parent[j]]],
             }
           }
         }
@@ -124,10 +93,6 @@ const update = (parent, reference, entry) => {
       }
     }
   }
-}
-
-exports.hasAssets = (schema) => {
-  return checkReferences(schema, 'asset')
 }
 
 exports.hasRteOrMarkdown = (schema) => {
@@ -173,9 +138,9 @@ const checkReferences = (schema, key) => {
     if (typeof schema === 'object' && Array.isArray(schema)) {
       for (let i = 0, j = schema.length; i < j; i++) {
         const field = schema[i]
-        if (field && field.data_type === 'file' && (key === 'asset' || typeof key === 'object')) {
+        if (field && field.data_type === 'file' && typeof key === 'object') {
           return true
-        } else if (field && field.reference_to && (key === 'entry' || typeof key === 'object')) {
+        } else if (field && field.reference_to) {
           return true
         } else if (field && field.data_type === 'group' && field.schema) {
           if (checkReferences(field.schema, key)) {
@@ -210,10 +175,9 @@ exports.buildAssetObject = (asset, locale) => {
   asset.filename = matches[5]
 
   return {
-    content_type_uid: '_assets',
     _content_type_uid: '_assets',
-    data: asset,
-    action: 'publish',
+    ...asset,
+    type: 'publish',
     locale,
     uid: asset.uid
   }

@@ -64,7 +64,7 @@ export class Q extends EventEmitter {
       this.iLock = true
       lock()
     }
-    debug(`Content type '${data.content_type_uid}' received for '${data.action}'`)
+    debug(`Content type '${data._content_type_uid}' received for '${data.type}'`)
     this.emit('next')
   }
 
@@ -78,7 +78,7 @@ export class Q extends EventEmitter {
       this.iLock = true
       lock()
     }
-    debug(`Content type '${data.content_type_uid}' received for '${data.action}'`)
+    debug(`Content type '${data._content_type_uid}' received for '${data.type}'`)
     this.emit('next')
   }
 
@@ -90,8 +90,8 @@ export class Q extends EventEmitter {
     notify('error', obj)
     logger.error(obj)
     debug(`Error handler called with ${JSON.stringify(obj)}`)
-    if (obj.data.checkpoint) {
-      return saveToken(obj.data.checkpoint.name, obj.data.checkpoint.token).then(() => {
+    if (obj.checkpoint) {
+      return saveToken(obj.checkpoint.name, obj.checkpoint.token).then(() => {
         return saveFailedItems(obj).then(() => {
           this.inProgress = false
           this.emit('next')
@@ -151,18 +151,18 @@ export class Q extends EventEmitter {
    */
   private process(data) {
     logger.log(
-      `${data.action.toUpperCase()}ING: { content_type: '${data.content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'}`)
+      `${data.type.toUpperCase()}ING: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'}`)
 
-    notify(data.action, data)
-    switch (data.action) {
+    notify(data.type, data)
+    switch (data.type) {
     case 'publish':
-      this.exec(data, data.action)
+      this.exec(data, data.type)
       break
     case 'unpublish':
-      this.exec(data, data.action)
+      this.exec(data, data.type)
       break
     default:
-      this.exec(data, data.action)
+      this.exec(data, data.type)
       break
     }
   }
@@ -237,7 +237,7 @@ export class Q extends EventEmitter {
         .then(() => {
           debug('After action plugins executed successfully!')
           logger.log(
-            `${action.toUpperCase()}ING: { content_type: '${data.content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'}`)
+            `${action.toUpperCase()}ING: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'}`)
           this.inProgress = false
           this.emit('next', data)
         })
