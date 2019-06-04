@@ -24,10 +24,12 @@ exports.map = (arr, fn, concurrency = 1, resultBucket = []) => {
             }
             resultBucket.push(fn(arr.shift()));
         }
-        return Promise.all(resultBucket).then(() => {
+        return Promise.all(resultBucket)
+            .then(() => {
             return exports.map(arr, fn, concurrency, resultBucket)
                 .then(resolve)
                 .catch(reject);
-        }).catch(reject);
+        })
+            .catch(reject);
     });
 };

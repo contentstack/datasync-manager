@@ -126,8 +126,8 @@ exports.validateExternalInput = (data) => {
     if (typeof data.locale !== 'string' || data.locale.length === 0) {
         throw new Error('data.locale should be of type string and not empty!');
     }
-    if (!(lodash_1.isPlainObject(data.data)) || lodash_1.isEmpty(data.data)) {
-        throw new Error('data.data should be of type object and not empty!');
+    if (!(lodash_1.isPlainObject(data)) || lodash_1.isEmpty(data)) {
+        throw new Error('data should be of type object and not empty!');
     }
 };
 /**

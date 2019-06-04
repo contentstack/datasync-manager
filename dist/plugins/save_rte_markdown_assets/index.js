@@ -7,10 +7,10 @@ module.exports = function SaveRteMarkdownAssets() {
     SaveRteMarkdownAssets.beforeSync = (data, action) => {
         return new Promise((resolve, reject) => {
             try {
-                if (action !== 'publish' || data.content_type_uid === '_assets' || !(helper.hasRteOrMarkdown(data.content_type.schema))) {
+                if (action !== 'publish' || data._content_type_uid === '_assets' || !(helper.hasRteOrMarkdown(data._content_type.schema))) {
                     return resolve(data);
                 }
-                let assets = util.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, [], true);
+                let assets = util.getOrSetRTEMarkdownAssets(data._content_type.schema, data, [], true);
                 // if no assets were found in the RTE/Markdown
                 if (assets.length === 0) {
                     return resolve(data);
@@ -21,16 +21,16 @@ module.exports = function SaveRteMarkdownAssets() {
                 const assetBucket = [];
                 assets.forEach((asset) => {
                     assetBucket.push(index.getAssetLocation(asset).then((location) => {
-                        asset.data._internal_url = location;
+                        asset._internal_url = location;
                     }));
                 });
                 return Promise.all(assetBucket)
                     .then(() => {
-                    data.data = util.getOrSetRTEMarkdownAssets(data.content_type.schema, data.data, assets, false);
+                    data = util.getOrSetRTEMarkdownAssets(data._content_type.schema, data, assets, false);
                     // unshift the entry back into 'Q'
                     // index.unshift(data)
                     assets.forEach((asset) => {
-                        if (asset && typeof asset === 'object' && asset.data) {
+                        if (asset && typeof asset === 'object') {
                             // unshift all assets into the 'Q'
                             index.unshift(asset);
                         }

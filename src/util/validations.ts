@@ -136,8 +136,8 @@ export const validateExternalInput = (data) => {
     throw new Error('data.locale should be of type string and not empty!')
   }
 
-  if (!(isPlainObject(data.data)) || isEmpty(data.data)) {
-    throw new Error('data.data should be of type object and not empty!')
+  if (!(isPlainObject(data)) || isEmpty(data)) {
+    throw new Error('data should be of type object and not empty!')
   }
 }
 

@@ -5,10 +5,10 @@ module.exports = function TransformEntries() {
     TransformEntries.beforeSync = (data, action) => {
         return new Promise((resolve, reject) => {
             try {
-                if (action !== 'publish' || data.content_type_uid === '_assets' || !(helper.hasReferences(data.content_type.schema))) {
+                if (action !== 'publish' || data._content_type_uid === '_assets' || !(helper.hasReferences(data._content_type.schema))) {
                     return resolve(data);
                 }
-                helper.buildEntryReferences(data.data, data.content_type.schema);
+                helper.buildReferences(data, data._content_type.schema);
                 return resolve(data);
             }
             catch (error) {
