@@ -1,6 +1,6 @@
 "use strict";
 const { cloneDeep } = require('lodash');
-exports.buildReferences = (entry, schema) => {
+exports.buildReferences = (entry, schema, parent = []) => {
     for (let i = 0, c = schema.length; i < c; i++) {
         switch (schema[i].data_type) {
             case 'reference':
@@ -108,14 +108,14 @@ exports.hasRteOrMarkdown = (schema) => {
                     return true;
                 }
                 else if (field && field.data_type === 'group' && field.schema) {
-                    if (this.hasRteOrMarkdown(field.schema, key)) {
+                    if (this.hasRteOrMarkdown(field.schema)) {
                         return true;
                     }
                     continue;
                 }
                 else if (field && field.data_type === 'blocks' && field.blocks) {
                     for (let x = 0, y = field.blocks; x < y; x++) {
-                        if (this.hasRteOrMarkdown(field.blocks[x].schema, key)) {
+                        if (this.hasRteOrMarkdown(field.blocks[x].schema)) {
                             return true;
                         }
                     }

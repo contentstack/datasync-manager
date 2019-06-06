@@ -208,6 +208,12 @@ const assetPublishedStructure = (asset) => {
   return true
 }
 
+export const validatePlugin = (plugin) => {
+  if (!plugin.name || typeof plugin.name !== 'string' || plugin.name.length < 1) {
+    throw new Error(`Invalid plugin config, 'plugin.name' is a required property!`)
+  }
+}
+
 const entryPublishedStructure = (entry) => {
   const requiredKeys = ['content_type_uid', 'data', 'data.uid', 'data.publish_details',
     'data.publish_details.locale',

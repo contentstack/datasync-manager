@@ -5,10 +5,9 @@
 */
 
 import Debug from 'debug'
-import { existsSync } from 'fs'
 import { hasIn } from 'lodash'
-import { join, resolve } from 'path'
-import { logger } from '../util/logger'
+import { normalizePluginPath } from '../util/index'
+import { validatePlugin } from '../util/validations'
 
 const debug = Debug('plugins')
 const pluginMethods = ['beforeSync', 'afterSync']
@@ -30,43 +29,39 @@ export const load = (config) => {
     pluginInstances.internal[pluginMethod] = pluginInstances[pluginMethod] || []
   })
 
-  for (const pluginName of Object.keys(plugins)) {
+  plugins.forEach((plugin) => {
+    validatePlugin(plugin)
+
+    const pluginName = plugin.name
     const slicedName = pluginName.slice(0, 13)
-    let pluginPath
+    let isInternal = false
     if (slicedName === '_cs_internal_') {
-      // load internal plugins
-      pluginPath = join(__dirname, '..', 'plugins', pluginName.slice(13), 'index.js')
-    } else {
-      // external plugins
-      pluginPath = resolve(join(config.paths.plugin, pluginName, 'index.js'))
+      isInternal = true
     }
 
-    if (existsSync(pluginPath)) {
-      const Plugin = require(pluginPath)
-      const pluginConfig = plugins[pluginName]
-      Plugin.options = pluginConfig
-      
-      // execute/initiate plugin
-      Plugin()
-      
-      pluginMethods.forEach((pluginMethod) => {
-        if (hasIn(Plugin, pluginMethod)) {
-          if (slicedName === '_cs_internal_') {
-            if (!(pluginConfig.disabled)) {
-              pluginInstances.internal[pluginMethod].push(Plugin[pluginMethod])
-            }
-          } else {
-            pluginInstances.external[pluginMethod].push(Plugin[pluginMethod])
-          }
-          debug(`${pluginMethod} loaded from ${pluginName} successfully!`)
+    const pluginPath = normalizePluginPath(config, plugin, isInternal)
+
+    const Plugin = require(pluginPath)
+    Plugin.options = plugin.options
+    
+    // execute/initiate plugin
+    Plugin()
+    
+    pluginMethods.forEach((pluginMethod) => {
+      if (hasIn(Plugin, pluginMethod)) {
+        if (plugin.disabled) {
+          // do nothing
+        } else if (isInternal) {
+          pluginInstances.internal[pluginMethod].push(Plugin[pluginMethod])
         } else {
-          debug(`${pluginMethod} not found in ${pluginName}`)
+          pluginInstances.external[pluginMethod].push(Plugin[pluginMethod])
         }
-      })
-    } else {
-      logger.warn(`Unable to load ${pluginName} plugin since ${pluginPath} was not found!`)
-    }
-  }
+        debug(`${pluginMethod} loaded from ${pluginName} successfully!`)
+      } else {
+        debug(`${pluginMethod} not found in ${pluginName}`)
+      }
+    })
+  })
   debug('Plugins loaded successfully!')
 
   return pluginInstances
