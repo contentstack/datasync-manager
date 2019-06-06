@@ -9,10 +9,9 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
-const fs_1 = require("fs");
 const lodash_1 = require("lodash");
-const path_1 = require("path");
-const logger_1 = require("../util/logger");
+const index_1 = require("../util/index");
+const validations_1 = require("../util/validations");
 const debug = debug_1.default('plugins');
 const pluginMethods = ['beforeSync', 'afterSync'];
 /**
@@ -31,44 +30,37 @@ exports.load = (config) => {
         pluginInstances.external[pluginMethod] = pluginInstances[pluginMethod] || [];
         pluginInstances.internal[pluginMethod] = pluginInstances[pluginMethod] || [];
     });
-    for (const pluginName of Object.keys(plugins)) {
+    plugins.forEach((plugin) => {
+        validations_1.validatePlugin(plugin);
+        const pluginName = plugin.name;
         const slicedName = pluginName.slice(0, 13);
-        let pluginPath;
+        let isInternal = false;
         if (slicedName === '_cs_internal_') {
-            // load internal plugins
-            pluginPath = path_1.join(__dirname, '..', 'plugins', pluginName.slice(13), 'index.js');
+            isInternal = true;
         }
-        else {
-            // external plugins
-            pluginPath = path_1.resolve(path_1.join(config.paths.plugin, pluginName, 'index.js'));
-        }
-        if (fs_1.existsSync(pluginPath)) {
-            const Plugin = require(pluginPath);
-            const pluginConfig = plugins[pluginName];
-            Plugin.options = pluginConfig;
-            // execute/initiate plugin
-            Plugin();
-            pluginMethods.forEach((pluginMethod) => {
-                if (lodash_1.hasIn(Plugin, pluginMethod)) {
-                    if (slicedName === '_cs_internal_') {
-                        if (!(pluginConfig.disabled)) {
-                            pluginInstances.internal[pluginMethod].push(Plugin[pluginMethod]);
-                        }
-                    }
-                    else {
-                        pluginInstances.external[pluginMethod].push(Plugin[pluginMethod]);
-                    }
-                    debug(`${pluginMethod} loaded from ${pluginName} successfully!`);
+        const pluginPath = index_1.normalizePluginPath(config, plugin, isInternal);
+        const Plugin = require(pluginPath);
+        Plugin.options = plugin.options;
+        // execute/initiate plugin
+        Plugin();
+        pluginMethods.forEach((pluginMethod) => {
+            if (lodash_1.hasIn(Plugin, pluginMethod)) {
+                if (plugin.disabled) {
+                    // do nothing
+                }
+                else if (isInternal) {
+                    pluginInstances.internal[pluginMethod].push(Plugin[pluginMethod]);
                 }
                 else {
-                    debug(`${pluginMethod} not found in ${pluginName}`);
+                    pluginInstances.external[pluginMethod].push(Plugin[pluginMethod]);
                 }
-            });
-        }
-        else {
-            logger_1.logger.warn(`Unable to load ${pluginName} plugin since ${pluginPath} was not found!`);
-        }
-    }
+                debug(`${pluginMethod} loaded from ${pluginName} successfully!`);
+            }
+            else {
+                debug(`${pluginMethod} not found in ${pluginName}`);
+            }
+        });
+    });
     debug('Plugins loaded successfully!');
     return pluginInstances;
 };

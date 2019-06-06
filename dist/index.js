@@ -155,7 +155,8 @@ exports.start = (config = {}) => {
             }).then(() => {
                 logger_1.logger.info('Contentstack sync utility started successfully!');
                 return resolve();
-            }).catch(reject);
+            })
+            .catch(reject);
         }
         catch (error) {
             return reject(error);
