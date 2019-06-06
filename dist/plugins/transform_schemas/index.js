@@ -8,7 +8,7 @@ module.exports = function TransformSchemas() {
                 if (action !== 'publish' || data._content_type_uid === '_assets' || !(helper.hasAssetsOrReferences(data._content_type.schema))) {
                     return resolve(data);
                 }
-                const transformations = helper.buildReferences(data._content_type.schema);
+                const transformations = helper.buildReferencePaths(data._content_type.schema);
                 if (options.logAssetPaths) {
                     data._content_type._assets = transformations.assetReferences;
                 }

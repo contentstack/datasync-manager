@@ -19,6 +19,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const marked_1 = __importDefault(require("marked"));
+const path_1 = require("path");
 const index_1 = require("../index");
 const fs_1 = require("./fs");
 const logger_1 = require("./logger");
@@ -125,9 +126,8 @@ exports.formatItems = (items, config) => {
             case 'asset_published':
                 item._content_type_uid = formattedAssetType;
                 item.type = config.contentstack.actions.publish;
-                item._locale = item.data.publish_details.locale;
+                item.locale = item.data.publish_details.locale;
                 // extra keys
-                item._event_at = item.data.publish_details.time;
                 item._synced_at = time;
                 item = lodash_1.merge(item, item.data);
                 delete item.data;
@@ -150,9 +150,8 @@ exports.formatItems = (items, config) => {
             case 'entry_published':
                 item.type = config.contentstack.actions.publish;
                 item._content_type_uid = item.content_type_uid;
-                item._locale = item.data.publish_details.locale;
+                item.locale = item.data.publish_details.locale;
                 // extra keys
-                item._event_at = item.data.publish_details.time;
                 item._synced_at = time;
                 item = lodash_1.merge(item, item.data);
                 delete item.data;
@@ -375,4 +374,31 @@ exports.getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotReplac
         return bucket;
     }
     return entry;
+};
+exports.normalizePluginPath = (config, plugin, isInternal) => {
+    let pluginPath;
+    if (plugin.path && typeof plugin.path === 'string' && plugin.path.length > 0) {
+        if (path_1.isAbsolute(plugin.path)) {
+            if (!fs_1.existsSync(plugin.path)) {
+                throw new Error(`${plugin.path} does not exist!`);
+            }
+            return plugin.path;
+        }
+        pluginPath = path_1.resolve(path_1.join(config.paths.baseDir, plugin.name, 'index.js'));
+        if (!fs_1.existsSync(pluginPath)) {
+            throw new Error(`${pluginPath} does not exist!`);
+        }
+        return pluginPath;
+    }
+    if (isInternal) {
+        pluginPath = path_1.join(__dirname, '..', 'plugins', plugin.name.slice(13), 'index.js');
+        if (fs_1.existsSync(pluginPath)) {
+            return pluginPath;
+        }
+    }
+    pluginPath = path_1.resolve(path_1.join(config.paths.plugin, plugin.name, 'index.js'));
+    if (!fs_1.existsSync(pluginPath)) {
+        throw new Error(`Unable to find plugin: ${JSON.stringify(plugin)}`);
+    }
+    return pluginPath;
 };

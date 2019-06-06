@@ -10,7 +10,7 @@ module.exports = function TransformSchemas () {
           return resolve(data)
         }
 
-        const transformations = helper.buildReferences(data._content_type.schema)
+        const transformations = helper.buildReferencePaths(data._content_type.schema)
 
         if (options.logAssetPaths) {
           data._content_type._assets = transformations.assetReferences

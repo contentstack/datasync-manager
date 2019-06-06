@@ -31,22 +31,31 @@ exports.config = {
     },
     listener: {},
     locales: [],
-    plugins: {
-        _cs_internal_transform_entries: {
+    plugins: [
+        {
+            name: '_cs_internal_transform_entries',
+            // path: '',
             disabled: false,
+            options: {
+            // other overrides...
+            },
         },
-        _cs_internal_transform_assets: {
+        {
+            name: '_cs_internal_transform_schemas',
             disabled: false,
+            options: {
+                logAssetPaths: true,
+                logReferencePaths: true,
+            },
         },
-        _cs_internal_transform_schemas: {
+        {
+            name: '_cs_internal_save_rte_markdown_assets',
             disabled: false,
-            logAssetPaths: true,
-            logReferencePaths: true,
-        },
-        _cs_internal_save_rte_markdown_assets: {
-            disabled: false,
-        },
-    },
+            options: {
+            // other overrides...
+            },
+        }
+    ],
     syncManager: {
         cooloff: 3000,
         enableAssetReferences: true,

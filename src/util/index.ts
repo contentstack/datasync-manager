@@ -7,6 +7,7 @@
 import Debug from 'debug'
 import { cloneDeep, isEmpty, find, map, merge, remove } from 'lodash'
 import marked from 'marked'
+import { isAbsolute, join, resolve } from 'path'
 import { getConfig } from '../index'
 import { existsSync, mkdirpSync, stat } from './fs'
 import { logger } from './logger'
@@ -122,9 +123,8 @@ export const formatItems = (items, config) => {
       case 'asset_published':
         item._content_type_uid = formattedAssetType
         item.type = config.contentstack.actions.publish
-        item._locale = item.data.publish_details.locale
+        item.locale = item.data.publish_details.locale
         // extra keys
-        item._event_at = item.data.publish_details.time
         item._synced_at = time
         item = merge(item, item.data)
         delete item.data
@@ -147,9 +147,8 @@ export const formatItems = (items, config) => {
       case 'entry_published':
         item.type = config.contentstack.actions.publish
         item._content_type_uid = item.content_type_uid
-        item._locale = item.data.publish_details.locale
+        item.locale = item.data.publish_details.locale
         // extra keys
-        item._event_at = item.data.publish_details.time
         item._synced_at = time
         item = merge(item, item.data)
         delete item.data
@@ -373,4 +372,41 @@ export const getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotR
     return bucket
   }
   return entry
+}
+
+export const normalizePluginPath = (config, plugin, isInternal) => {
+  let pluginPath
+  if (plugin.path && typeof plugin.path === 'string' && plugin.path.length > 0) {
+    if (isAbsolute(plugin.path)) {
+      if (!existsSync(plugin.path)) {
+        throw new Error(`${plugin.path} does not exist!`)
+      }
+
+      return plugin.path
+    }
+
+    pluginPath = resolve(join(config.paths.baseDir, plugin.name, 'index.js'))
+
+    if (!existsSync(pluginPath)) {
+      throw new Error(`${pluginPath} does not exist!`)
+    }
+
+    return pluginPath
+  }
+
+  if (isInternal) {
+    pluginPath = join(__dirname, '..', 'plugins', plugin.name.slice(13), 'index.js')
+
+    if (existsSync(pluginPath)) {
+      return pluginPath
+    }
+  }
+
+  pluginPath = resolve(join(config.paths.plugin, plugin.name, 'index.js'))
+
+  if (!existsSync(pluginPath)) {
+    throw new Error(`Unable to find plugin: ${JSON.stringify(plugin)}`)
+  }
+
+  return pluginPath
 }
