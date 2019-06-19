@@ -18,14 +18,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
-const core_1 = require("./core");
+const index_1 = require("./core/index");
 const inet_1 = require("./core/inet");
 const process_1 = require("./core/process");
 const q_1 = require("./core/q");
 exports.notifications = q_1.notifications;
 const config_1 = require("./config");
 const build_paths_1 = require("./util/build-paths");
-const index_1 = require("./util/index");
+const index_2 = require("./util/index");
 const logger_1 = require("./util/logger");
 const validations_1 = require("./util/validations");
 const debug = debug_1.default('registration');
@@ -34,17 +34,16 @@ let appConfig = {};
 let contentStore;
 let assetStore;
 let listener;
-let q;
 exports.push = (data) => {
     validations_1.validateExternalInput(data);
-    q.emit('push', data);
+    index_1.push(data);
 };
 exports.unshift = (data) => {
     validations_1.validateExternalInput(data);
-    q.emit('unshift', data);
+    index_1.unshift(data);
 };
 exports.pop = () => {
-    q.emit('pop');
+    index_1.pop();
 };
 exports.getAssetLocation = (asset) => {
     return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
@@ -143,20 +142,18 @@ exports.start = (config = {}) => {
             }).then((contentStoreInstance) => {
                 debug('Content store instance has returned successfully!');
                 validations_1.validateContentStoreInstance(contentStoreInstance);
-                appConfig = index_1.formatSyncFilters(appConfig);
-                return core_1.init(contentStoreInstance, assetStoreInstance);
+                appConfig = index_2.formatSyncFilters(appConfig);
+                return index_1.init(contentStoreInstance, assetStoreInstance);
             }).then(() => {
                 debug('Sync Manager initiated successfully!');
-                listener.register(core_1.poke);
+                listener.register(index_1.poke);
                 // start checking for inet 10 secs after the app has started
                 inet_1.init();
-                q = new q_1.Q({}, {}, {});
                 return listener.start(appConfig);
             }).then(() => {
                 logger_1.logger.info('Contentstack sync utility started successfully!');
                 return resolve();
-            })
-            .catch(reject);
+            }).catch(reject);
         }
         catch (error) {
             return reject(error);

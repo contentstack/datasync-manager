@@ -1,7 +1,7 @@
 import { cloneDeep, merge } from 'lodash'
 import { setConfig } from '../../src'
 import { Q, notifications } from '../../src/core/q'
-import { config as internalConfig } from '../../src/defaults'
+import { config as internalConfig } from '../../src/config'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
@@ -20,7 +20,7 @@ test('error handler should work fine', () => {
   const q = new Q(contentConnector, assetConnector, configs)
   const errorObject = {
     data: {
-      checkpoint: {
+      _checkpoint: {
         name: 'dummyCheckpointName',
         token: 'dummyCheckpointToken',
       },

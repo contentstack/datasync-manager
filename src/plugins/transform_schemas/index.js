@@ -3,23 +3,23 @@ const helper = require('../helper')
 module.exports = function TransformSchemas () {
   const options = TransformSchemas.options
 
-  TransformSchemas.beforeSync = (data, action) => {
+  TransformSchemas.beforeSync = (action, data, schema) => {
     return new Promise((resolve, reject) => {
       try {
-        if (action !== 'publish' || data._content_type_uid === '_assets' || !(helper.hasAssetsOrReferences(data._content_type.schema))) {
+        if (action !== 'publish' || data._content_type_uid === '_assets' || !(helper.hasAssetsOrReferences(schema.schema))) {
           return resolve(data)
         }
 
-        const transformations = helper.buildReferencePaths(data._content_type.schema)
+        const transformations = helper.buildReferencePaths(schema.schema)
 
         if (options.logAssetPaths) {
-          data._content_type._assets = transformations.assetReferences
+          schema._assets = transformations.assetReferences
         }
         if (options.logReferencePaths) {
-          data._content_type._references = transformations.entryReferences
+          schema._references = transformations.entryReferences
         }
 
-        return resolve(data)
+        return resolve({data, schema})
       } catch (error) {
         return reject(error)
       }

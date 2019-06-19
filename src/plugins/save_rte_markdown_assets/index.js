@@ -5,15 +5,15 @@ const util = require('../../util/index')
 module.exports = function SaveRteMarkdownAssets () {
   const options = SaveRteMarkdownAssets.options
 
-  SaveRteMarkdownAssets.beforeSync = (data, action) => {
+  SaveRteMarkdownAssets.beforeSync = (action, data, schema) => {
     return new Promise((resolve, reject) => {
       try {
-        if (action !== 'publish' || data._content_type_uid === '_assets' || !(helper.hasRteOrMarkdown(data._content_type.schema))) {
+        if (action !== 'publish' || data._content_type_uid === '_assets' || !(helper.hasRteOrMarkdown(schema.schema))) {
 
           return resolve(data)
         }
 
-        let assets = util.getOrSetRTEMarkdownAssets(data._content_type.schema, data, [], true)
+        let assets = util.getOrSetRTEMarkdownAssets(schema.schema, data, [], true)
 
         // if no assets were found in the RTE/Markdown
         if (assets.length === 0) {
@@ -35,7 +35,7 @@ module.exports = function SaveRteMarkdownAssets () {
 
         return Promise.all(assetBucket)
           .then(() => {
-            data = util.getOrSetRTEMarkdownAssets(data._content_type.schema, data, assets, false)
+            data = util.getOrSetRTEMarkdownAssets(schema.schema, data, assets, false)
             // unshift the entry back into 'Q'
             // index.unshift(data)
             assets.forEach((asset) => {
@@ -47,7 +47,7 @@ module.exports = function SaveRteMarkdownAssets () {
 
             return
           })
-          .then(resolve)
+          .then(() => resolve({data, schema}))
           .catch(reject)
       } catch (error) {
         return reject(error)

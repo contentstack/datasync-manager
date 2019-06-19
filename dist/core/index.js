@@ -82,6 +82,15 @@ exports.init = (contentStore, assetStore) => {
         }
     });
 };
+exports.push = (data) => {
+    Q.emit('push', data);
+};
+exports.unshift = (data) => {
+    Q.emit('push', data);
+};
+exports.pop = () => {
+    Q.emit('pop');
+};
 /**
  * @description Notifies the sync manager utility to wake up and start syncing..
  */

@@ -1,16 +1,12 @@
 import { cloneDeep, merge } from 'lodash'
 import { setConfig } from '../../src'
-import { config as internalConfig } from '../../src/defaults'
+import { config as internalConfig } from '../../src/config'
 import { buildConfigPaths } from '../../src/util/build-paths'
-import { buildContentReferences, filterItems, formatItems } from '../../src/util'
+import { filterItems, formatItems } from '../../src/util'
 import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
 import { response } from '../dummy/filter-items'
-import { schema } from '../dummy/references-content-type' 
-import { entry as inputEntry } from '../dummy/references-entry'
-import { entry as outputEntry } from '../dummy/references-entry-expected'
 
-const formattedAssetType = '_assets'
 const conf: any = cloneDeep(merge({}, internalConfig, config))
 
 describe('core-utilities', () => {
@@ -23,6 +19,8 @@ describe('core-utilities', () => {
     test('format items: asset publish', () => {
       const items = [
         {
+          action: 'publish',
+          content_type_uid: 'sys_assets',
           data: {
             publish_details: {
               locale: 'en-us',
@@ -33,29 +31,19 @@ describe('core-utilities', () => {
         },
       ]
       const configs = cloneDeep(merge({}, internalConfig, config))
-      const modifiedItems = [
-        {
-          action: configs.contentstack.actions.publish,
-          content_type_uid:  formattedAssetType,
-          data: {
-            locale: 'en-us',
-            publish_details: {
-              locale: 'en-us',
-            },
-            uid: 'a1',
-          },
-          locale: items[0].data.publish_details.locale,
-          type: 'asset_published',
-          uid: items[0].data.uid,
-        },
-      ]
-      expect(formatItems(items, configs)).toEqual(modifiedItems)
-      // expect(items[0]).toEqual(modifiedItems[0])
+
+      const formattedItem = formatItems(items, configs)[0]
+      expect(formattedItem).toHaveProperty('_content_type_uid')
+      expect(formattedItem).not.toHaveProperty('content_type_uid')
+      expect(formattedItem).toHaveProperty('_synced_at')
+      expect(formattedItem).toHaveProperty('action')
     })
 
     test('asset unpublish should work without errors', () => {
       const items = [
         {
+          action: 'unpublish',
+          content_type_uid: 'sys_assets',
           data: {
             locale: 'en-us',
             uid: 'a1',
@@ -65,26 +53,18 @@ describe('core-utilities', () => {
       ]
 
       const configs = cloneDeep(merge({}, internalConfig, config))
-      const modifiedItems = [
-        {
-          action: configs.contentstack.actions.unpublish,
-          content_type_uid:  formattedAssetType,
-          data: {
-            locale: 'en-us',
-            uid: 'a1',
-          },
-          locale: items[0].data.locale,
-          type: 'asset_unpublished',
-          uid: items[0].data.uid,
-        },
-      ]
-      expect(formatItems(items, configs)).toEqual(modifiedItems)
-      // expect(items[0]).toEqual(modifiedItems[0])
+      const formattedItem = formatItems(items, configs)[0]
+      expect(formattedItem).toHaveProperty('_content_type_uid')
+      expect(formattedItem).not.toHaveProperty('content_type_uid')
+      expect(formattedItem).not.toHaveProperty('_synced_at')
+      expect(formattedItem).toHaveProperty('action')
     })
 
     test('asset delete should work without errors', () => {
       const items = [
         {
+          action: 'delete',
+          content_type_uid: 'sys_assets',
           data: {
             locale: 'en-us',
             uid: 'a1',
@@ -94,21 +74,11 @@ describe('core-utilities', () => {
       ]
 
       const configs = cloneDeep(merge({}, internalConfig, config))
-      const modifiedItems = [
-        {
-          action: configs.contentstack.actions.delete,
-          content_type_uid:  formattedAssetType,
-          data: {
-            locale: 'en-us',
-            uid: 'a1',
-          },
-          locale: items[0].data.locale,
-          type: 'asset_deleted',
-          uid: items[0].data.uid,
-        },
-      ]
-      expect(formatItems(items, configs)).toEqual(modifiedItems)
-      // expect(items[0]).toEqual(modifiedItems[0])
+      const formattedItem = formatItems(items, configs)[0]
+      expect(formattedItem).toHaveProperty('_content_type_uid')
+      expect(formattedItem).not.toHaveProperty('content_type_uid')
+      expect(formattedItem).not.toHaveProperty('_synced_at')
+      expect(formattedItem).toHaveProperty('action')
     })
 
     test('entry publish should work without errors', () => {
@@ -121,27 +91,16 @@ describe('core-utilities', () => {
             },
             uid: 'e1',
           },
+          action: 'publish',
           type: 'entry_published',
         },
       ]
       const configs = cloneDeep(merge({}, internalConfig, config))
-      const modifiedItems = [
-        {
-          action: configs.contentstack.actions.publish,
-          content_type_uid:  'ct1',
-          data: {
-            publish_details: {
-              locale: 'en-us',
-            },
-            uid: 'e1',
-          },
-          locale: items[0].data.publish_details.locale,
-          type: 'entry_published',
-          uid: items[0].data.uid,
-        },
-      ]
-      expect(formatItems(items, configs)).toEqual(modifiedItems)
-      // expect(items[0]).toEqual(modifiedItems[0])
+      const formattedItem = formatItems(items, configs)[0]
+      expect(formattedItem).toHaveProperty('_content_type_uid')
+      expect(formattedItem).not.toHaveProperty('content_type_uid')
+      expect(formattedItem).toHaveProperty('_synced_at')
+      expect(formattedItem).toHaveProperty('action')
     })
 
     test('entry unpublish should work without errors', () => {
@@ -156,26 +115,17 @@ describe('core-utilities', () => {
         },
       ]
       const configs = cloneDeep(merge({}, internalConfig, config))
-      const modifiedItems = [
-        {
-          action: configs.contentstack.actions.unpublish,
-          content_type_uid:  'ct1',
-          data: {
-            locale: 'en-us',
-            uid: 'e1',
-          },
-          locale: items[0].data.locale,
-          type: 'entry_unpublished',
-          uid: items[0].data.uid,
-        },
-      ]
-      expect(formatItems(items, configs)).toEqual(modifiedItems)
-      // expect(items[0]).toEqual(modifiedItems[0])
+      const formattedItem = formatItems(items, configs)[0]
+      expect(formattedItem).toHaveProperty('_content_type_uid')
+      expect(formattedItem).not.toHaveProperty('content_type_uid')
+      expect(formattedItem).not.toHaveProperty('_synced_at')
+
     })
 
     test('entry delete should work without errors', () => {
       const items = [
         {
+          action: 'delete',
           content_type_uid: 'ct1',
           data: {
             locale: 'en-us',
@@ -185,21 +135,11 @@ describe('core-utilities', () => {
         },
       ]
       const configs = cloneDeep(merge({}, internalConfig, config))
-      const modifiedItems = [
-        {
-          action: configs.contentstack.actions.delete,
-          content_type_uid:  'ct1',
-          data: {
-            locale: 'en-us',
-            uid: 'e1',
-          },
-          locale: items[0].data.locale,
-          type: 'entry_deleted',
-          uid: items[0].data.uid,
-        },
-      ]
-      expect(formatItems(items, configs)).toEqual(modifiedItems)
-      // expect(items[0]).toEqual(modifiedItems[0])
+      const formattedItem = formatItems(items, configs)[0]
+      expect(formattedItem).toHaveProperty('_content_type_uid')
+      expect(formattedItem).not.toHaveProperty('content_type_uid')
+      expect(formattedItem).not.toHaveProperty('_synced_at')
+      expect(formattedItem).toHaveProperty('action')
     })
   })
 
@@ -217,12 +157,6 @@ describe('core-utilities', () => {
       }).catch((error) => {
         expect(error).toBeNull()
       })
-    })
-  })
-
-  describe('buildContentReferences', () => {
-    test('building entry references should work without errors', () => {
-      expect(buildContentReferences(schema, inputEntry, [])).toEqual(outputEntry)
     })
   })
 })

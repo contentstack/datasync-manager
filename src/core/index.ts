@@ -17,6 +17,31 @@ import { map } from '../util/promise.map'
 import { Q as Queue } from './q'
 import { getToken, saveCheckpoint } from './token-management'
 
+interface IQueryString {
+  init?: true,
+  pagination_token?: string,
+  sync_token?: string,
+}
+
+interface IApiRequest {
+  qs: IQueryString,
+  path?: string,
+}
+
+interface IItem {
+  content_type_uid: string,
+  data: any,
+  event_at: string,
+  locale?: string,
+}
+
+interface ISyncResponse {
+  items: IItem[],
+  pagination_token?: string,
+  sync_token?: string,
+  limit?: number,
+}
+
 interface IToken {
   name: string
   token: string
@@ -82,6 +107,18 @@ export const init = (contentStore, assetStore) => {
       return reject(error)
     }
   })
+}
+
+export const push = (data) => {
+  Q.emit('push', data)
+}
+
+export const unshift = (data) => {
+  Q.emit('push', data)
+}
+
+export const pop = () => {
+  Q.emit('pop')
 }
 
 /**
@@ -154,7 +191,7 @@ export const lock = () => {
 /**
  * @description Used to unlock the 'sync' process in case of errors/exceptions
  */
-export const unlock = (refire ? ) => {
+export const unlock = (refire?: boolean) => {
   debug('Contentstack sync unlocked..', refire)
   flag.lockdown = false
   if (typeof refire === 'boolean' && refire) {
@@ -172,17 +209,17 @@ export const unlock = (refire ? ) => {
  * @description Description required
  * @param {Object} req - Contentstack sync API request object
  */
-const fire = (req) => {
+const fire = (req: IApiRequest) => {
   debug(`Fire called with: ${JSON.stringify(req)}`)
   flag.SQ = true
 
   return new Promise((resolve, reject) => {
-    return get(req).then((response) => {
+    return get(req).then((response: ISyncResponse) => {
       delete req.qs.init
       delete req.qs.pagination_token
       delete req.qs.sync_token
       delete req.path
-      const syncResponse: any = response
+      const syncResponse: ISyncResponse = response
       if (syncResponse.items.length) {
         return filterItems(syncResponse, config).then(() => {
           if (syncResponse.items.length === 0) {
