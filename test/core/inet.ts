@@ -1,6 +1,6 @@
 import { cloneDeep, merge } from 'lodash'
 import { setConfig } from '../../src'
-import { config as internalConfig } from '../../src/defaults'
+import { config as internalConfig } from '../../src/config'
 import { checkNetConnectivity, init, netConnectivityIssues } from '../../src/core/inet'
 import { config as mockConfig } from '../dummy/config'
 

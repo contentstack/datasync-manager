@@ -5,7 +5,7 @@ import { join, resolve } from 'path'
 import { sync as rimrafSync } from 'rimraf'
 
 import { setConfig } from '../../src'
-import { config as internalConfig } from '../../src/defaults'
+import { config as internalConfig } from '../../src/config'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { setLogger } from '../../src/util/logger'
 import { saveFilteredItems } from '../../src/util/unprocessible'

@@ -6,10 +6,10 @@
 
 import Debug from 'debug'
 import { merge } from 'lodash'
-import { init, poke } from './core'
+import { init, push as pushQueue, unshift as unshiftQueue, pop as popQueue, poke } from './core/index'
 import { init as pinger } from './core/inet'
 import { configure } from './core/process'
-import { notifications, Q } from './core/q'
+import { notifications } from './core/q'
 import { config as internalConfig } from './config'
 import { buildConfigPaths } from './util/build-paths'
 import { formatSyncFilters } from './util/index'
@@ -32,7 +32,6 @@ let appConfig: any = {}
 let contentStore
 let assetStore
 let listener
-let q
 
 /**
  * @public
@@ -40,9 +39,9 @@ let q
  * @summary Asset store instance interface
  */
 interface IAssetStore {
-  download(): any,
-  unpublish(): any,
-  delete(): any,
+  download<T>(input: T): Promise<{T}>,
+  unpublish<T>(input: T): Promise<{T}>,
+  delete<T>(input: T): Promise<{T}>,
 }
 
 /**
@@ -51,9 +50,9 @@ interface IAssetStore {
  * @summary Content store instance interface
  */
 interface IContentStore {
-  publish(): any,
-  unpublish(): any,
-  delete(): any,
+  publish<T>(input: T): Promise<{T}>,
+  unpublish<T>(input: T): Promise<{T}>,
+  delete<T>(input: T): Promise<{T}>,
 }
 
 /**
@@ -76,22 +75,31 @@ interface ILogger {
   info(): any,
   log(): any,
   error(): any,
+  debug(): any,
 }
 
-export const push = (data: any) => {
-  validateExternalInput(data)
-
-  q.emit('push', data)
+interface IInputData {
+  _content_type_uid: string,
+  uid: string,
+  locale: string,
+  action: string,
+  [propName: string]: any
 }
 
-export const unshift = (data: any) => {
+export const push = (data: IInputData) => {
   validateExternalInput(data)
 
-  q.emit('unshift', data)
+  pushQueue(data)
+}
+
+export const unshift = (data: IInputData) => {
+  validateExternalInput(data)
+
+  unshiftQueue(data)
 }
 
 export const pop = () => {
-  q.emit('pop')
+  popQueue()
 }
 
 export const getAssetLocation = (asset) => {
@@ -215,7 +223,6 @@ export const start = (config: IConfig = {}): Promise<{}> => {
         listener.register(poke)
         // start checking for inet 10 secs after the app has started
         pinger()
-        q = new Q({}, {}, {})
 
         return listener.start(appConfig)
       }).then(() => {

@@ -11,9 +11,9 @@ module.exports = {
   contentStore: {
     dbName: 'references',
     collection: {
-      entry: 'development',
-      asset: 'development',
-      schema: 'development'
+      entry: 'entries',
+      asset: 'assets',
+      schema: 'content_types'
     }
   },
   assetStore: {

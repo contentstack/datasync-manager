@@ -90,8 +90,8 @@ export class Q extends EventEmitter {
     notify('error', obj)
     logger.error(obj)
     debug(`Error handler called with ${JSON.stringify(obj)}`)
-    if (obj.checkpoint) {
-      return saveToken(obj.checkpoint.name, obj.checkpoint.token).then(() => {
+    if (obj._checkpoint) {
+      return saveToken(obj._checkpoint.name, obj._checkpoint.token).then(() => {
         return saveFailedItems(obj).then(() => {
           this.inProgress = false
           this.emit('next')
@@ -127,8 +127,8 @@ export class Q extends EventEmitter {
     if (!this.inProgress && this.q.length) {
       this.inProgress = true
       const item = this.q.shift()
-      if (item.checkpoint) {
-        saveToken(item.checkpoint.name, item.checkpoint.token).then(() => {
+      if (item._checkpoint) {
+        saveToken(item._checkpoint.name, item._checkpoint.token).then(() => {
           this.process(item)
         }).catch((error) => {
           logger.error('Save token failed to save a checkpoint!')
@@ -151,7 +151,7 @@ export class Q extends EventEmitter {
    */
   private process(data) {
     logger.log(
-      `${data.type.toUpperCase()}ING: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'}`)
+      `${data.type.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'} is in progress...`)
 
     notify(data.type, data)
     switch (data.type) {
@@ -179,18 +179,30 @@ export class Q extends EventEmitter {
     try {
       debug(`Exec: ${action}`)
       const beforeSyncInternalPlugins = []
-      let transformedItem
+      let transformedData
+      let transformedSchema
+      let schema
+      if (data._content_type_uid !== '_assets') {
+        schema = data._content_type
+        schema._content_type_uid = '_content_types'
+        schema.event_at = data.event_at
+        schema._synced_at = data._synced_at
+        schema.locale = data.locale
+        delete data._content_type
+      }
 
       this.pluginInstances.internal.beforeSync.forEach((method) => {
-        beforeSyncInternalPlugins.push(() => { return method(data, action) })
+        beforeSyncInternalPlugins.push(() => { return method(action, data, schema) })
       })
 
-      series(beforeSyncInternalPlugins)
+      return series(beforeSyncInternalPlugins)
         .then(() => {
           if (this.config.pluginTransformations) {
-            transformedItem = data
+            transformedData = data
+            transformedSchema = schema
           } else {
-            transformedItem = cloneDeep(data)
+            transformedData = cloneDeep(data)
+            transformedSchema = cloneDeep(schema)
           }
 
           // re-initializing everytime with const.. avoids memory leaks
@@ -198,13 +210,13 @@ export class Q extends EventEmitter {
 
           if (this.config.serializePlugins) {
             this.pluginInstances.external.beforeSync.forEach((method) => {
-              beforeSyncPlugins.push(() => { return method(transformedItem, action) })
+              beforeSyncPlugins.push(() => { return method(action, transformedData, transformedSchema) })
             })
 
             return series(beforeSyncPlugins)
           } else {
             this.pluginInstances.external.beforeSync.forEach((method) => {
-              beforeSyncPlugins.push(method(transformedItem, action))
+              beforeSyncPlugins.push(method(action, transformedData, transformedSchema))
             })
 
             return Promise.all(beforeSyncPlugins)
@@ -216,19 +228,27 @@ export class Q extends EventEmitter {
           return this.contentStore[action](data)
         })
         .then(() => {
+          debug(`Completed '${action}' on connector successfully!`)
+
+          if (typeof schema === 'undefined') {
+            return
+          }
+          return this.contentStore.updateContentType(schema)
+        })
+        .then(() => {
           debug('Connector instance called successfully!')
           // re-initializing everytime with const.. avoids memory leaks
           const afterSyncPlugins = []
 
           if (this.config.serializePlugins) {
             this.pluginInstances.external.afterSync.forEach((method) => {
-              afterSyncPlugins.push(() => { return method(transformedItem, action) })
+              afterSyncPlugins.push(() => { return method(action, transformedData, transformedSchema) })
             })
 
             return series(afterSyncPlugins)
           } else {
             this.pluginInstances.external.afterSync.forEach((method) => {
-              afterSyncPlugins.push(method(transformedItem, action))
+              afterSyncPlugins.push(method(action, transformedData, transformedSchema))
             })
 
             return Promise.all(afterSyncPlugins)
@@ -237,7 +257,7 @@ export class Q extends EventEmitter {
         .then(() => {
           debug('After action plugins executed successfully!')
           logger.log(
-            `${action.toUpperCase()}ING: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'}`)
+            `${action.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'} completed successfully!`)
           this.inProgress = false
           this.emit('next', data)
         })

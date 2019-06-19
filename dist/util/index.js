@@ -196,7 +196,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
         debug(`Only assets found in SYNC API response. Last content type is ${contentTypeUids[0]}`);
         const items = groupedItems[contentTypeUids[0]];
         // find the last item, add checkpoint to it
-        items[items.length - 1].checkpoint = {
+        items[items.length - 1]._checkpoint = {
             name: tokenName,
             token: tokenValue,
         };
@@ -205,7 +205,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
         debug(`Only content type events found in SYNC API response. Last content type is ${contentTypeUids[0]}`);
         const items = groupedItems[contentTypeUids[0]];
         // find the last item, add checkpoint to it
-        items[items.length - 1].checkpoint = {
+        items[items.length - 1]._checkpoint = {
             name: tokenName,
             token: tokenValue,
         };
@@ -214,7 +214,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
         debug(`Assets & content types found found in SYNC API response. Last content type is ${contentTypeUids[1]}`);
         const items = groupedItems[contentTypeUids[1]];
         // find the last item, add checkpoint to it
-        items[items.length - 1].checkpoint = {
+        items[items.length - 1]._checkpoint = {
             name: tokenName,
             token: tokenValue,
         };
@@ -223,7 +223,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
         const lastContentTypeUid = contentTypeUids[contentTypeUids.length - 1];
         debug(`Mixed content types found in SYNC API response. Last content type is ${lastContentTypeUid}`);
         const entries = groupedItems[lastContentTypeUid];
-        entries[entries.length - 1].checkpoint = {
+        entries[entries.length - 1]._checkpoint = {
             name: tokenName,
             token: tokenValue,
         };

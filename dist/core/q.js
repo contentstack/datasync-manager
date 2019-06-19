@@ -81,8 +81,8 @@ class Q extends events_1.EventEmitter {
         notify('error', obj);
         logger_1.logger.error(obj);
         debug(`Error handler called with ${JSON.stringify(obj)}`);
-        if (obj.checkpoint) {
-            return token_management_1.saveToken(obj.checkpoint.name, obj.checkpoint.token).then(() => {
+        if (obj._checkpoint) {
+            return token_management_1.saveToken(obj._checkpoint.name, obj._checkpoint.token).then(() => {
                 return unprocessible_1.saveFailedItems(obj).then(() => {
                     this.inProgress = false;
                     this.emit('next');
@@ -116,8 +116,8 @@ class Q extends events_1.EventEmitter {
         if (!this.inProgress && this.q.length) {
             this.inProgress = true;
             const item = this.q.shift();
-            if (item.checkpoint) {
-                token_management_1.saveToken(item.checkpoint.name, item.checkpoint.token).then(() => {
+            if (item._checkpoint) {
+                token_management_1.saveToken(item._checkpoint.name, item._checkpoint.token).then(() => {
                     this.process(item);
                 }).catch((error) => {
                     logger_1.logger.error('Save token failed to save a checkpoint!');
@@ -138,7 +138,7 @@ class Q extends events_1.EventEmitter {
      * @param {Object} data - Current processing item
      */
     process(data) {
-        logger_1.logger.log(`${data.type.toUpperCase()}ING: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'}`);
+        logger_1.logger.log(`${data.type.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'} is in progress...`);
         notify(data.type, data);
         switch (data.type) {
             case 'publish':
@@ -164,29 +164,41 @@ class Q extends events_1.EventEmitter {
         try {
             debug(`Exec: ${action}`);
             const beforeSyncInternalPlugins = [];
-            let transformedItem;
+            let transformedData;
+            let transformedSchema;
+            let schema;
+            if (data._content_type_uid !== '_assets') {
+                schema = data._content_type;
+                schema._content_type_uid = '_content_types';
+                schema.event_at = data.event_at;
+                schema._synced_at = data._synced_at;
+                schema.locale = data.locale;
+                delete data._content_type;
+            }
             this.pluginInstances.internal.beforeSync.forEach((method) => {
-                beforeSyncInternalPlugins.push(() => { return method(data, action); });
+                beforeSyncInternalPlugins.push(() => { return method(action, data, schema); });
             });
-            series_1.series(beforeSyncInternalPlugins)
+            return series_1.series(beforeSyncInternalPlugins)
                 .then(() => {
                 if (this.config.pluginTransformations) {
-                    transformedItem = data;
+                    transformedData = data;
+                    transformedSchema = schema;
                 }
                 else {
-                    transformedItem = lodash_1.cloneDeep(data);
+                    transformedData = lodash_1.cloneDeep(data);
+                    transformedSchema = lodash_1.cloneDeep(schema);
                 }
                 // re-initializing everytime with const.. avoids memory leaks
                 const beforeSyncPlugins = [];
                 if (this.config.serializePlugins) {
                     this.pluginInstances.external.beforeSync.forEach((method) => {
-                        beforeSyncPlugins.push(() => { return method(transformedItem, action); });
+                        beforeSyncPlugins.push(() => { return method(action, transformedData, transformedSchema); });
                     });
                     return series_1.series(beforeSyncPlugins);
                 }
                 else {
                     this.pluginInstances.external.beforeSync.forEach((method) => {
-                        beforeSyncPlugins.push(method(transformedItem, action));
+                        beforeSyncPlugins.push(method(action, transformedData, transformedSchema));
                     });
                     return Promise.all(beforeSyncPlugins);
                 }
@@ -196,25 +208,32 @@ class Q extends events_1.EventEmitter {
                 return this.contentStore[action](data);
             })
                 .then(() => {
+                debug(`Completed '${action}' on connector successfully!`);
+                if (typeof schema === 'undefined') {
+                    return;
+                }
+                return this.contentStore.updateContentType(schema);
+            })
+                .then(() => {
                 debug('Connector instance called successfully!');
                 // re-initializing everytime with const.. avoids memory leaks
                 const afterSyncPlugins = [];
                 if (this.config.serializePlugins) {
                     this.pluginInstances.external.afterSync.forEach((method) => {
-                        afterSyncPlugins.push(() => { return method(transformedItem, action); });
+                        afterSyncPlugins.push(() => { return method(action, transformedData, transformedSchema); });
                     });
                     return series_1.series(afterSyncPlugins);
                 }
                 else {
                     this.pluginInstances.external.afterSync.forEach((method) => {
-                        afterSyncPlugins.push(method(transformedItem, action));
+                        afterSyncPlugins.push(method(action, transformedData, transformedSchema));
                     });
                     return Promise.all(afterSyncPlugins);
                 }
             })
                 .then(() => {
                 debug('After action plugins executed successfully!');
-                logger_1.logger.log(`${action.toUpperCase()}ING: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'}`);
+                logger_1.logger.log(`${action.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'} completed successfully!`);
                 this.inProgress = false;
                 this.emit('next', data);
             })
