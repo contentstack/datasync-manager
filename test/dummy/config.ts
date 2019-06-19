@@ -6,7 +6,10 @@ export const config = {
     sync_token: 'dummySyncToken',
   },
   plugins: {
-    myplugin: {
+    myplugin1: {
+      name: 'Jane Doe',
+    },
+    myplugin2: {
       name: 'Jane Doe',
     },
   },

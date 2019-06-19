@@ -21,12 +21,6 @@ export const contentConnector = {
   delete: () => {
     return Promise.resolve()
   },
-  find: () => {
-    return Promise.resolve()
-  },
-  findOne: () => {
-    return Promise.resolve()
-  },
   publish: () => {
     return Promise.resolve()
   },
@@ -38,6 +32,8 @@ export const contentConnector = {
   },
 }
 
+let lConfig
+
 // Dummy listener instance
 export const listener = {
   register: (fn) => {
@@ -47,6 +43,12 @@ export const listener = {
     consumer = fn
 
     return
+  },
+  getConfig: () => {
+    return lConfig
+  },
+  setConfig: (config) => {
+    lConfig = config
   },
   start: () => {
     // simply fire events every 10 seconds

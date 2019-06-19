@@ -1,7 +1,7 @@
 import { cloneDeep, merge } from 'lodash'
 import { join, resolve } from 'path'
 import rimraf from 'rimraf'
-import { config as internalConfig } from '../../src/defaults'
+import { config as internalConfig } from '../../src/config'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { mkdir, readFile, readFileSync, writeFile } from '../../src/util/fs'
 import { setLogger } from '../../src/util/logger'

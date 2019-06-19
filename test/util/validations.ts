@@ -1,13 +1,10 @@
 import { cloneDeep, merge } from 'lodash'
-import { config as internalConfig } from '../../src/defaults'
+import { config as internalConfig } from '../../src/config'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { setLogger } from '../../src/util/logger'
 
 import {
-  validateAssetConnector,
   validateConfig,
-  validateContentConnector,
-  validateInstances,
   validateItemStructure,
   validateListener,
   validateLogger
@@ -22,7 +19,7 @@ import { item as deletedEntry } from '../dummy/api-responses/delete-entry'
 import { item as deletedContentType } from '../dummy/api-responses/delete-content-type'
 
 import { config } from '../dummy/config'
-import { assetConnector, contentConnector, listener } from '../dummy/connector-listener-instances'
+import { /* assetConnector, contentConnector,  */listener } from '../dummy/connector-listener-instances'
 
 describe('validations', () => {
   beforeAll(() => {
@@ -57,82 +54,14 @@ describe('validations', () => {
     })
   })
 
-  describe('validate instances', () => {
-    test('asset connector is not defined', () => {
-      expect(() => {
-        validateInstances(undefined, contentConnector, listener)
-        // Question: Why 'regex' does not work here?
-      }).toThrowError("Call 'setAssetStore()' before calling sync-manager start!")
-    })
-
-    test('content connector is not defined', () => {
-      expect(() => {
-        validateInstances(assetConnector, undefined, listener)
-      }).toThrowError("Call 'setContentStore()' before calling sync-manager start!")
-    })
-
-    test('listener is not defined', () => {
-      expect(() => {
-        validateInstances(assetConnector, contentConnector, undefined)
-      }).toThrowError("Call 'setListener()' before calling sync-manager start!")
-    })
-
-    test('asset connector does not have start()', () => {
-      const assetConnectorClone = cloneDeep(assetConnector)
-      delete assetConnectorClone.start
-      expect(() => {
-        validateInstances(assetConnectorClone, contentConnector, listener)
-      }).toThrowError("Connector and listener instances should have 'start()' method")
-    })
-
-    test('content connector does not have start()', () => {
-      const contentConnectorClone = cloneDeep(contentConnector)
-      delete contentConnectorClone.start
-      expect(() => {
-        validateInstances(assetConnector, contentConnectorClone, listener)
-      }).toThrowError("Connector and listener instances should have 'start()' method")
-    })
-
-    test('listener does not have start()', () => {
-      const listenerClone = cloneDeep(listener)
-      delete listenerClone.start
-      expect(() => {
-        validateInstances(assetConnector, contentConnector, listenerClone)
-      }).toThrowError("Connector and listener instances should have 'start()' method")
-    })
-
-    test('listener start() is not a funciton', () => {
-      const listenerClone = cloneDeep(listener)
-      listenerClone.start = ({} as any)
-      expect(() => {
-        validateInstances(assetConnector, contentConnector, listenerClone)
-      }).toThrowError("Connector and listener instances should have 'start()' method")
-    })
-  })
-
   describe('validate instance methods', () => {
-    test('asset connector does not have download()', () => {
-      const assetConnectorClone = cloneDeep(assetConnector)
-      delete assetConnectorClone.download
-      expect(() => {
-        validateAssetConnector(assetConnectorClone)
-      }).toThrowError(`${assetConnectorClone} asset store does not support 'download()'`)
-    })
-
-    test('content connector does not have publish()', () => {
-      const contentConnectorClone = cloneDeep(contentConnector)
-      delete contentConnectorClone.publish
-      expect(() => {
-        validateContentConnector(contentConnectorClone)
-      }).toThrowError(`${contentConnectorClone} content store does not support 'publish()'`)
-    })
 
     test('listener does not have register()', () => {
       const listenerClone = cloneDeep(listener)
       delete listenerClone.register
       expect(() => {
         validateListener(listenerClone)
-      }).toThrowError(`${listenerClone} listener does not support 'register()'`)
+      }).toThrowError(`Missing required methods! Listener is missing 'register()'!`)
     })
 
     test('custom logger', () => {

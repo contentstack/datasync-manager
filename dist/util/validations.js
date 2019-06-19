@@ -72,12 +72,11 @@ exports.validateContentStore = (contentStore) => {
  */
 exports.validateListener = (listener) => {
     if (typeof listener !== 'object' && typeof listener !== 'function') {
-        console.log('typeof listener', typeof listener, JSON.stringify(listener));
         throw new Error('Invalid Type! Listener is of neither \'object\' or \'function\'!');
     }
     const methods = ['getConfig', 'setConfig', 'start', 'register'];
     methods.forEach((method) => {
-        if (!(lodash_1.hasIn(listener, method)) && typeof listener[method] === 'function') {
+        if (!(lodash_1.hasIn(listener, method)) || typeof listener[method] !== 'function') {
             throw new Error(`Missing required methods! Listener is missing '${method}()'!`);
         }
     });
@@ -89,7 +88,7 @@ exports.validateListener = (listener) => {
  * @param {Object} instance - Content store instance
  */
 exports.validateContentStoreInstance = (instance) => {
-    const fns = ['publish', 'unpublish', 'delete'];
+    const fns = ['publish', 'unpublish', 'delete', 'updateContentType'];
     fns.forEach((fn) => {
         if (!(lodash_1.hasIn(instance, fn)) && typeof instance[fn] === 'function') {
             throw new Error(`${instance} content store does not support '${fn}()'`);
