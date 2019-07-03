@@ -5,28 +5,27 @@
   "description": "The primary module of Contentstack DataSync. Syncs Contentstack data with your server using Contentstack Sync API",
   "main": "dist/index.js",
   "dependencies": {
-    "@contentstack/webhook-listener": "0.0.1",
-    "debug": "4.1.0",
+    "debug": "4.1.1",
     "dns-socket": "4.2.0",
     "lodash": "4.17.11",
-    "marked": "^0.6.3",
-    "write-file-atomic": "2.3.0"
+    "marked": "0.6.3",
+    "write-file-atomic": "3.0.0"
   },
   "devDependencies": {
-    "@types/debug": "^0.0.31",
-    "@types/jest": "^23.3.11",
-    "@types/lodash": "^4.14.119",
-    "@types/mkdirp": "^0.5.2",
-    "@types/nock": "^9.3.0",
-    "@types/node": "^10.12.12",
-    "@types/rimraf": "^2.0.2",
-    "@types/write-file-atomic": "^2.1.1",
+    "@types/debug": "0.0.31",
+    "@types/jest": "23.3.11",
+    "@types/lodash": "4.14.119",
+    "@types/mkdirp": "0.5.2",
+    "@types/nock": "9.3.0",
+    "@types/node": "10.12.12",
+    "@types/rimraf": "2.0.2",
+    "@types/write-file-atomic": "2.1.1",
     "jest": "24.8.0",
-    "mkdirp": "^0.5.1",
-    "nock": "^10.0.6",
-    "rimraf": "^2.6.2",
-    "ts-jest": "^23.10.5",
-    "tslint": "^5.11.0",
+    "mkdirp": "0.5.1",
+    "nock": "10.0.6",
+    "rimraf": "2.6.2",
+    "ts-jest": "24.0.2",
+    "tslint": "5.18.0",
     "typescript": "3.5.2"
   },
   "scripts": {
@@ -44,8 +43,7 @@
   },
   "keywords": [
     "contentstack",
-    "datasync",
-    "datasync-manager",
+    "DataSync",
     "utility"
   ],
   "repository": {
