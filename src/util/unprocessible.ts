@@ -6,8 +6,8 @@
 */
 
 import { getConfig } from '../index'
-import { getFile } from './index'
 import { existsSync, readFile, writeFile } from './fs'
+import { getFile } from './index'
 import { logger } from './logger'
 
 const counter = {
@@ -48,6 +48,7 @@ export const saveFilteredItems = (items, name, token) => {
   return new Promise(async (resolve, reject) => {
     try {
       const config = getConfig()
+      let filename
       if (!config.syncManager.saveFilteredItems) {
         return resolve()
       }
@@ -57,7 +58,7 @@ export const saveFilteredItems = (items, name, token) => {
         timestamp: new Date().toISOString(),
         token,
       }
-      let filename
+
       if (counter.filtered === 0) {
         filename = `${config.paths.filtered}.json`
       } else {

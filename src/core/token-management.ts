@@ -6,8 +6,8 @@
 
 import Debug from 'debug'
 import { getConfig } from '..'
-import { getFile } from '../util/index'
 import { existsSync, readFile, writeFile } from '../util/fs'
+import { getFile } from '../util/index'
 
 const debug = Debug('token-management')
 let counter = 0
@@ -44,11 +44,13 @@ export const getToken = () => {
 
       if (existsSync(checkpoint)) {
         debug(`Checkpoint read: ${checkpoint}`)
+
         return readFile(checkpoint).then((data) => {
           return resolve(JSON.parse(data as any))
         })
       } else if (existsSync(token)) {
         debug(`Token read: ${token}`)
+
         return readFile(token).then((data) => {
           return resolve(JSON.parse(data as any))
         })
@@ -120,20 +122,17 @@ export const saveToken = (name, token) => {
  * @param {String} token - Token value
  * @param {String} type - Token type
  */
-export const saveCheckpoint = (name, token) => {
+export const saveCheckpoint = async (name, token) => {
   debug(`Save token invoked with name: ${name}, token: ${token}`)
+  const config = getConfig()
+  const path = config.paths.checkpoint
+  const data: IToken = {
+    name,
+    timestamp: new Date().toISOString(),
+    token,
+  }
 
-  return new Promise((resolve, reject) => {
-    const config = getConfig()
-    const path = config.paths.checkpoint
-    const data: IToken = {
-      name,
-      timestamp: new Date().toISOString(),
-      token,
-    }
+  await writeFile(path, JSON.stringify(data))
 
-    return writeFile(path, JSON.stringify(data))
-      .then(resolve)
-      .catch(reject)
-  })
+  return
 }

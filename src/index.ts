@@ -6,11 +6,11 @@
 
 import Debug from 'debug'
 import { merge } from 'lodash'
-import { init, push as pushQueue, unshift as unshiftQueue, pop as popQueue, poke } from './core/index'
+import { config as internalConfig } from './config'
+import { init, poke, pop as popQueue, push as pushQueue, unshift as unshiftQueue } from './core/index'
 import { init as pinger } from './core/inet'
 import { configure } from './core/process'
 import { notifications } from './core/q'
-import { config as internalConfig } from './config'
 import { buildConfigPaths } from './util/build-paths'
 import { formatSyncFilters } from './util/index'
 import { logger, setLogger } from './util/logger'
@@ -106,8 +106,9 @@ export const getAssetLocation = (asset) => {
   return new Promise(async (resolve, reject) => {
     try {
       const assetStoreConfig = assetStore.getConfig()
-      const assetConfig = (assetStoreConfig.assetStore) ? assetStoreConfig.assetStore: assetStoreConfig
+      const assetConfig = (assetStoreConfig.assetStore) ? assetStoreConfig.assetStore : assetStoreConfig
       const location = await assetStore.getAssetLocation(asset, assetConfig)
+
       return resolve(location)
     } catch (error) {
       return reject(error)

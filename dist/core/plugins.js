@@ -22,8 +22,8 @@ const pluginMethods = ['beforeSync', 'afterSync'];
 exports.load = (config) => {
     debug('Plugins load called');
     const pluginInstances = {
+        external: {},
         internal: {},
-        external: {}
     };
     const plugins = config.plugins || {};
     pluginMethods.forEach((pluginMethod) => {
