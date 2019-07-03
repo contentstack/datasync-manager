@@ -1,9 +1,9 @@
 "use strict";
 /*!
-* Contentstack DataSync Manager
-* Copyright (c) 2019 Contentstack LLC
-* MIT Licensed
-*/
+ * Contentstack DataSync Manager
+ * Copyright (c) 2019 Contentstack LLC
+ * MIT Licensed
+ */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -36,48 +36,40 @@ const assetType = 'sys_assets';
  * @returns {Promise} Returns a promise
  */
 exports.filterItems = (response, config) => __awaiter(this, void 0, void 0, function* () {
-    return new Promise((resolve, reject) => {
-        try {
-            const locales = lodash_1.map(config.locales, 'code');
-            const filteredObjects = lodash_1.remove(response.items, (item) => {
-                // validate item structure. If the structure is not as expected, filter it out
-                if (!(validations_1.validateItemStructure(item))) {
-                    return item;
-                }
-                // for published items
-                if (item.data.publish_details) {
-                    return locales.indexOf(item.data.publish_details.locale) !== -1;
-                    // for unpublished items || deleted items
-                }
-                else if (item.data.locale) {
-                    return locales.indexOf(item.data.locale) !== -1;
-                }
-                return false;
-            });
-            if (filteredObjects.length === 0) {
-                return resolve();
-            }
-            // do something with filteredObjects
-            let name;
-            if (response.pagination_token) {
-                name = 'pagination_token';
-            }
-            else {
-                name = 'sync_token';
-            }
-            return unprocessible_1.saveFilteredItems(filteredObjects, name, response[name])
-                .then(resolve)
-                .catch(reject);
+    const locales = lodash_1.map(config.locales, 'code');
+    const filteredObjects = lodash_1.remove(response.items, (item) => {
+        // validate item structure. If the structure is not as expected, filter it out
+        if (!(validations_1.validateItemStructure(item))) {
+            return item;
         }
-        catch (error) {
-            return reject(error);
+        // for published items
+        if (item.data.publish_details) {
+            return locales.indexOf(item.data.publish_details.locale) !== -1;
+            // for unpublished items || deleted items
         }
+        else if (item.data.locale) {
+            return locales.indexOf(item.data.locale) !== -1;
+        }
+        return false;
     });
+    if (filteredObjects.length === 0) {
+        return;
+    }
+    // do something with filteredObjects
+    let name;
+    if (response.pagination_token) {
+        name = 'pagination_token';
+    }
+    else {
+        name = 'sync_token';
+    }
+    yield unprocessible_1.saveFilteredItems(filteredObjects, name, response[name]);
+    return;
 });
 exports.formatSyncFilters = (config) => {
     if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
         const filters = config.syncManager.filters;
-        for (let filter in filters) {
+        for (const filter in filters) {
             if (filters[filter] && filters[filter] instanceof Array && filters[filter].length) {
                 const filtersData = filters[filter];
                 filtersData.forEach((element, index) => {
@@ -237,6 +229,7 @@ exports.markCheckpoint = (groupedItems, syncResponse) => {
  * @returns {String} Returns path to a file
  */
 exports.getFile = (file, rotate) => {
+    // tslint:disable-next-line: no-shadowed-variable
     return new Promise((resolve, reject) => {
         const config = index_1.getConfig();
         if (fs_1.existsSync(file)) {
@@ -263,7 +256,8 @@ exports.getFile = (file, rotate) => {
 };
 const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) => {
     try {
-        let matches, convertedText;
+        let matches;
+        let convertedText;
         const isMarkdown = (schema.field_metadata.markdown) ? true : false;
         if (isMarkdown) {
             convertedText = marked_1.default(entry);
@@ -272,6 +266,7 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
             convertedText = entry;
         }
         const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g');
+        // tslint:disable-next-line: no-conditional-assignment
         while ((matches = regexp.exec(convertedText)) !== null) {
             if (matches && matches.length) {
                 const assetObject = {};
@@ -287,8 +282,9 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
                     const asset = lodash_1.find(bucket, (item) => {
                         const newRegexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)', 'g');
                         let urlparts;
+                        // tslint:disable-next-line: no-conditional-assignment
                         while ((urlparts = newRegexp.exec(item.url)) !== null) {
-                            return item.download_id === urlparts[4];
+                            return assetObject.download_id === urlparts[4];
                         }
                         return undefined;
                     });
@@ -349,8 +345,9 @@ const iterate = (schema, entry, bucket, findNoteReplace, parentKeys) => {
     }
 };
 exports.getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotReplace, parent = []) => {
-    for (let i = 0, _i = schema.length; i < _i; i++) {
-        if (schema[i].data_type === 'text' && schema[i].field_metadata && (schema[i].field_metadata.allow_rich_text || schema[i].field_metadata.markdown)) {
+    for (let i = 0, j = schema.length; i < j; i++) {
+        if (schema[i].data_type === 'text' && schema[i].field_metadata && (schema[i].field_metadata.allow_rich_text ||
+            schema[i].field_metadata.markdown)) {
             parent.push(schema[i].uid);
             iterate(schema[i], entry, bucket, isFindNotReplace, parent);
             parent.pop();
@@ -361,10 +358,10 @@ exports.getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotReplac
             parent.pop();
         }
         else if (schema[i].data_type === 'blocks') {
-            for (let j = 0, _j = schema[i].blocks.length; j < _j; j++) {
+            for (let k = 0, l = schema[i].blocks.length; k < l; k++) {
                 parent.push(schema[i].uid);
-                parent.push(schema[i].blocks[j].uid);
-                exports.getOrSetRTEMarkdownAssets(schema[i].blocks[j].schema, entry, bucket, isFindNotReplace, parent);
+                parent.push(schema[i].blocks[k].uid);
+                exports.getOrSetRTEMarkdownAssets(schema[i].blocks[k].schema, entry, bucket, isFindNotReplace, parent);
                 parent.pop();
                 parent.pop();
             }

@@ -12,21 +12,25 @@ const debug_1 = __importDefault(require("debug"));
 const dns_socket_1 = __importDefault(require("dns-socket"));
 const events_1 = require("events");
 const index_1 = require("../index");
-const index_2 = require("./index");
 const logger_1 = require("../util/logger");
+const index_2 = require("./index");
 const emitter = new events_1.EventEmitter();
 const debug = debug_1.default('inet');
 let disconnected = false;
-let sm, query, port, dns, currentTimeout;
+let sm;
+let query;
+let port;
+let dns;
+let currentTimeout;
 exports.init = () => {
     sm = index_1.getConfig().syncManager;
     query = {
         questions: [
             {
+                name: sm.inet.host,
                 type: sm.inet.type,
-                name: sm.inet.host
-            }
-        ]
+            },
+        ],
     };
     port = sm.inet.port;
     dns = sm.inet.dns;
@@ -38,7 +42,7 @@ exports.init = () => {
 exports.checkNetConnectivity = () => {
     const socket = dns_socket_1.default({
         retries: sm.inet.retries,
-        timeout: sm.inet.timeout
+        timeout: sm.inet.timeout,
     });
     debug('checking network connectivity');
     socket.query(query, port, dns, (err) => {

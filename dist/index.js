@@ -18,12 +18,12 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
+const config_1 = require("./config");
 const index_1 = require("./core/index");
 const inet_1 = require("./core/inet");
 const process_1 = require("./core/process");
 const q_1 = require("./core/q");
 exports.notifications = q_1.notifications;
-const config_1 = require("./config");
 const build_paths_1 = require("./util/build-paths");
 const index_2 = require("./util/index");
 const logger_1 = require("./util/logger");

@@ -33,28 +33,28 @@ exports.config = {
     locales: [],
     plugins: [
         {
+            disabled: false,
             name: '_cs_internal_transform_entries',
             // path: '',
-            disabled: false,
             options: {
             // other overrides...
             },
         },
         {
-            name: '_cs_internal_transform_schemas',
             disabled: false,
+            name: '_cs_internal_transform_schemas',
             options: {
                 logAssetPaths: true,
                 logReferencePaths: true,
             },
         },
         {
-            name: '_cs_internal_save_rte_markdown_assets',
             disabled: false,
+            name: '_cs_internal_save_rte_markdown_assets',
             options: {
             // other overrides...
             },
-        }
+        },
     ],
     syncManager: {
         cooloff: 3000,
@@ -67,24 +67,24 @@ exports.config = {
             // DNS port
             port: 53,
             retries: 5,
-            retryTimeout: 20 * 1000,
             retryIncrement: 5 * 1000,
+            retryTimeout: 20 * 1000,
             timeout: 10 * 1000,
             type: 'A',
         },
         limit: 100,
         markdown: {
-            gfm: true,
-            tables: true,
             breaks: true,
+            gfm: true,
             smartLists: true,
-            xhtml: false
+            tables: true,
+            xhtml: false,
         },
         // max file sizes in bytes
         maxsize: 2097152,
         queue: {
             pause_threshold: 10000,
-            resume_threshold: 5000
+            resume_threshold: 5000,
         },
         saveFailedItems: true,
         saveFilteredItems: true,
