@@ -118,10 +118,10 @@ exports.formatItems = (items, config) => {
             case 'asset_published':
                 item._content_type_uid = formattedAssetType;
                 item.type = config.contentstack.actions.publish;
-                item.locale = item.data.publish_details.locale;
                 // extra keys
                 item._synced_at = time;
                 item = lodash_1.merge(item, item.data);
+                item.locale = item.data.publish_details.locale;
                 delete item.data;
                 delete item.content_type_uid;
                 break;
@@ -142,10 +142,10 @@ exports.formatItems = (items, config) => {
             case 'entry_published':
                 item.type = config.contentstack.actions.publish;
                 item._content_type_uid = item.content_type_uid;
-                item.locale = item.data.publish_details.locale;
                 // extra keys
                 item._synced_at = time;
                 item = lodash_1.merge(item, item.data);
+                item.locale = item.data.publish_details.locale;
                 delete item.data;
                 delete item.content_type_uid;
                 break;
