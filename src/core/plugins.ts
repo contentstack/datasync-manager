@@ -20,8 +20,8 @@ const pluginMethods = ['beforeSync', 'afterSync']
 export const load = (config) => {
   debug('Plugins load called')
   const pluginInstances = {
+    external: {},
     internal: {},
-    external: {}
   }
   const plugins = config.plugins || {}
   pluginMethods.forEach((pluginMethod) => {
@@ -43,10 +43,8 @@ export const load = (config) => {
 
     const Plugin = require(pluginPath)
     Plugin.options = plugin.options
-    
     // execute/initiate plugin
     Plugin()
-    
     pluginMethods.forEach((pluginMethod) => {
       if (hasIn(Plugin, pluginMethod)) {
         if (plugin.disabled) {

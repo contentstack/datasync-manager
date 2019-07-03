@@ -12,7 +12,8 @@ const path_1 = require("path");
  */
 exports.buildConfigPaths = () => {
     const baseDir = path_1.resolve(path_1.join(__dirname, '..', '..', '..', '..'));
-    let pluginPath, tokenPath;
+    let pluginPath;
+    let tokenPath;
     if (process.env.PLUGIN_PATH) {
         if (!path_1.isAbsolute(process.env.PLUGIN_PATH)) {
             pluginPath = path_1.join(baseDir, process.env.PLUGIN_PATH);
@@ -31,12 +32,13 @@ exports.buildConfigPaths = () => {
     }
     const paths = {
         baseDir: path_1.resolve(path_1.join(__dirname, '..', '..')),
-        plugin: path_1.resolve(path_1.join((pluginPath || baseDir), 'plugins')),
-        unprocessibleDir: path_1.resolve(path_1.join(tokenPath || baseDir, 'unprocessible')),
+        checkpoint: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.checkpoint')),
         failed: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), 'unprocessible', 'failed')),
         filtered: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), 'unprocessible', 'filtered')),
-        checkpoint: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.checkpoint')), ledger: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.ledger')),
-        token: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.token'))
+        ledger: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.ledger')),
+        plugin: path_1.resolve(path_1.join((pluginPath || baseDir), 'plugins')),
+        token: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.token')),
+        unprocessibleDir: path_1.resolve(path_1.join(tokenPath || baseDir, 'unprocessible')),
     };
     return paths;
 };

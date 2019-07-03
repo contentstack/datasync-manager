@@ -7,13 +7,13 @@
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep, remove } from 'lodash'
-import { netConnectivityIssues } from './inet'
 import { getConfig } from '../'
 import { get, init as initAPI } from '../api'
-import { filterItems, formatItems, groupItems, markCheckpoint } from '../util/index'
 import { existsSync, readFileSync } from '../util/fs'
+import { filterItems, formatItems, groupItems, markCheckpoint } from '../util/index'
 import { logger } from '../util/logger'
 import { map } from '../util/promise.map'
+import { netConnectivityIssues } from './inet'
 import { Q as Queue } from './q'
 import { getToken, saveCheckpoint } from './token-management'
 
@@ -94,7 +94,8 @@ export const init = (contentStore, assetStore) => {
         request.qs.init = true
         if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
           const filters = config.syncManager.filters
-          for (let filter in filters) {
+          // tslint:disable-next-line: forin
+          for (const filter in filters) {
             request.qs[filter] = filters[filter].join(',')
           }
         }
@@ -262,7 +263,7 @@ const fire = (req: IApiRequest) => {
                 path: `${Contentstack.apis.content_types}${uid}`,
               }).then((contentTypeSchemaResponse) => {
                 const schemaResponse: {
-                  content_type: any
+                  content_type: any,
                 } = (contentTypeSchemaResponse as any)
                 if (schemaResponse.content_type) {
                   const items = groupedItems[uid]
@@ -341,8 +342,8 @@ const postProcess = (req, resp) => {
         logger.log('Checkpoint: lockdown has been invoked')
         flag.requestCache = {
           params: req,
+          reject,
           resolve,
-          reject
         }
       } else {
         if (name === 'sync_token') {

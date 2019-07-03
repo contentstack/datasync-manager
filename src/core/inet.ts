@@ -8,23 +8,41 @@ import Debug from 'debug'
 import dnsSocket from 'dns-socket'
 import { EventEmitter } from 'events'
 import { getConfig } from '../index'
-import { poke } from './index'
 import { logger } from '../util/logger'
+import { poke } from './index'
+
+interface ISyncManager {
+  inet: {
+    host: string,
+    type: string,
+    port: number,
+    dns: string,
+    retryTimeout: number,
+    retries: number,
+    timeout: number,
+    retryIncrement: number,
+  },
+  [propName: string]: any,
+}
 
 const emitter = new EventEmitter()
 const debug = Debug('inet')
 let disconnected = false
-let sm, query, port, dns, currentTimeout
+let sm: ISyncManager
+let query
+let port: number
+let dns: string
+let currentTimeout: number
 
 export const init = () => {
   sm = getConfig().syncManager
   query = {
     questions: [
       {
+        name: sm.inet.host,
         type: sm.inet.type,
-        name: sm.inet.host
-      }
-    ]
+      },
+    ],
   }
   port = sm.inet.port
   dns = sm.inet.dns
@@ -37,13 +55,14 @@ export const init = () => {
 export const checkNetConnectivity = () => {
   const socket = dnsSocket({
     retries: sm.inet.retries,
-    timeout: sm.inet.timeout
+    timeout: sm.inet.timeout,
   })
   debug('checking network connectivity')
   socket.query(query, port, dns, (err) => {
     if (err) {
       debug(`errorred.. ${err}`)
       disconnected = true
+
       return socket.destroy(() => {
         debug('socket destroyed')
         emitter.emit('disconnected', currentTimeout += sm.inet.retryIncrement)
@@ -52,7 +71,7 @@ export const checkNetConnectivity = () => {
       poke()
     }
     disconnected = false
-    
+
     return socket.destroy(() => {
       debug('socket destroyed')
       emitter.emit('ok')

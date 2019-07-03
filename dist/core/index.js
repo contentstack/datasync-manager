@@ -11,13 +11,13 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
-const inet_1 = require("./inet");
 const __1 = require("../");
 const api_1 = require("../api");
-const index_1 = require("../util/index");
 const fs_1 = require("../util/fs");
+const index_1 = require("../util/index");
 const logger_1 = require("../util/logger");
 const promise_map_1 = require("../util/promise.map");
+const inet_1 = require("./inet");
 const q_1 = require("./q");
 const token_management_1 = require("./token-management");
 const debug = debug_1.default('sync-core');
@@ -68,7 +68,8 @@ exports.init = (contentStore, assetStore) => {
                 request.qs.init = true;
                 if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
                     const filters = config.syncManager.filters;
-                    for (let filter in filters) {
+                    // tslint:disable-next-line: forin
+                    for (const filter in filters) {
                         request.qs[filter] = filters[filter].join(',');
                     }
                 }
@@ -287,8 +288,8 @@ const postProcess = (req, resp) => {
                 logger_1.logger.log('Checkpoint: lockdown has been invoked');
                 flag.requestCache = {
                     params: req,
+                    reject,
                     resolve,
-                    reject
                 };
             }
             else {

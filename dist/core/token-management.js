@@ -18,8 +18,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const debug_1 = __importDefault(require("debug"));
 const __1 = require("..");
-const index_1 = require("../util/index");
 const fs_1 = require("../util/fs");
+const index_1 = require("../util/index");
 const debug = debug_1.default('token-management');
 let counter = 0;
 /**
@@ -104,18 +104,15 @@ exports.saveToken = (name, token) => {
  * @param {String} token - Token value
  * @param {String} type - Token type
  */
-exports.saveCheckpoint = (name, token) => {
+exports.saveCheckpoint = (name, token) => __awaiter(this, void 0, void 0, function* () {
     debug(`Save token invoked with name: ${name}, token: ${token}`);
-    return new Promise((resolve, reject) => {
-        const config = __1.getConfig();
-        const path = config.paths.checkpoint;
-        const data = {
-            name,
-            timestamp: new Date().toISOString(),
-            token,
-        };
-        return fs_1.writeFile(path, JSON.stringify(data))
-            .then(resolve)
-            .catch(reject);
-    });
-};
+    const config = __1.getConfig();
+    const path = config.paths.checkpoint;
+    const data = {
+        name,
+        timestamp: new Date().toISOString(),
+        token,
+    };
+    yield fs_1.writeFile(path, JSON.stringify(data));
+    return;
+});

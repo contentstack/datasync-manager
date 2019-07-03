@@ -167,7 +167,9 @@ class Q extends events_1.EventEmitter {
             let transformedData;
             let transformedSchema;
             let schema;
-            if (data._content_type_uid !== '_assets') {
+            delete data.type;
+            delete data.publish_details;
+            if (action === 'publish' && data._content_type_uid !== '_assets') {
                 schema = data._content_type;
                 schema._content_type_uid = '_content_types';
                 schema.event_at = data.event_at;

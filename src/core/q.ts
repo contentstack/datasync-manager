@@ -182,7 +182,9 @@ export class Q extends EventEmitter {
       let transformedData
       let transformedSchema
       let schema
-      if (data._content_type_uid !== '_assets') {
+      delete data.type
+      delete data.publish_details
+      if (action === 'publish' && data._content_type_uid !== '_assets') {
         schema = data._content_type
         schema._content_type_uid = '_content_types'
         schema.event_at = data.event_at
@@ -257,7 +259,8 @@ export class Q extends EventEmitter {
         .then(() => {
           debug('After action plugins executed successfully!')
           logger.log(
-            `${action.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'} completed successfully!`)
+            `${action.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'} completed successfully!`
+            )
           this.inProgress = false
           this.emit('next', data)
         })
