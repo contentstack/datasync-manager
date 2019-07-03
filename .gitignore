@@ -17,6 +17,6 @@ package-lock.json
 coverage
 
 # Private examples
-example
-!example/mock/**/*
+example/**/*
+!example/config.js
 !example/index.js
