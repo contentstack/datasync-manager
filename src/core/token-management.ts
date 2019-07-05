@@ -5,7 +5,7 @@
 */
 
 import Debug from 'debug'
-import { getConfig } from '..'
+import { getConfig } from '../index'
 import { existsSync, readFile, writeFile } from '../util/fs'
 import { getFile } from '../util/index'
 
@@ -36,27 +36,25 @@ interface IToken {
  */
 export const getToken = () => {
 
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     try {
       const config = getConfig()
       const checkpoint = config.paths.checkpoint
       const token = config.paths.token
-
+      let data: any = {}
       if (existsSync(checkpoint)) {
         debug(`Checkpoint read: ${checkpoint}`)
 
-        return readFile(checkpoint).then((data) => {
-          return resolve(JSON.parse(data as any))
-        })
+        const contents: any = await readFile(checkpoint)
+        data = JSON.parse(contents)
       } else if (existsSync(token)) {
         debug(`Token read: ${token}`)
 
-        return readFile(token).then((data) => {
-          return resolve(JSON.parse(data as any))
-        })
+        const contents: any = await readFile(token)
+        data = JSON.parse(contents)
       }
 
-      return resolve({})
+      return resolve(data)
     } catch (error) {
       return reject(error)
     }
@@ -72,16 +70,18 @@ export const getToken = () => {
 export const saveToken = (name, token) => {
   debug(`Save token invoked with name: ${name}, token: ${token}`)
 
-  return new Promise((resolve, reject) => {
-    const config = getConfig()
-    const path = config.paths.token
-    const data: IToken = {
-      name,
-      timestamp: new Date().toISOString(),
-      token,
-    }
+  return new Promise(async (resolve, reject) => {
+    try {
+      const config = getConfig()
+      const path = config.paths.token
+      const data: IToken = {
+        name,
+        timestamp: new Date().toISOString(),
+        token,
+      }
 
-    return writeFile(path, JSON.stringify(data)).then(async () => {
+      // write token information @path
+      await writeFile(path, JSON.stringify(data))
       const obj: ITokenLedger = {
         name,
         timestamp: new Date().toISOString(),
@@ -100,19 +100,20 @@ export const saveToken = (name, token) => {
         return `${config.paths.ledger}-${counter}`
       }) as any)
       debug(`ledger file: ${file} exists?(${existsSync(file)})`)
-      if (!existsSync(file)) {
-        return writeFile(file, JSON.stringify([obj]))
-        .then(resolve)
-      }
 
-      return readFile(file).then((ledger) => {
+      if (!existsSync(file)) {
+        await writeFile(file, JSON.stringify([obj]))
+      } else {
+        const ledger = await readFile(file)
         const ledgerDetails: ITokenLedger[] = JSON.parse(ledger as any)
         ledgerDetails.splice(0, 0, obj)
+        await writeFile(file, JSON.stringify(ledgerDetails))
+      }
 
-        return writeFile(file, JSON.stringify(ledgerDetails))
-          .then(resolve)
-      })
-    }).catch(reject)
+      return resolve()
+    } catch (error) {
+      return reject(error)
+    }
   })
 }
 
