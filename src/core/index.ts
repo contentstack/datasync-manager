@@ -237,7 +237,8 @@ const fire = (req: IApiRequest) => {
               Q.push(asset)
             })
             delete groupedItems[formattedAssetType]
-          } else if (groupedItems[formattedContentType]) {
+          }
+          if (groupedItems[formattedContentType]) {
             groupedItems[formattedContentType].forEach((contentType) => {
               Q.push(contentType)
             })

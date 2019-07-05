@@ -4,6 +4,14 @@
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -78,31 +86,29 @@ class Q extends events_1.EventEmitter {
      * @param {Object} obj - Errorred item
      */
     errorHandler(obj) {
-        notify('error', obj);
-        logger_1.logger.error(obj);
-        debug(`Error handler called with ${JSON.stringify(obj)}`);
-        if (obj._checkpoint) {
-            return token_management_1.saveToken(obj._checkpoint.name, obj._checkpoint.token).then(() => {
-                return unprocessible_1.saveFailedItems(obj).then(() => {
-                    this.inProgress = false;
-                    this.emit('next');
-                });
-            }).catch((error) => {
-                logger_1.logger.error('Errorred while saving token');
-                logger_1.logger.error(error);
+        return __awaiter(this, void 0, void 0, function* () {
+            const that = this;
+            try {
+                notify('error', obj);
+                logger_1.logger.error(obj);
+                debug(`Error handler called with ${JSON.stringify(obj)}`);
+                if (obj._checkpoint) {
+                    yield token_management_1.saveToken(obj._checkpoint.name, obj._checkpoint.token);
+                }
+                yield unprocessible_1.saveFailedItems(obj);
                 this.inProgress = false;
                 this.emit('next');
-            });
-        }
-        return unprocessible_1.saveFailedItems(obj).then(() => {
-            this.inProgress = false;
-            this.emit('next');
-        }).catch((error) => {
-            logger_1.logger.error('Errorred while saving failed items');
-            logger_1.logger.error(error);
-            this.inProgress = false;
-            this.emit('next');
+            }
+            catch (error) {
+                // probably, the context could change
+                logger_1.logger.error('Something went wrong in errorHandler!');
+                that.inProgress = false;
+                that.emit('next');
+            }
         });
+    }
+    peek() {
+        return this.q;
     }
     /**
      * @description Calls next item in the queue
@@ -116,6 +122,7 @@ class Q extends events_1.EventEmitter {
         if (!this.inProgress && this.q.length) {
             this.inProgress = true;
             const item = this.q.shift();
+            // TODO: this could end up as a bug, if the last item fails!
             if (item._checkpoint) {
                 token_management_1.saveToken(item._checkpoint.name, item._checkpoint.token).then(() => {
                     this.process(item);
@@ -130,15 +137,11 @@ class Q extends events_1.EventEmitter {
             }
         }
     }
-    peek() {
-        return this.q;
-    }
     /**
      * @description Passes and calls the appropriate methods and hooks for item execution
      * @param {Object} data - Current processing item
      */
     process(data) {
-        logger_1.logger.log(`${data.type.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'} is in progress...`);
         notify(data.type, data);
         switch (data.type) {
             case 'publish':
@@ -162,6 +165,10 @@ class Q extends events_1.EventEmitter {
      */
     exec(data, action) {
         try {
+            const type = data.type.toUpperCase();
+            const contentType = data._content_type_uid;
+            const locale = data.locale;
+            const uid = data.uid;
             debug(`Exec: ${action}`);
             const beforeSyncInternalPlugins = [];
             let transformedData;
@@ -177,8 +184,9 @@ class Q extends events_1.EventEmitter {
                 schema.locale = data.locale;
                 delete data._content_type;
             }
+            logger_1.logger.log(`${type}: { content_type: '${contentType}', ${(locale) ? `locale: '${locale}',` : ''} uid: '${uid}'} is in progress`);
             this.pluginInstances.internal.beforeSync.forEach((method) => {
-                beforeSyncInternalPlugins.push(() => { return method(action, data, schema); });
+                beforeSyncInternalPlugins.push(() => method(action, data, schema));
             });
             return series_1.series(beforeSyncInternalPlugins)
                 .then(() => {
@@ -194,7 +202,7 @@ class Q extends events_1.EventEmitter {
                 const beforeSyncPlugins = [];
                 if (this.config.serializePlugins) {
                     this.pluginInstances.external.beforeSync.forEach((method) => {
-                        beforeSyncPlugins.push(() => { return method(action, transformedData, transformedSchema); });
+                        beforeSyncPlugins.push(() => method(action, transformedData, transformedSchema));
                     });
                     return series_1.series(beforeSyncPlugins);
                 }
@@ -222,7 +230,7 @@ class Q extends events_1.EventEmitter {
                 const afterSyncPlugins = [];
                 if (this.config.serializePlugins) {
                     this.pluginInstances.external.afterSync.forEach((method) => {
-                        afterSyncPlugins.push(() => { return method(action, transformedData, transformedSchema); });
+                        afterSyncPlugins.push(() => method(action, transformedData, transformedSchema));
                     });
                     return series_1.series(afterSyncPlugins);
                 }
@@ -235,7 +243,7 @@ class Q extends events_1.EventEmitter {
             })
                 .then(() => {
                 debug('After action plugins executed successfully!');
-                logger_1.logger.log(`${action.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'} completed successfully!`);
+                logger_1.logger.log(`${type}: { content_type: '${contentType}', ${(locale) ? `locale: '${locale}',` : ''} uid: '${uid}'} was completed successfully!`);
                 this.inProgress = false;
                 this.emit('next', data);
             })

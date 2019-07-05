@@ -25,12 +25,12 @@ let instance = null
  *  Handles/processes 'sync' items one at a time, firing 'before' and 'after' hooks
  */
 export class Q extends EventEmitter {
-  private config: any
+  private readonly config: any
+  private readonly pluginInstances: any
+  private readonly contentStore: any
+  private readonly q: any
   private iLock: boolean
   private inProgress: boolean
-  private pluginInstances: any
-  private contentStore: any
-  private q: any
 
   /**
    * 'Q's constructor
@@ -86,33 +86,29 @@ export class Q extends EventEmitter {
    * @description Handles errors in 'Q'
    * @param {Object} obj - Errorred item
    */
-  public errorHandler(obj) {
-    notify('error', obj)
-    logger.error(obj)
-    debug(`Error handler called with ${JSON.stringify(obj)}`)
-    if (obj._checkpoint) {
-      return saveToken(obj._checkpoint.name, obj._checkpoint.token).then(() => {
-        return saveFailedItems(obj).then(() => {
-          this.inProgress = false
-          this.emit('next')
-        })
-      }).catch((error) => {
-        logger.error('Errorred while saving token')
-        logger.error(error)
-        this.inProgress = false
-        this.emit('next')
-      })
+  public async errorHandler(obj) {
+    const that = this
+    try {
+      notify('error', obj)
+      logger.error(obj)
+      debug(`Error handler called with ${JSON.stringify(obj)}`)
+      if (obj._checkpoint) {
+        await saveToken(obj._checkpoint.name, obj._checkpoint.token)
+      }
+      await saveFailedItems(obj)
+      this.inProgress = false
+      this.emit('next')
+    } catch (error) {
+      // probably, the context could change
+      logger.error('Something went wrong in errorHandler!')
+      that.inProgress = false
+      that.emit('next')
     }
+  }
 
-    return saveFailedItems(obj).then(() => {
-      this.inProgress = false
-      this.emit('next')
-    }).catch((error) => {
-      logger.error('Errorred while saving failed items')
-      logger.error(error)
-      this.inProgress = false
-      this.emit('next')
-    })
+  public peek() {
+
+    return this.q
   }
 
   /**
@@ -127,6 +123,7 @@ export class Q extends EventEmitter {
     if (!this.inProgress && this.q.length) {
       this.inProgress = true
       const item = this.q.shift()
+      // TODO: this could end up as a bug, if the last item fails!
       if (item._checkpoint) {
         saveToken(item._checkpoint.name, item._checkpoint.token).then(() => {
           this.process(item)
@@ -141,18 +138,11 @@ export class Q extends EventEmitter {
     }
   }
 
-  public peek() {
-    return this.q
-  }
-
   /**
    * @description Passes and calls the appropriate methods and hooks for item execution
    * @param {Object} data - Current processing item
    */
   private process(data) {
-    logger.log(
-      `${data.type.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'} is in progress...`)
-
     notify(data.type, data)
     switch (data.type) {
     case 'publish':
@@ -177,6 +167,10 @@ export class Q extends EventEmitter {
    */
   private exec(data, action) {
     try {
+      const type = data.type.toUpperCase()
+      const contentType = data._content_type_uid
+      const locale = data.locale
+      const uid = data.uid
       debug(`Exec: ${action}`)
       const beforeSyncInternalPlugins = []
       let transformedData
@@ -192,9 +186,14 @@ export class Q extends EventEmitter {
         schema.locale = data.locale
         delete data._content_type
       }
+      logger.log(
+        `${type}: { content_type: '${contentType}', ${
+            (locale) ? `locale: '${locale}',` : ''
+          } uid: '${uid}'} is in progress`,
+        )
 
       this.pluginInstances.internal.beforeSync.forEach((method) => {
-        beforeSyncInternalPlugins.push(() => { return method(action, data, schema) })
+        beforeSyncInternalPlugins.push(() => method(action, data, schema))
       })
 
       return series(beforeSyncInternalPlugins)
@@ -212,7 +211,7 @@ export class Q extends EventEmitter {
 
           if (this.config.serializePlugins) {
             this.pluginInstances.external.beforeSync.forEach((method) => {
-              beforeSyncPlugins.push(() => { return method(action, transformedData, transformedSchema) })
+              beforeSyncPlugins.push(() => method(action, transformedData, transformedSchema))
             })
 
             return series(beforeSyncPlugins)
@@ -235,6 +234,7 @@ export class Q extends EventEmitter {
           if (typeof schema === 'undefined') {
             return
           }
+
           return this.contentStore.updateContentType(schema)
         })
         .then(() => {
@@ -244,7 +244,7 @@ export class Q extends EventEmitter {
 
           if (this.config.serializePlugins) {
             this.pluginInstances.external.afterSync.forEach((method) => {
-              afterSyncPlugins.push(() => { return method(action, transformedData, transformedSchema) })
+              afterSyncPlugins.push(() => method(action, transformedData, transformedSchema))
             })
 
             return series(afterSyncPlugins)
@@ -259,7 +259,9 @@ export class Q extends EventEmitter {
         .then(() => {
           debug('After action plugins executed successfully!')
           logger.log(
-            `${action.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',`: ''} uid: '${data.uid}'} completed successfully!`
+            `${type}: { content_type: '${contentType}', ${
+                (locale) ? `locale: '${locale}',` : ''
+              } uid: '${uid}'} was completed successfully!`,
             )
           this.inProgress = false
           this.emit('next', data)
