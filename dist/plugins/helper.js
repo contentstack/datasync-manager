@@ -34,7 +34,9 @@ exports.buildReferencePaths = (schema, entryReferences = {}, assetReferences = {
         if (field && field.data_type) {
             if (field.data_type === 'reference') {
                 const fieldPath = ((parent) ? `${parent}.${schema[i].uid}` : field.uid);
-                entryReferences[fieldPath] = field.reference_to;
+                // all references will now be an array
+                // example: { _reference: { field1.product: [''] } }
+                entryReferences[fieldPath] = (typeof field.reference_to === 'string') ? [field.reference_to] : field.reference_to;
             }
             else if (field.data_type === 'file') {
                 const fieldPath = ((parent) ? `${parent}.${field.uid}` : field.uid);
