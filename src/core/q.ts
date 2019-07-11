@@ -8,6 +8,7 @@ import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep } from 'lodash'
 import { lock, unlock } from '.'
+import { filterUnwantedKeys, getSchema } from '../util/index'
 import { logger } from '../util/logger'
 import { series } from '../util/series'
 import { saveFailedItems } from '../util/unprocessible'
@@ -25,7 +26,7 @@ let instance = null
  *  Handles/processes 'sync' items one at a time, firing 'before' and 'after' hooks
  */
 export class Q extends EventEmitter {
-  private readonly config: any
+  private readonly syncManager: any
   private readonly pluginInstances: any
   private readonly contentStore: any
   private readonly q: any
@@ -43,7 +44,7 @@ export class Q extends EventEmitter {
       super()
       this.pluginInstances = load(config)
       this.contentStore = contentStore
-      this.config = config.syncManager
+      this.syncManager = config.syncManager
       this.iLock = false
       this.inProgress = false
       this.q = []
@@ -60,7 +61,7 @@ export class Q extends EventEmitter {
 
   public unshift(data) {
     this.q.unshift(data)
-    if (this.q.length > this.config.queue.pause_threshold) {
+    if (this.q.length > this.syncManager.queue.pause_threshold) {
       this.iLock = true
       lock()
     }
@@ -74,7 +75,7 @@ export class Q extends EventEmitter {
    */
   public push(data) {
     this.q.push(data)
-    if (this.q.length > this.config.queue.pause_threshold) {
+    if (this.q.length > this.syncManager.queue.pause_threshold) {
       this.iLock = true
       lock()
     }
@@ -92,8 +93,8 @@ export class Q extends EventEmitter {
       notify('error', obj)
       logger.error(obj)
       debug(`Error handler called with ${JSON.stringify(obj)}`)
-      if (obj._checkpoint) {
-        await saveToken(obj._checkpoint.name, obj._checkpoint.token)
+      if (typeof obj.checkpoint !== 'undefined') {
+        await saveToken(obj.checkpoint.name, obj.checkpoint.token)
       }
       await saveFailedItems(obj)
       this.inProgress = false
@@ -114,27 +115,22 @@ export class Q extends EventEmitter {
   /**
    * @description Calls next item in the queue
    */
-  private next() {
-    if (this.iLock && this.q.length < this.config.queue.resume_threshold) {
-      unlock(true)
-      this.iLock = false
-    }
-    debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`)
-    if (!this.inProgress && this.q.length) {
-      this.inProgress = true
-      const item = this.q.shift()
-      // TODO: this could end up as a bug, if the last item fails!
-      if (item._checkpoint) {
-        saveToken(item._checkpoint.name, item._checkpoint.token).then(() => {
-          this.process(item)
-        }).catch((error) => {
-          logger.error('Save token failed to save a checkpoint!')
-          logger.error(error)
-          this.process(item)
-        })
-      } else {
+  private async next() {
+    try {
+      if (this.iLock && this.q.length < this.syncManager.queue.resume_threshold) {
+        unlock(true)
+        this.iLock = false
+      }
+      debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`)
+      if (!this.inProgress && this.q.length) {
+        this.inProgress = true
+        const item = this.q.shift()
         this.process(item)
       }
+    } catch (error) {
+      logger.error(error)
+      this.inProgress = false
+      this.emit('next')
     }
   }
 
@@ -165,27 +161,33 @@ export class Q extends EventEmitter {
    * @param {String} afterAction - Name of the hook to execute after the action has been performed
    * @returns {Promise} Returns promise
    */
-  private exec(data, action) {
+  private async exec(data, action) {
+    let checkpoint: any
     try {
       const type = data.type.toUpperCase()
       const contentType = data._content_type_uid
       const locale = data.locale
       const uid = data.uid
-      debug(`Exec: ${action}`)
+
+      if (data.hasOwnProperty('_checkpoint')) {
+        checkpoint = data._checkpoint
+        delete data._checkpoint
+      }
+      debug(`Executing: ${JSON.stringify(data)}`)
       const beforeSyncInternalPlugins = []
+      // re-initializing everytime with const.. avoids memory leaks
+      const beforeSyncPlugins = []
+      // re-initializing everytime with const.. avoids memory leaks
+      const afterSyncPlugins = []
       let transformedData
       let transformedSchema
-      let schema
-      delete data.type
-      delete data.publish_details
-      if (action === 'publish' && data._content_type_uid !== '_assets') {
-        schema = data._content_type
-        schema._content_type_uid = '_content_types'
-        schema.event_at = data.event_at
-        schema._synced_at = data._synced_at
-        schema.locale = data.locale
-        delete data._content_type
+
+      let { schema } = getSchema(action, data)
+      data = filterUnwantedKeys(action, data)
+      if (typeof schema !== 'undefined') {
+        schema = filterUnwantedKeys(action, schema)
       }
+
       logger.log(
         `${type}: { content_type: '${contentType}', ${
             (locale) ? `locale: '${locale}',` : ''
@@ -196,86 +198,69 @@ export class Q extends EventEmitter {
         beforeSyncInternalPlugins.push(() => method(action, data, schema))
       })
 
-      return series(beforeSyncInternalPlugins)
-        .then(() => {
-          if (this.config.pluginTransformations) {
-            transformedData = data
-            transformedSchema = schema
-          } else {
-            transformedData = cloneDeep(data)
-            transformedSchema = cloneDeep(schema)
-          }
+      await series(beforeSyncInternalPlugins)
+      if (this.syncManager.pluginTransformations) {
+        transformedData = data
+        transformedSchema = schema
+      } else {
+        transformedData = cloneDeep(data)
+        transformedSchema = cloneDeep(schema)
+      }
 
-          // re-initializing everytime with const.. avoids memory leaks
-          const beforeSyncPlugins = []
-
-          if (this.config.serializePlugins) {
-            this.pluginInstances.external.beforeSync.forEach((method) => {
-              beforeSyncPlugins.push(() => method(action, transformedData, transformedSchema))
-            })
-
-            return series(beforeSyncPlugins)
-          } else {
-            this.pluginInstances.external.beforeSync.forEach((method) => {
-              beforeSyncPlugins.push(method(action, transformedData, transformedSchema))
-            })
-
-            return Promise.all(beforeSyncPlugins)
-          }
+      if (this.syncManager.serializePlugins) {
+        this.pluginInstances.external.beforeSync.forEach((method) => {
+          beforeSyncPlugins.push(() => method(action, transformedData, transformedSchema))
         })
-        .then(() => {
-          debug('Before action plugins executed successfully!')
 
-          return this.contentStore[action](data)
+        await series(beforeSyncPlugins)
+      } else {
+        this.pluginInstances.external.beforeSync.forEach((method) => {
+          beforeSyncPlugins.push(method(action, transformedData, transformedSchema))
         })
-        .then(() => {
-          debug(`Completed '${action}' on connector successfully!`)
 
-          if (typeof schema === 'undefined') {
-            return
-          }
+        await Promise.all(beforeSyncPlugins)
+      }
+      debug('Before action plugins executed successfully!')
+      await this.contentStore[action](data)
 
-          return this.contentStore.updateContentType(schema)
+      debug(`Completed '${action}' on connector successfully!`)
+      if (typeof schema !== 'undefined') {
+        await this.contentStore.updateContentType(schema)
+      }
+
+      debug('Connector instance called successfully!')
+      if (this.syncManager.serializePlugins) {
+        this.pluginInstances.external.afterSync.forEach((method) => {
+          afterSyncPlugins.push(() => method(action, transformedData, transformedSchema))
         })
-        .then(() => {
-          debug('Connector instance called successfully!')
-          // re-initializing everytime with const.. avoids memory leaks
-          const afterSyncPlugins = []
 
-          if (this.config.serializePlugins) {
-            this.pluginInstances.external.afterSync.forEach((method) => {
-              afterSyncPlugins.push(() => method(action, transformedData, transformedSchema))
-            })
+        await series(afterSyncPlugins)
+      } else {
+        this.pluginInstances.external.afterSync.forEach((method) => {
+          afterSyncPlugins.push(method(action, transformedData, transformedSchema))
+        })
 
-            return series(afterSyncPlugins)
-          } else {
-            this.pluginInstances.external.afterSync.forEach((method) => {
-              afterSyncPlugins.push(method(action, transformedData, transformedSchema))
-            })
+        await Promise.all(afterSyncPlugins)
+      }
 
-            return Promise.all(afterSyncPlugins)
-          }
-        })
-        .then(() => {
-          debug('After action plugins executed successfully!')
-          logger.log(
-            `${type}: { content_type: '${contentType}', ${
-                (locale) ? `locale: '${locale}',` : ''
-              } uid: '${uid}'} was completed successfully!`,
-            )
-          this.inProgress = false
-          this.emit('next', data)
-        })
-        .catch((error) => {
-          this.emit('error', {
-            data,
-            error,
-          })
-        })
+      if (typeof checkpoint !== 'undefined') {
+        await saveToken(checkpoint.name, checkpoint.token)
+      }
+
+      debug('After action plugins executed successfully!')
+      logger.log(
+        `${type}: { content_type: '${contentType}', ${
+            (locale) ? `locale: '${locale}',` : ''
+          } uid: '${uid}'} was completed successfully!`,
+        )
+      this.inProgress = false
+      this.emit('next', data)
     } catch (error) {
       this.emit('error', {
         data,
         error,
+        // tslint:disable-next-line: object-literal-sort-keys
+        checkpoint,
       })
     }
   }

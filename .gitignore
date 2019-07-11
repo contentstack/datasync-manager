@@ -5,6 +5,7 @@
 _contents
 unprocessible
 _mongo_assets
+_dev_assets
 
 # IDE config
 .vscode
