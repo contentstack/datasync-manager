@@ -394,6 +394,7 @@ exports.normalizePluginPath = (config, plugin, isInternal) => {
         }
     }
     pluginPath = path_1.resolve(path_1.join(config.paths.plugin, plugin.name, 'index.js'));
+    console.error('plugin path', pluginPath);
     if (!fs_1.existsSync(pluginPath)) {
         throw new Error(`Unable to find plugin: ${JSON.stringify(plugin)}`);
     }

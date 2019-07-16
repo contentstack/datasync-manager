@@ -1,11 +1,11 @@
 import { cloneDeep, merge } from 'lodash'
 import { setConfig } from '../../src'
-import { Q, notifications } from '../../src/core/q'
 import { config as internalConfig } from '../../src/config'
+import { notifications, Q } from '../../src/core/q'
 import { buildConfigPaths } from '../../src/util/build-paths'
 import { setLogger } from '../../src/util/logger'
 import { config } from '../dummy/config'
-import { contentConnector, assetConnector } from '../dummy/connector-listener-instances'
+import { assetConnector, contentConnector } from '../dummy/connector-listener-instances'
 
 const configs: any = cloneDeep(merge({}, internalConfig, config))
 
@@ -31,7 +31,7 @@ test('error handler should work fine', () => {
   notifications.on('error', (error) => {
     expect(error).toMatchObject(errorObject)
   })
-  
+
   return q.errorHandler(errorObject)
     .then((result) => {
       expect(result).toBeUndefined()

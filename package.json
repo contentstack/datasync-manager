@@ -21,6 +21,7 @@
     "@types/rimraf": "2.0.2",
     "@types/write-file-atomic": "2.1.1",
     "jest": "24.8.0",
+    "jest-html-reporter": "^2.5.0",
     "mkdirp": "0.5.1",
     "nock": "10.0.6",
     "rimraf": "2.6.2",

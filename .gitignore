@@ -16,6 +16,7 @@ package-lock.json
 
 # Coverage directories
 coverage
+test-report.html
 
 # Private examples
 example/**/*
