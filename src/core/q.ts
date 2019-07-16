@@ -102,6 +102,7 @@ export class Q extends EventEmitter {
     } catch (error) {
       // probably, the context could change
       logger.error('Something went wrong in errorHandler!')
+      logger.error(error)
       that.inProgress = false
       that.emit('next')
     }

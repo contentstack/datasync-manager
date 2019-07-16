@@ -138,10 +138,9 @@ const sync = () => {
                 },
             };
             return fire(request)
-                .then(resolve)
-                .catch(reject);
+                .then(resolve);
         }).catch((error) => {
-            logger_1.logger.error(error);
+            return reject(error);
         });
     });
 };
@@ -255,8 +254,7 @@ const fire = (req) => {
                 });
             }
             return postProcess(req, syncResponse)
-                .then(resolve)
-                .catch(reject);
+                .then(resolve);
         }).catch((error) => {
             if (inet_1.netConnectivityIssues(error)) {
                 flag.SQ = false;

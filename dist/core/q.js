@@ -103,6 +103,7 @@ class Q extends events_1.EventEmitter {
             catch (error) {
                 // probably, the context could change
                 logger_1.logger.error('Something went wrong in errorHandler!');
+                logger_1.logger.error(error);
                 that.inProgress = false;
                 that.emit('next');
             }
