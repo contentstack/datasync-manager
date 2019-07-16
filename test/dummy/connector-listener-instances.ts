@@ -2,6 +2,13 @@ let consumer
 
 // Build a dummy asset connector
 export const assetConnector = {
+  getAssetLocation: () => {
+    return Promise.resolve('/assets/dummy/file.jpg')
+  },
+  getConfig: () => {
+    return {}
+  },
+  // tslint:disable-next-line: object-literal-sort-keys
   delete: () => {
     return Promise.resolve()
   },
@@ -30,6 +37,9 @@ export const contentConnector = {
   unpublish: () => {
     return Promise.resolve()
   },
+  updateContentType: () => {
+    return Promise.resolve()
+  }
 }
 
 let lConfig
