@@ -25,7 +25,7 @@ exports.load = (config) => {
         external: {},
         internal: {},
     };
-    const plugins = config.plugins || {};
+    const plugins = config.plugins || [];
     pluginMethods.forEach((pluginMethod) => {
         pluginInstances.external[pluginMethod] = pluginInstances[pluginMethod] || [];
         pluginInstances.internal[pluginMethod] = pluginInstances[pluginMethod] || [];
@@ -40,7 +40,7 @@ exports.load = (config) => {
         }
         const pluginPath = index_1.normalizePluginPath(config, plugin, isInternal);
         const Plugin = require(pluginPath);
-        Plugin.options = plugin.options;
+        Plugin.options = plugin.options || {};
         // execute/initiate plugin
         Plugin();
         pluginMethods.forEach((pluginMethod) => {

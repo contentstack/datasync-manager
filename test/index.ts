@@ -9,7 +9,12 @@ import { contentType as contentTypeSchema } from './dummy/api-responses/content-
 import { response as deleteResponse } from './dummy/api-responses/delete'
 import { response as emptyResponse } from './dummy/api-responses/empty'
 import { response as mixedUnpublishResponse } from './dummy/api-responses/entries'
+import { contentType as rteSchema } from './dummy/api-responses/markdown-content-type'
+import { response as rteEntries } from './dummy/api-responses/markdown-entries'
 import { response as publishResponse } from './dummy/api-responses/publish'
+import { contentType as referenceSchema } from './dummy/api-responses/references-content-type'
+import { contentType as reference2Schema } from './dummy/api-responses/references-content-type-2'
+import { response as referencesEntries } from './dummy/api-responses/references-entries'
 import { config } from './dummy/config'
 import { assetConnector, contentConnector, listener } from './dummy/connector-listener-instances'
 
@@ -24,7 +29,7 @@ describe('core', () => {
     nock('https://api.localhost.io', { reqheaders: {
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
-      'x-user-agent': `datasync-manager/v${packageInfo.version}`
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
     }})
       .get('/v3/stacks/sync/publish-success')
       .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
@@ -35,7 +40,7 @@ describe('core', () => {
     nock('https://api.localhost.io', { reqheaders: {
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
-      'x-user-agent': `datasync-manager/v${packageInfo.version}`
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
     }})
       .get('/v3/stacks/sync')
       .query({pagination_token: 'publish-token', environment: 'test', limit: 100})
@@ -46,7 +51,7 @@ describe('core', () => {
     nock('https://api.localhost.io', { reqheaders: {
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
-      'x-user-agent': `datasync-manager/v${packageInfo.version}`
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
     }})
       .get('/v3/stacks/sync/publish-success')
       .query({pagination_token: 'publish-token', environment: 'test', limit: 100})
@@ -57,8 +62,9 @@ describe('core', () => {
     nock('https://api.localhost.io', { reqheaders: {
       'access_token': 'dummyDeliveryToken',
       'api_key': 'dummyApiKey',
-      'x-user-agent': `datasync-manager/v${packageInfo.version}`
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
     }})
+    // tslint:disable-next-line: max-line-length
     // "url": "https://api.localhost.io/v3/stacks/sync/publish-success?environment=test&limit=100&sync_token=dummySyncToken",
 
       .get('/v3/stacks/sync')
@@ -95,6 +101,28 @@ describe('core', () => {
       'api_key': 'dummyApiKey',
       'x-user-agent': `datasync-manager/v${packageInfo.version}`,
     }})
+      .get('/v3/stacks/sync/rte-success')
+      .query({sync_token: 'dummyRTEToken', environment: 'test', limit: 100})
+      .reply(200, rteEntries)
+  })
+
+  beforeEach(() => {
+    nock('https://api.localhost.io', { reqheaders: {
+      'access_token': 'dummyDeliveryToken',
+      'api_key': 'dummyApiKey',
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
+    }})
+      .get('/v3/stacks/sync/references-success')
+      .query({sync_token: 'dummyReferencesToken', environment: 'test', limit: 100})
+      .reply(200, referencesEntries)
+  })
+
+  beforeEach(() => {
+    nock('https://api.localhost.io', { reqheaders: {
+      'access_token': 'dummyDeliveryToken',
+      'api_key': 'dummyApiKey',
+      'x-user-agent': `datasync-manager/v${packageInfo.version}`,
+    }})
       .get('/v3/stacks/sync')
       .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
       .reply(200, deleteResponse)
@@ -104,6 +132,24 @@ describe('core', () => {
     nock('https://api.localhost.io')
       .get('/v3/content_types/authors')
       .reply(200, contentTypeSchema)
+  })
+
+  beforeEach(() => {
+    nock('https://api.localhost.io')
+      .get('/v3/content_types/sample_three')
+      .reply(200, rteSchema)
+  })
+
+  beforeEach(() => {
+    nock('https://api.localhost.io')
+      .get('/v3/content_types/sample_fourt')
+      .reply(200, referenceSchema)
+  })
+
+  beforeEach(() => {
+    nock('https://api.localhost.io')
+      .get('/v3/content_types/references')
+      .reply(200, reference2Schema)
   })
 
   beforeEach(() => {
@@ -133,7 +179,7 @@ describe('core', () => {
     expect(setConfig(config)).toBeUndefined()
   })
 
-  test('process mixed data without errors', () => {
+  test('process mixed data without errors', async () => {
     const configs = cloneDeep(merge({}, config, internalConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
@@ -141,15 +187,16 @@ describe('core', () => {
     setContentStore((contentConnector as any))
     setAssetStore((assetConnector as any))
     setListener((listener as any))
-
-    return start(configs).then((status) => {
-      expect(status).toBeUndefined()
-    }).catch((error) => {
-      expect(error).toBeNull()
-    })
+    const status = (await start(configs))
+    expect(status).toBeUndefined()
+    // return start(configs).then((status) => {
+    //   expect(status).toBeUndefined()
+    // }).catch((error) => {
+    //   expect(error).toBeNull()
+    // })
   })
 
-  test('process publish data without errors', () => {
+  test('process publish data without errors', async () => {
     const configs = cloneDeep(merge({}, config, internalConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
@@ -159,14 +206,54 @@ describe('core', () => {
     setAssetStore((assetConnector as any))
     setListener((listener as any))
 
-    return start(configs).then((status) => {
-      expect(status).toBeUndefined()
-    }).catch((error) => {
-      expect(error).toBeNull()
-    })
+    const status = (await start(configs))
+    expect(status).toBeUndefined()
+    // return start(configs).then((status) => {
+    //   expect(status).toBeUndefined()
+    // }).catch((error) => {
+    //   expect(error).toBeNull()
+    // })
   })
 
-  test('process unpublish data without errors', () => {
+  test('process published RTE data without errors', async () => {
+    const configs = cloneDeep(merge({}, config, internalConfig))
+    const contentstack = configs.contentstack
+    contentstack.sync_token = 'dummyRTEToken'
+    contentstack.host = 'api.localhost.io'
+    contentstack.apis.sync += '/rte-success'
+    setContentStore((contentConnector as any))
+    setAssetStore((assetConnector as any))
+    setListener((listener as any))
+
+    const status = (await start(configs))
+    expect(status).toBeUndefined()
+    // return start(configs).then((status) => {
+    //   expect(status).toBeUndefined()
+    // }).catch((error) => {
+    //   expect(error).toBeNull()
+    // })
+  })
+
+  test('process published references data without errors', async () => {
+    const configs = cloneDeep(merge({}, config, internalConfig))
+    const contentstack = configs.contentstack
+    contentstack.sync_token = 'dummyReferencesToken'
+    contentstack.host = 'api.localhost.io'
+    contentstack.apis.sync += '/references-success'
+    setContentStore((contentConnector as any))
+    setAssetStore((assetConnector as any))
+    setListener((listener as any))
+
+    const status = (await start(configs))
+    expect(status).toBeUndefined()
+    // return start(configs).then((status) => {
+    //   expect(status).toBeUndefined()
+    // }).catch((error) => {
+    //   expect(error).toBeNull()
+    // })
+  })
+
+  test('process unpublish data without errors', async () => {
     const configs = cloneDeep(merge({}, config, internalConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
@@ -175,15 +262,16 @@ describe('core', () => {
     setContentStore((contentConnector as any))
     setAssetStore((assetConnector as any))
     setListener((listener as any))
-
-    return start(configs).then((status) => {
-      expect(status).toBeUndefined()
-    }).catch((error) => {
-      expect(error).toBeNull()
-    })
+    const status = (await start(configs))
+    expect(status).toBeUndefined()
+    // return start(configs).then((status) => {
+    //   expect(status).toBeUndefined()
+    // }).catch((error) => {
+    //   expect(error).toBeNull()
+    // })
   })
 
-  test('process deleted data without errors', () => {
+  test('process deleted data without errors', async () => {
     const configs = cloneDeep(merge({}, config, internalConfig))
     delete configs.plugins
     const contentstack: any = configs.contentstack
@@ -196,10 +284,12 @@ describe('core', () => {
     delete contentstack.sync_token
     setConfig(configs)
 
-    return start(configs).then((status) => {
-      expect(status).toBeUndefined()
-    }).catch((error) => {
-      expect(error).toBeNull()
-    })
+    const status = (await start(configs))
+    expect(status).toBeUndefined()
+    // return start(configs).then((status) => {
+    //   expect(status).toBeUndefined()
+    // }).catch((error) => {
+    //   expect(error).toBeNull()
+    // })
   })
 })

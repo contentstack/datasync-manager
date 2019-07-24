@@ -5,6 +5,7 @@
 _contents
 unprocessible
 _mongo_assets
+_dev_assets
 
 # IDE config
 .vscode
@@ -15,6 +16,7 @@ package-lock.json
 
 # Coverage directories
 coverage
+test-report.html
 
 # Private examples
 example/**/*

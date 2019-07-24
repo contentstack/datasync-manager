@@ -174,9 +174,9 @@ const sync = () => {
 
       return fire(request)
         .then(resolve)
-        .catch(reject)
     }).catch((error) => {
-      logger.error(error)
+
+      return reject(error)
     })
   })
 }
@@ -237,7 +237,8 @@ const fire = (req: IApiRequest) => {
               Q.push(asset)
             })
             delete groupedItems[formattedAssetType]
-          } else if (groupedItems[formattedContentType]) {
+          }
+          if (groupedItems[formattedContentType]) {
             groupedItems[formattedContentType].forEach((contentType) => {
               Q.push(contentType)
             })
@@ -306,7 +307,6 @@ const fire = (req: IApiRequest) => {
 
       return postProcess(req, syncResponse)
         .then(resolve)
-        .catch(reject)
     }).catch((error) => {
       if (netConnectivityIssues(error)) {
         flag.SQ = false

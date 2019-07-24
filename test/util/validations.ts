@@ -7,16 +7,16 @@ import {
   validateConfig,
   validateItemStructure,
   validateListener,
-  validateLogger
+  validateLogger,
 } from '../../src/util/validations'
 
-import { item as publishedAsset } from '../dummy/api-responses/publish-asset'
-import { item as unpublishedAsset } from '../dummy/api-responses/unpublish-asset'
 import { item as deletedAsset } from '../dummy/api-responses/delete-asset'
-import { item as publishedEntry } from '../dummy/api-responses/publish-entry'
-import { item as unpublishedEntry } from '../dummy/api-responses/unpublish-entry'
-import { item as deletedEntry } from '../dummy/api-responses/delete-entry'
 import { item as deletedContentType } from '../dummy/api-responses/delete-content-type'
+import { item as deletedEntry } from '../dummy/api-responses/delete-entry'
+import { item as publishedAsset } from '../dummy/api-responses/publish-asset'
+import { item as publishedEntry } from '../dummy/api-responses/publish-entry'
+import { item as unpublishedAsset } from '../dummy/api-responses/unpublish-asset'
+import { item as unpublishedEntry } from '../dummy/api-responses/unpublish-entry'
 
 import { config } from '../dummy/config'
 import { /* assetConnector, contentConnector,  */listener } from '../dummy/connector-listener-instances'
@@ -61,15 +61,22 @@ describe('validations', () => {
       delete listenerClone.register
       expect(() => {
         validateListener(listenerClone)
-      }).toThrowError(`Missing required methods! Listener is missing 'register()'!`)
+      }).toThrowError("Missing required methods! Listener is missing 'register()'!")
     })
 
     test('custom logger', () => {
-      function logger() {}
+      // tslint:disable-next-line: no-empty
+      // const logger = () => {}
+      function logger () {}
+      // tslint:disable-next-line: no-empty
       logger.prototype.info = () => {}
+      // tslint:disable-next-line: no-empty
       logger.prototype.warn = () => {}
+      // tslint:disable-next-line: no-empty
       logger.prototype.log = () => {}
+      // tslint:disable-next-line: no-empty
       logger.prototype.error = () => {}
+      // tslint:disable-next-line: no-empty
       logger.prototype.debug = () => {}
       const loggerInstance = new logger()
       expect(validateLogger(loggerInstance)).toEqual(true)
