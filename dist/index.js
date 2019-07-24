@@ -28,7 +28,7 @@ const build_paths_1 = require("./util/build-paths");
 const index_2 = require("./util/index");
 const logger_1 = require("./util/logger");
 const validations_1 = require("./util/validations");
-const debug = debug_1.default('registration');
+const debug = debug_1.default('sm:index');
 let assetStoreInstance;
 let appConfig = {};
 let contentStore;
@@ -160,3 +160,19 @@ exports.start = (config = {}) => {
         }
     });
 };
+/**
+ * @public
+ * @method debugNotifications
+ * @param {object} item Item being processed
+ * @returns {void}
+ */
+exports.debugNotifications = (action) => {
+    return (item) => {
+        debug(`Notifications: ${action} - ${JSON.stringify(item)}`);
+    };
+};
+q_1.notifications
+    .on('publish', exports.debugNotifications('publish'))
+    .on('unpublish', exports.debugNotifications('unpublish'))
+    .on('delete', exports.debugNotifications('delete'))
+    .on('error', exports.debugNotifications('error'));

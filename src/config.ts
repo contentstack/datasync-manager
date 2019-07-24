@@ -53,7 +53,7 @@ export const config = {
   locales: [],
   plugins: [
     {
-      disabled: false,
+      disabled: true,
       name: '_cs_internal_transform_entries',
       // path: '',
       options: {
@@ -61,7 +61,7 @@ export const config = {
       },
     },
     {
-      disabled: false,
+      disabled: true,
       name: '_cs_internal_transform_schemas',
       options: {
         logAssetPaths: true,
@@ -70,7 +70,7 @@ export const config = {
       },
     },
     {
-      disabled: false,
+      disabled: true,
       name: '_cs_internal_save_rte_markdown_assets',
       options: {
         // other overrides...
