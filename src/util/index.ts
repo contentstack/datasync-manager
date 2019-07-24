@@ -144,22 +144,22 @@ export const formatItems = (items, config) => {
       item._synced_at = time
       item = merge(item, item.data)
       item.locale = item.data.publish_details.locale
-      delete item.data
-      delete item.content_type_uid
+      // delete item.data
+      // delete item.content_type_uid
       break
     case 'asset_unpublished':
       item._content_type_uid = formattedAssetType
       item.type = config.contentstack.actions.unpublish
       item = merge(item, item.data)
-      delete item.data
-      delete item.content_type_uid
+      // delete item.data
+      // delete item.content_type_uid
       break
     case 'asset_deleted':
       item._content_type_uid = formattedAssetType
       item.type = config.contentstack.actions.delete
       item = merge(item, item.data)
-      delete item.data
-      delete item.content_type_uid
+      // delete item.data
+      // delete item.content_type_uid
       break
     case 'entry_published':
       item.type = config.contentstack.actions.publish
@@ -168,28 +168,28 @@ export const formatItems = (items, config) => {
       item._synced_at = time
       item = merge(item, item.data)
       item.locale = item.data.publish_details.locale
-      delete item.data
-      delete item.content_type_uid
+      // delete item.data
+      // delete item.content_type_uid
       break
     case 'entry_unpublished':
       item._content_type_uid = item.content_type_uid
       item.type = config.contentstack.actions.unpublish
       item = merge(item, item.data)
-      delete item.data
-      delete item.content_type_uid
+      // delete item.data
+      // delete item.content_type_uid
       break
     case 'entry_deleted':
       item._content_type_uid = item.content_type_uid
       item.type = config.contentstack.actions.delete
       item = merge(item, item.data)
-      delete item.data
-      delete item.content_type_uid
+      // delete item.data
+      // delete item.content_type_uid
       break
     case 'content_type_deleted':
       item.type = config.contentstack.actions.delete
       item.uid = item.content_type_uid
       item._content_type_uid = formattedContentType
-      delete item.content_type_uid
+      // delete item.content_type_uid
       break
     default:
       break
@@ -288,7 +288,8 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
     } else {
       convertedText = entry
     }
-    const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g')
+    // tslint:disable-next-line: max-line-length
+    const regexp = new RegExp('https://(assets|images|dev-assets|dev-images|stag-assets|stag-images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g')
     // tslint:disable-next-line: no-conditional-assignment
     while ((matches = regexp.exec(convertedText)) !== null) {
       if (matches && matches.length) {
@@ -303,8 +304,8 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
           bucket.push(assetObject)
         } else {
           const asset: any = find(bucket, (item) => {
-            const newRegexp = new RegExp(
-              'https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)', 'g')
+            // tslint:disable-next-line: max-line-length
+            const newRegexp = new RegExp('https://(assets|images|dev-assets|dev-images|stag-assets|stag-images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)', 'g')
             let urlparts
             // tslint:disable-next-line: no-conditional-assignment
             while ((urlparts = newRegexp.exec(item.url)) !== null) {
@@ -430,10 +431,52 @@ export const normalizePluginPath = (config, plugin, isInternal) => {
   }
 
   pluginPath = resolve(join(config.paths.plugin, plugin.name, 'index.js'))
-
   if (!existsSync(pluginPath)) {
     throw new Error(`Unable to find plugin: ${JSON.stringify(plugin)}`)
   }
 
   return pluginPath
+}
+
+export const filterUnwantedKeys = (action, data) => {
+  if (action === 'publish') {
+    const contentStore = getConfig().contentStore
+    switch (data._content_type_uid) {
+      case '_assets':
+        data = filterKeys(data, contentStore.unwanted.asset)
+        break
+      case '_content_types':
+        data = filterKeys(data, contentStore.unwanted.contentType)
+        break
+      default:
+        data = filterKeys(data, contentStore.unwanted.entry)
+    }
+  }
+
+  return data
+}
+
+// TODO
+// Add option to delete embedded documents
+const filterKeys = (data, unwantedKeys) => {
+  for (const key in unwantedKeys) {
+    if (unwantedKeys[key] && data.hasOwnProperty(key)) {
+      delete data[key]
+    }
+  }
+
+  return data
+}
+
+export const getSchema = (action, data) => {
+  let schema
+  if (action === 'publish' && data._content_type_uid !== '_assets') {
+    schema = data._content_type
+    schema._content_type_uid = '_content_types'
+    schema.event_at = data.event_at
+    schema._synced_at = data._synced_at
+    schema.locale = data.locale
+  }
+
+  return { schema }
 }

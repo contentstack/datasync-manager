@@ -9,7 +9,7 @@
     "dns-socket": "4.2.0",
     "lodash": "4.17.11",
     "marked": "0.6.3",
-    "write-file-atomic": "3.0.0"
+    "write-file-atomic": "^2.4.2"
   },
   "devDependencies": {
     "@types/debug": "0.0.31",
@@ -21,6 +21,7 @@
     "@types/rimraf": "2.0.2",
     "@types/write-file-atomic": "2.1.1",
     "jest": "24.8.0",
+    "jest-html-reporter": "^2.5.0",
     "mkdirp": "0.5.1",
     "nock": "10.0.6",
     "rimraf": "2.6.2",
