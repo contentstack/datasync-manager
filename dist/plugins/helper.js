@@ -34,7 +34,9 @@ exports.buildReferencePaths = (schema, entryReferences = {}, assetReferences = {
         if (field && field.data_type) {
             if (field.data_type === 'reference') {
                 const fieldPath = ((parent) ? `${parent}.${schema[i].uid}` : field.uid);
-                entryReferences[fieldPath] = field.reference_to;
+                // all references will now be an array
+                // example: { _reference: { field1.product: [''] } }
+                entryReferences[fieldPath] = (typeof field.reference_to === 'string') ? [field.reference_to] : field.reference_to;
             }
             else if (field.data_type === 'file') {
                 const fieldPath = ((parent) ? `${parent}.${field.uid}` : field.uid);
@@ -171,7 +173,7 @@ const checkReferences = (schema, key) => {
 exports.buildAssetObject = (asset, locale) => {
     // add locale key to inside of asset
     asset.locale = locale;
-    const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*)', 'g');
+    const regexp = new RegExp('https://(assets|images|dev-assets|dev-images|stag-assets|stag-images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*)', 'g');
     const matches = regexp.exec(asset.url);
     if (!(matches[5]) || matches[5].length === 0) {
         throw new Error('Unable to determine fine name.\n' + JSON.stringify(matches));

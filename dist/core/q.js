@@ -4,6 +4,14 @@
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -12,6 +20,7 @@ const debug_1 = __importDefault(require("debug"));
 const events_1 = require("events");
 const lodash_1 = require("lodash");
 const _1 = require(".");
+const index_1 = require("../util/index");
 const logger_1 = require("../util/logger");
 const series_1 = require("../util/series");
 const unprocessible_1 = require("../util/unprocessible");
@@ -38,7 +47,7 @@ class Q extends events_1.EventEmitter {
             super();
             this.pluginInstances = plugins_1.load(config);
             this.contentStore = contentStore;
-            this.config = config.syncManager;
+            this.syncManager = config.syncManager;
             this.iLock = false;
             this.inProgress = false;
             this.q = [];
@@ -53,7 +62,7 @@ class Q extends events_1.EventEmitter {
     }
     unshift(data) {
         this.q.unshift(data);
-        if (this.q.length > this.config.queue.pause_threshold) {
+        if (this.q.length > this.syncManager.queue.pause_threshold) {
             this.iLock = true;
             _1.lock();
         }
@@ -66,7 +75,7 @@ class Q extends events_1.EventEmitter {
      */
     push(data) {
         this.q.push(data);
-        if (this.q.length > this.config.queue.pause_threshold) {
+        if (this.q.length > this.syncManager.queue.pause_threshold) {
             this.iLock = true;
             _1.lock();
         }
@@ -78,67 +87,60 @@ class Q extends events_1.EventEmitter {
      * @param {Object} obj - Errorred item
      */
     errorHandler(obj) {
-        notify('error', obj);
-        logger_1.logger.error(obj);
-        debug(`Error handler called with ${JSON.stringify(obj)}`);
-        if (obj._checkpoint) {
-            return token_management_1.saveToken(obj._checkpoint.name, obj._checkpoint.token).then(() => {
-                return unprocessible_1.saveFailedItems(obj).then(() => {
-                    this.inProgress = false;
-                    this.emit('next');
-                });
-            }).catch((error) => {
-                logger_1.logger.error('Errorred while saving token');
-                logger_1.logger.error(error);
+        return __awaiter(this, void 0, void 0, function* () {
+            const that = this;
+            try {
+                notify('error', obj);
+                logger_1.logger.error(obj);
+                debug(`Error handler called with ${JSON.stringify(obj)}`);
+                if (typeof obj.checkpoint !== 'undefined') {
+                    yield token_management_1.saveToken(obj.checkpoint.name, obj.checkpoint.token);
+                }
+                yield unprocessible_1.saveFailedItems(obj);
                 this.inProgress = false;
                 this.emit('next');
-            });
-        }
-        return unprocessible_1.saveFailedItems(obj).then(() => {
-            this.inProgress = false;
-            this.emit('next');
-        }).catch((error) => {
-            logger_1.logger.error('Errorred while saving failed items');
-            logger_1.logger.error(error);
-            this.inProgress = false;
-            this.emit('next');
+            }
+            catch (error) {
+                // probably, the context could change
+                logger_1.logger.error('Something went wrong in errorHandler!');
+                logger_1.logger.error(error);
+                that.inProgress = false;
+                that.emit('next');
+            }
         });
+    }
+    peek() {
+        return this.q;
     }
     /**
      * @description Calls next item in the queue
      */
     next() {
-        if (this.iLock && this.q.length < this.config.queue.resume_threshold) {
-            _1.unlock(true);
-            this.iLock = false;
-        }
-        debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`);
-        if (!this.inProgress && this.q.length) {
-            this.inProgress = true;
-            const item = this.q.shift();
-            if (item._checkpoint) {
-                token_management_1.saveToken(item._checkpoint.name, item._checkpoint.token).then(() => {
+        return __awaiter(this, void 0, void 0, function* () {
+            try {
+                if (this.iLock && this.q.length < this.syncManager.queue.resume_threshold) {
+                    _1.unlock(true);
+                    this.iLock = false;
+                }
+                debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`);
+                if (!this.inProgress && this.q.length) {
+                    this.inProgress = true;
+                    const item = this.q.shift();
                     this.process(item);
-                }).catch((error) => {
-                    logger_1.logger.error('Save token failed to save a checkpoint!');
-                    logger_1.logger.error(error);
-                    this.process(item);
-                });
+                }
             }
-            else {
-                this.process(item);
+            catch (error) {
+                logger_1.logger.error(error);
+                this.inProgress = false;
+                this.emit('next');
             }
-        }
-    }
-    peek() {
-        return this.q;
+        });
     }
     /**
      * @description Passes and calls the appropriate methods and hooks for item execution
      * @param {Object} data - Current processing item
      */
     process(data) {
-        logger_1.logger.log(`${data.type.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'} is in progress...`);
         notify(data.type, data);
         switch (data.type) {
             case 'publish':
@@ -161,28 +163,36 @@ class Q extends events_1.EventEmitter {
      * @returns {Promise} Returns promise
      */
     exec(data, action) {
-        try {
-            debug(`Exec: ${action}`);
-            const beforeSyncInternalPlugins = [];
-            let transformedData;
-            let transformedSchema;
-            let schema;
-            delete data.type;
-            delete data.publish_details;
-            if (action === 'publish' && data._content_type_uid !== '_assets') {
-                schema = data._content_type;
-                schema._content_type_uid = '_content_types';
-                schema.event_at = data.event_at;
-                schema._synced_at = data._synced_at;
-                schema.locale = data.locale;
-                delete data._content_type;
-            }
-            this.pluginInstances.internal.beforeSync.forEach((method) => {
-                beforeSyncInternalPlugins.push(() => { return method(action, data, schema); });
-            });
-            return series_1.series(beforeSyncInternalPlugins)
-                .then(() => {
-                if (this.config.pluginTransformations) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let checkpoint;
+            try {
+                const type = data.type.toUpperCase();
+                const contentType = data._content_type_uid;
+                const locale = data.locale;
+                const uid = data.uid;
+                if (data.hasOwnProperty('_checkpoint')) {
+                    checkpoint = data._checkpoint;
+                    delete data._checkpoint;
+                }
+                debug(`Executing: ${JSON.stringify(data)}`);
+                const beforeSyncInternalPlugins = [];
+                // re-initializing everytime with const.. avoids memory leaks
+                const beforeSyncPlugins = [];
+                // re-initializing everytime with const.. avoids memory leaks
+                const afterSyncPlugins = [];
+                let transformedData;
+                let transformedSchema;
+                let { schema } = index_1.getSchema(action, data);
+                data = index_1.filterUnwantedKeys(action, data);
+                if (typeof schema !== 'undefined') {
+                    schema = index_1.filterUnwantedKeys(action, schema);
+                }
+                logger_1.logger.log(`${type}: { content_type: '${contentType}', ${(locale) ? `locale: '${locale}',` : ''} uid: '${uid}'} is in progress`);
+                this.pluginInstances.internal.beforeSync.forEach((method) => {
+                    beforeSyncInternalPlugins.push(() => method(action, data, schema));
+                });
+                yield series_1.series(beforeSyncInternalPlugins);
+                if (this.syncManager.pluginTransformations) {
                     transformedData = data;
                     transformedSchema = schema;
                 }
@@ -190,68 +200,54 @@ class Q extends events_1.EventEmitter {
                     transformedData = lodash_1.cloneDeep(data);
                     transformedSchema = lodash_1.cloneDeep(schema);
                 }
-                // re-initializing everytime with const.. avoids memory leaks
-                const beforeSyncPlugins = [];
-                if (this.config.serializePlugins) {
+                if (this.syncManager.serializePlugins) {
                     this.pluginInstances.external.beforeSync.forEach((method) => {
-                        beforeSyncPlugins.push(() => { return method(action, transformedData, transformedSchema); });
+                        beforeSyncPlugins.push(() => method(action, transformedData, transformedSchema));
                     });
-                    return series_1.series(beforeSyncPlugins);
+                    yield series_1.series(beforeSyncPlugins);
                 }
                 else {
                     this.pluginInstances.external.beforeSync.forEach((method) => {
                         beforeSyncPlugins.push(method(action, transformedData, transformedSchema));
                     });
-                    return Promise.all(beforeSyncPlugins);
+                    yield Promise.all(beforeSyncPlugins);
                 }
-            })
-                .then(() => {
                 debug('Before action plugins executed successfully!');
-                return this.contentStore[action](data);
-            })
-                .then(() => {
+                yield this.contentStore[action](data);
                 debug(`Completed '${action}' on connector successfully!`);
-                if (typeof schema === 'undefined') {
-                    return;
+                if (typeof schema !== 'undefined') {
+                    yield this.contentStore.updateContentType(schema);
                 }
-                return this.contentStore.updateContentType(schema);
-            })
-                .then(() => {
                 debug('Connector instance called successfully!');
-                // re-initializing everytime with const.. avoids memory leaks
-                const afterSyncPlugins = [];
-                if (this.config.serializePlugins) {
+                if (this.syncManager.serializePlugins) {
                     this.pluginInstances.external.afterSync.forEach((method) => {
-                        afterSyncPlugins.push(() => { return method(action, transformedData, transformedSchema); });
+                        afterSyncPlugins.push(() => method(action, transformedData, transformedSchema));
                     });
-                    return series_1.series(afterSyncPlugins);
+                    yield series_1.series(afterSyncPlugins);
                 }
                 else {
                     this.pluginInstances.external.afterSync.forEach((method) => {
                         afterSyncPlugins.push(method(action, transformedData, transformedSchema));
                     });
-                    return Promise.all(afterSyncPlugins);
+                    yield Promise.all(afterSyncPlugins);
                 }
-            })
-                .then(() => {
+                if (typeof checkpoint !== 'undefined') {
+                    yield token_management_1.saveToken(checkpoint.name, checkpoint.token);
+                }
                 debug('After action plugins executed successfully!');
-                logger_1.logger.log(`${action.toUpperCase()}: { content_type: '${data._content_type_uid}', ${(data.locale) ? `locale: '${data.locale}',` : ''} uid: '${data.uid}'} completed successfully!`);
+                logger_1.logger.log(`${type}: { content_type: '${contentType}', ${(locale) ? `locale: '${locale}',` : ''} uid: '${uid}'} was completed successfully!`);
                 this.inProgress = false;
                 this.emit('next', data);
-            })
-                .catch((error) => {
+            }
+            catch (error) {
                 this.emit('error', {
                     data,
                     error,
+                    // tslint:disable-next-line: object-literal-sort-keys
+                    checkpoint,
                 });
-            });
-        }
-        catch (error) {
-            this.emit('error', {
-                data,
-                error,
-            });
-        }
+            }
+        });
     }
 }
 exports.Q = Q;

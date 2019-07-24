@@ -9,7 +9,28 @@
  */
 export const config = {
   assetStore: {},
-  contentStore: {},
+  contentStore: {
+    unwanted: {
+      asset: {
+        _in_progress: true,
+        content_type_uid: true,
+        data: true,
+        publish_details: true,
+        type: true,
+      },
+      contentType: {
+        content_type_uid: true,
+      },
+      entry: {
+        _content_type: true,
+        _in_progress: true,
+        content_type_uid: true,
+        data: true,
+        publish_details: true,
+        type: true,
+      }
+    }
+  },
   contentstack: {
     MAX_RETRY_LIMIT: 6,
     actions: {

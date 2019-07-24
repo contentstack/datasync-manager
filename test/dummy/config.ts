@@ -5,12 +5,14 @@ export const config = {
     host: 'api.localhost.io',
     sync_token: 'dummySyncToken',
   },
-  plugins: {
-    myplugin1: {
-      name: 'Jane Doe',
-    },
-    myplugin2: {
-      name: 'Jane Doe',
-    },
-  },
+  // plugins: [
+  //   {
+  //     name: 'myplugin1',
+  //     path: '/home/ramanathan/Documents/contentstack/datasync/sync-manager/test/dummy/plugins/myplugin1/index.js',
+  //     // tslint:disable-next-line: object-literal-sort-keys
+  //     options: {
+  //       // other overrides...
+  //     },
+  //   },
+  // ],
 }
