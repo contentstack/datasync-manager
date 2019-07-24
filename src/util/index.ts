@@ -288,7 +288,8 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
     } else {
       convertedText = entry
     }
-    const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g')
+    // tslint:disable-next-line: max-line-length
+    const regexp = new RegExp('https://(assets|images|dev-assets|dev-images|stag-assets|stag-images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g')
     // tslint:disable-next-line: no-conditional-assignment
     while ((matches = regexp.exec(convertedText)) !== null) {
       if (matches && matches.length) {
@@ -303,8 +304,8 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
           bucket.push(assetObject)
         } else {
           const asset: any = find(bucket, (item) => {
-            const newRegexp = new RegExp(
-              'https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)', 'g')
+            // tslint:disable-next-line: max-line-length
+            const newRegexp = new RegExp('https://(assets|images|dev-assets|dev-images|stag-assets|stag-images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)', 'g')
             let urlparts
             // tslint:disable-next-line: no-conditional-assignment
             while ((urlparts = newRegexp.exec(item.url)) !== null) {
@@ -430,7 +431,6 @@ export const normalizePluginPath = (config, plugin, isInternal) => {
   }
 
   pluginPath = resolve(join(config.paths.plugin, plugin.name, 'index.js'))
-  console.error('plugin path', pluginPath)
   if (!existsSync(pluginPath)) {
     throw new Error(`Unable to find plugin: ${JSON.stringify(plugin)}`)
   }
