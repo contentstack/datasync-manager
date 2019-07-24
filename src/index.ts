@@ -25,7 +25,7 @@ import {
   validateListener,
 } from './util/validations'
 
-const debug = Debug('registration')
+const debug = Debug('sm:index')
 
 let assetStoreInstance
 let appConfig: any = {}
@@ -236,3 +236,21 @@ export const start = (config: IConfig = {}): Promise<{}> => {
     }
   })
 }
+
+/**
+ * @public
+ * @method debugNotifications
+ * @param {object} item Item being processed
+ * @returns {void}
+ */
+export const debugNotifications = (action) => {
+  return (item) => {
+    debug(`Notifications: ${action} - ${JSON.stringify(item)}`)
+  }
+}
+
+notifications
+.on('publish', debugNotifications('publish'))
+.on('unpublish', debugNotifications('unpublish'))
+.on('delete', debugNotifications('delete'))
+.on('error', debugNotifications('error'))
