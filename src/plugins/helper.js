@@ -168,7 +168,7 @@ const checkReferences = (schema, key) => {
 exports.buildAssetObject = (asset, locale) => {
   // add locale key to inside of asset
   asset.locale = locale
-  const regexp = new RegExp('https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*)', 'g')
+  const regexp = new RegExp('https://(assets|images|dev-assets|dev-images|stag-assets|stag-images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*)', 'g')
   const matches = regexp.exec(asset.url)
 
   if (!(matches[5]) || matches[5].length === 0) {
