@@ -6,6 +6,7 @@ _contents
 unprocessible
 _mongo_assets
 _dev_assets
+test-filtered.json
 
 # IDE config
 .vscode

@@ -29,8 +29,8 @@ exports.config = {
                 data: true,
                 publish_details: true,
                 type: true,
-            }
-        }
+            },
+        },
     },
     contentstack: {
         MAX_RETRY_LIMIT: 6,
@@ -89,8 +89,8 @@ exports.config = {
             port: 53,
             retries: 5,
             retryIncrement: 5 * 1000,
-            retryTimeout: 20 * 1000,
-            timeout: 10 * 1000,
+            retryTimeout: 15 * 1000,
+            timeout: 30 * 1000,
             type: 'A',
         },
         limit: 100,
@@ -104,8 +104,8 @@ exports.config = {
         // max file sizes in bytes
         maxsize: 2097152,
         queue: {
-            pause_threshold: 10000,
-            resume_threshold: 5000,
+            pause_threshold: 7000,
+            resume_threshold: 4000,
         },
         saveFailedItems: true,
         saveFilteredItems: true,

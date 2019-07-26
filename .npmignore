@@ -4,7 +4,6 @@ src
 # Beautifiers & Indenters
 .jsbeautifyrc
 tsconfig.json
-tslint.json
 
 # Test configurations
 jest.config.js
@@ -12,6 +11,9 @@ test-report.html
 
 # Data
 _contents
+_dev_assets
+_dev_contents
+_development_contents
 
 # Node module dependencies
 node_modules
