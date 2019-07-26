@@ -17,7 +17,7 @@ const _1 = require("./");
  */
 const handleExit = (signal) => {
     _1.lock();
-    const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : 1000;
+    const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : 20000;
     logger_1.logger.info(`Received ${signal}. This will shut down the process in ${killDuration}ms..`);
     setTimeout(abort, killDuration);
 };

@@ -3,17 +3,12 @@ module.exports = {
     apiKey: '',
     deliveryToken: ''
   },
-  plugins: {
-    sitemap: {
-      name: 'sitemap generator'
-    }
-  },
   contentStore: {
-    dbName: 'markdown',
+    dbName: 'contentstack',
     collectionName: 'development'
   },
   assetStore: {
-    baseDir: '_mongo_assets'
+    baseDir: './_development_contents'
   },
   syncManager: {
     inet: {
