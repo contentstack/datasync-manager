@@ -5,14 +5,30 @@ export const config = {
     host: 'api.localhost.io',
     sync_token: 'dummySyncToken',
   },
-  // plugins: [
-  //   {
-  //     name: 'myplugin1',
-  //     path: '/home/ramanathan/Documents/contentstack/datasync/sync-manager/test/dummy/plugins/myplugin1/index.js',
-  //     // tslint:disable-next-line: object-literal-sort-keys
-  //     options: {
-  //       // other overrides...
-  //     },
-  //   },
-  // ],
+  plugins: [
+    {
+      disabled: false,
+      name: '_cs_internal_transform_entries',
+      // path: '',
+      options: {
+        // other overrides...
+      },
+    },
+    {
+      disabled: false,
+      name: '_cs_internal_transform_schemas',
+      options: {
+        logAssetPaths: true,
+        logReferencePaths: true,
+        // other overrides...
+      },
+    },
+    {
+      disabled: false,
+      name: '_cs_internal_save_rte_markdown_assets',
+      options: {
+        // other overrides...
+      },
+    },
+  ],
 }

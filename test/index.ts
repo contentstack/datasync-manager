@@ -15,7 +15,7 @@ import { response as publishResponse } from './dummy/api-responses/publish'
 import { contentType as referenceSchema } from './dummy/api-responses/references-content-type'
 import { contentType as reference2Schema } from './dummy/api-responses/references-content-type-2'
 import { response as referencesEntries } from './dummy/api-responses/references-entries'
-import { config } from './dummy/config'
+import { config as testConfig } from './dummy/config'
 import { assetConnector, contentConnector, listener } from './dummy/connector-listener-instances'
 
 const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -176,11 +176,11 @@ describe('core', () => {
   })
 
   test('set config without errors', () => {
-    expect(setConfig(config)).toBeUndefined()
+    expect(setConfig(testConfig)).toBeUndefined()
   })
 
   test('process mixed data without errors', async () => {
-    const configs = cloneDeep(merge({}, config, internalConfig))
+    const configs = cloneDeep(merge({}, internalConfig, testConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
     contentstack.host = 'api.localhost.io'
@@ -197,7 +197,7 @@ describe('core', () => {
   })
 
   test('process publish data without errors', async () => {
-    const configs = cloneDeep(merge({}, config, internalConfig))
+    const configs = cloneDeep(merge({}, internalConfig, testConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
     contentstack.host = 'api.localhost.io'
@@ -216,7 +216,7 @@ describe('core', () => {
   })
 
   test('process published RTE data without errors', async () => {
-    const configs = cloneDeep(merge({}, config, internalConfig))
+    const configs = cloneDeep(merge({}, internalConfig, testConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummyRTEToken'
     contentstack.host = 'api.localhost.io'
@@ -235,7 +235,7 @@ describe('core', () => {
   })
 
   test('process published references data without errors', async () => {
-    const configs = cloneDeep(merge({}, config, internalConfig))
+    const configs = cloneDeep(merge({}, internalConfig, testConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummyReferencesToken'
     contentstack.host = 'api.localhost.io'
@@ -254,7 +254,7 @@ describe('core', () => {
   })
 
   test('process unpublish data without errors', async () => {
-    const configs = cloneDeep(merge({}, config, internalConfig))
+    const configs = cloneDeep(merge({}, internalConfig, testConfig))
     const contentstack = configs.contentstack
     contentstack.sync_token = 'dummySyncToken'
     contentstack.host = 'api.localhost.io'
@@ -272,7 +272,7 @@ describe('core', () => {
   })
 
   test('process deleted data without errors', async () => {
-    const configs = cloneDeep(merge({}, config, internalConfig))
+    const configs = cloneDeep(merge({}, internalConfig, testConfig))
     delete configs.plugins
     const contentstack: any = configs.contentstack
     contentstack.pagination_token = 'dummyPaginationToken'
