@@ -10,6 +10,32 @@ module.exports = {
   assetStore: {
     baseDir: './_development_contents'
   },
+  plugins: [
+    {
+      disabled: false,
+      name: '_cs_internal_transform_entries',
+      // path: '',
+      options: {
+        // other overrides...
+      },
+    },
+    {
+      disabled: false,
+      name: '_cs_internal_transform_schemas',
+      options: {
+        logAssetPaths: true,
+        logReferencePaths: true,
+        // other overrides...
+      },
+    },
+    {
+      disabled: false,
+      name: '_cs_internal_save_rte_markdown_assets',
+      options: {
+        // other overrides...
+      },
+    },
+  ],
   syncManager: {
     inet: {
       dns: '8.8.8.8',
@@ -20,8 +46,9 @@ module.exports = {
       retryIncrement: 1 * 1000,
       timeout: 6 * 1000,
       type: 'A',
-    }
-  }
+    },
+    processTimeout: 0
+  },
   // filtering now available!
   // syncManager: {
   //   filters: {

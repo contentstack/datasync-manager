@@ -66,7 +66,7 @@ class Q extends events_1.EventEmitter {
             this.iLock = true;
             _1.lock();
         }
-        debug(`Content type '${data._content_type_uid}' received for '${data.type}'`);
+        debug(`Content type '${data._content_type_uid}' received for '${data._type}'`);
         this.emit('next');
     }
     /**
@@ -79,7 +79,7 @@ class Q extends events_1.EventEmitter {
             this.iLock = true;
             _1.lock();
         }
-        debug(`Content type '${data._content_type_uid}' received for '${data.type}'`);
+        debug(`Content type '${data._content_type_uid}' received for '${data._type}'`);
         this.emit('next');
     }
     /**
@@ -141,16 +141,16 @@ class Q extends events_1.EventEmitter {
      * @param {Object} data - Current processing item
      */
     process(data) {
-        notify(data.type, data);
-        switch (data.type) {
+        notify(data._type, data);
+        switch (data._type) {
             case 'publish':
-                this.exec(data, data.type);
+                this.exec(data, data._type);
                 break;
             case 'unpublish':
-                this.exec(data, data.type);
+                this.exec(data, data._type);
                 break;
             default:
-                this.exec(data, data.type);
+                this.exec(data, data._type);
                 break;
         }
     }
@@ -166,7 +166,7 @@ class Q extends events_1.EventEmitter {
         return __awaiter(this, void 0, void 0, function* () {
             let checkpoint;
             try {
-                const type = data.type.toUpperCase();
+                const type = data._type.toUpperCase();
                 const contentType = data._content_type_uid;
                 const locale = data.locale;
                 const uid = data.uid;
