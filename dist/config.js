@@ -14,10 +14,10 @@ exports.config = {
         unwanted: {
             asset: {
                 _in_progress: true,
+                _type: true,
                 content_type_uid: true,
                 data: true,
                 publish_details: true,
-                type: true,
             },
             contentType: {
                 content_type_uid: true,
@@ -25,10 +25,10 @@ exports.config = {
             entry: {
                 _content_type: true,
                 _in_progress: true,
+                _type: true,
                 content_type_uid: true,
                 data: true,
                 publish_details: true,
-                type: true,
             },
         },
     },
@@ -44,8 +44,23 @@ exports.config = {
             sync: '/v3/stacks/sync',
         },
         host: 'cdn.contentstack.io',
+        options: 'ig',
         port: 443,
         protocol: 'https:',
+        regexp: {
+            asset_pattern: {
+                options: 'ig',
+                url: 'https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*)',
+            },
+            rte_asset_pattern_1: {
+                options: 'ig',
+                url: 'https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")',
+            },
+            rte_asset_pattern_2: {
+                options: 'g',
+                url: 'https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)',
+            },
+        },
         verbs: {
             get: 'GET',
         },
@@ -79,9 +94,6 @@ exports.config = {
     ],
     syncManager: {
         cooloff: 3000,
-        enableAssetReferences: true,
-        enableContentReferences: true,
-        enableRteMarkdownDownload: true,
         inet: {
             dns: '8.8.8.8',
             host: 'contentstack.io',
@@ -89,7 +101,7 @@ exports.config = {
             port: 53,
             retries: 5,
             retryIncrement: 5 * 1000,
-            retryTimeout: 15 * 1000,
+            retryTimeout: 90 * 1000,
             timeout: 30 * 1000,
             type: 'A',
         },
@@ -103,6 +115,8 @@ exports.config = {
         },
         // max file sizes in bytes
         maxsize: 2097152,
+        // waits for 10s if the app runs into errors or a kill signal is sent
+        processTimeout: 10 * 1000,
         queue: {
             pause_threshold: 7000,
             resume_threshold: 4000,

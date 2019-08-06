@@ -9,8 +9,9 @@
  * @note 'SIGSTOP' cannot have a listener installed.
  */
 
+import { getConfig } from '../index'
 import { logger } from '../util/logger'
-import { lock, unlock } from './'
+import { lock, unlock } from './index'
 
 /**
  * @description Handles process exit. Stops the current application and manages a graceful shutdown
@@ -18,7 +19,8 @@ import { lock, unlock } from './'
  */
 const handleExit = (signal) => {
   lock()
-  const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : 20000
+  const { syncManager } = getConfig()
+  const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : syncManager.processTimeout
   logger.info(`Received ${signal}. This will shut down the process in ${killDuration}ms..`)
   setTimeout(abort, killDuration)
 }
@@ -45,7 +47,9 @@ const unhandledErrors = (error) => {
 const calculateKillDuration = () => {
   const killDuration = parseInt(process.env.KILLDURATION, 10)
   if (isNaN(killDuration)) {
-    return 15000
+    const { syncManager } = getConfig()
+
+    return syncManager.processTimeout
   }
 
   return killDuration

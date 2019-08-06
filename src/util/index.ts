@@ -139,7 +139,7 @@ export const formatItems = (items, config) => {
     switch (item.type) {
     case 'asset_published':
       item._content_type_uid = formattedAssetType
-      item.type = config.contentstack.actions.publish
+      item._type = config.contentstack.actions.publish
       // extra keys
       item._synced_at = time
       item = merge(item, item.data)
@@ -149,20 +149,20 @@ export const formatItems = (items, config) => {
       break
     case 'asset_unpublished':
       item._content_type_uid = formattedAssetType
-      item.type = config.contentstack.actions.unpublish
+      item._type = config.contentstack.actions.unpublish
       item = merge(item, item.data)
       // delete item.data
       // delete item.content_type_uid
       break
     case 'asset_deleted':
       item._content_type_uid = formattedAssetType
-      item.type = config.contentstack.actions.delete
+      item._type = config.contentstack.actions.delete
       item = merge(item, item.data)
       // delete item.data
       // delete item.content_type_uid
       break
     case 'entry_published':
-      item.type = config.contentstack.actions.publish
+      item._type = config.contentstack.actions.publish
       item._content_type_uid = item.content_type_uid
       // extra keys
       item._synced_at = time
@@ -173,20 +173,20 @@ export const formatItems = (items, config) => {
       break
     case 'entry_unpublished':
       item._content_type_uid = item.content_type_uid
-      item.type = config.contentstack.actions.unpublish
+      item._type = config.contentstack.actions.unpublish
       item = merge(item, item.data)
       // delete item.data
       // delete item.content_type_uid
       break
     case 'entry_deleted':
       item._content_type_uid = item.content_type_uid
-      item.type = config.contentstack.actions.delete
+      item._type = config.contentstack.actions.delete
       item = merge(item, item.data)
       // delete item.data
       // delete item.content_type_uid
       break
     case 'content_type_deleted':
-      item.type = config.contentstack.actions.delete
+      item._type = config.contentstack.actions.delete
       item.uid = item.content_type_uid
       item._content_type_uid = formattedContentType
       // delete item.content_type_uid
@@ -280,16 +280,18 @@ export const getFile = (file, rotate) => {
 
 const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) => {
   try {
+    const { contentstack } = getConfig()
+    const isMarkdown = (schema.field_metadata.markdown) ? true : false
     let matches
     let convertedText
-    const isMarkdown = (schema.field_metadata.markdown) ? true : false
     if (isMarkdown) {
       convertedText = marked(entry)
     } else {
       convertedText = entry
     }
+
     // tslint:disable-next-line: max-line-length
-    const regexp = new RegExp('https://(assets|images|dev-assets|dev-images|stag-assets|stag-images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(?=")', 'g')
+    const regexp = new RegExp(contentstack.regexp.rte_asset_pattern_1.url, contentstack.regexp.rte_asset_pattern_1.options)
     // tslint:disable-next-line: no-conditional-assignment
     while ((matches = regexp.exec(convertedText)) !== null) {
       if (matches && matches.length) {
@@ -305,7 +307,7 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
         } else {
           const asset: any = find(bucket, (item) => {
             // tslint:disable-next-line: max-line-length
-            const newRegexp = new RegExp('https://(assets|images|dev-assets|dev-images|stag-assets|stag-images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)', 'g')
+            const newRegexp = new RegExp(contentstack.regexp.rte_asset_pattern_2.url, contentstack.regexp.rte_asset_pattern_2.options)
             let urlparts
             // tslint:disable-next-line: no-conditional-assignment
             while ((urlparts = newRegexp.exec(item.url)) !== null) {
