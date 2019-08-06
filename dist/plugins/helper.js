@@ -1,5 +1,6 @@
 "use strict";
 const { cloneDeep } = require('lodash');
+const { getConfig } = require('../index');
 exports.buildReferences = (entry, schema, parent = []) => {
     for (let i = 0, c = schema.length; i < c; i++) {
         switch (schema[i].data_type) {
@@ -170,14 +171,15 @@ const checkReferences = (schema, key) => {
         return false;
     }
 };
-exports.buildAssetObject = (asset, locale) => {
+exports.buildAssetObject = (asset, locale, entry_uid, content_type_uid) => {
+    const { contentstack } = getConfig();
     // add locale key to inside of asset
     asset.locale = locale;
-    const regexp = new RegExp('https://(assets|images|dev-assets|dev-images|stag-assets|stag-images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*)', 'g');
+    const regexp = new RegExp(contentstack.regexp.asset_pattern.url, contentstack.regexp.asset_pattern.options);
     const matches = regexp.exec(asset.url);
     if (!(matches[5]) || matches[5].length === 0) {
         throw new Error('Unable to determine fine name.\n' + JSON.stringify(matches));
     }
     asset.filename = matches[5];
-    return Object.assign({ _content_type_uid: '_assets' }, asset, { type: 'publish', locale, uid: asset.uid });
+    return Object.assign({ _content_type_uid: '_assets' }, asset, { _type: 'publish', entry_content_type: content_type_uid, entry_reffered_in: entry_uid, locale, uid: asset.uid });
 };
