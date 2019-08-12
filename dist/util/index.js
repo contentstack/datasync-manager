@@ -113,66 +113,65 @@ exports.groupItems = (items) => {
  */
 exports.formatItems = (items, config) => {
     const time = new Date().toISOString();
-    items.forEach((item) => {
-        switch (item.type) {
+    for (let i = 0, j = items.length; i < j; i++) {
+        switch (items[i].type) {
             case 'asset_published':
-                item._content_type_uid = formattedAssetType;
-                item._type = config.contentstack.actions.publish;
+                delete items[i].type;
+                items[i]._content_type_uid = formattedAssetType;
+                items[i]._type = config.contentstack.actions.publish;
                 // extra keys
-                item._synced_at = time;
-                item = lodash_1.merge(item, item.data);
-                item.locale = item.data.publish_details.locale;
-                // delete item.data
-                // delete item.content_type_uid
+                items[i]._synced_at = time;
+                items[i] = lodash_1.merge(items[i], items[i].data);
+                items[i].locale = items[i].data.publish_details.locale;
                 break;
             case 'asset_unpublished':
-                item._content_type_uid = formattedAssetType;
-                item._type = config.contentstack.actions.unpublish;
-                item = lodash_1.merge(item, item.data);
-                // delete item.data
-                // delete item.content_type_uid
+                delete items[i].type;
+                items[i]._content_type_uid = formattedAssetType;
+                items[i]._type = config.contentstack.actions.unpublish;
+                items[i] = lodash_1.merge(items[i], items[i].data);
                 break;
             case 'asset_deleted':
-                item._content_type_uid = formattedAssetType;
-                item._type = config.contentstack.actions.delete;
-                item = lodash_1.merge(item, item.data);
-                // delete item.data
-                // delete item.content_type_uid
+                delete items[i].type;
+                items[i]._content_type_uid = formattedAssetType;
+                items[i]._type = config.contentstack.actions.delete;
+                items[i] = lodash_1.merge(items[i], items[i].data);
                 break;
             case 'entry_published':
-                item._type = config.contentstack.actions.publish;
-                item._content_type_uid = item.content_type_uid;
+                delete items[i].type;
+                items[i]._type = config.contentstack.actions.publish;
+                items[i]._content_type_uid = items[i].content_type_uid;
                 // extra keys
-                item._synced_at = time;
-                item = lodash_1.merge(item, item.data);
-                item.locale = item.data.publish_details.locale;
-                // delete item.data
-                // delete item.content_type_uid
+                items[i]._synced_at = time;
+                items[i] = lodash_1.merge(items[i], items[i].data);
+                items[i].locale = items[i].data.publish_details.locale;
                 break;
             case 'entry_unpublished':
-                item._content_type_uid = item.content_type_uid;
-                item._type = config.contentstack.actions.unpublish;
-                item = lodash_1.merge(item, item.data);
-                // delete item.data
-                // delete item.content_type_uid
+                delete items[i].type;
+                items[i]._content_type_uid = items[i].content_type_uid;
+                items[i]._type = config.contentstack.actions.unpublish;
+                items[i] = lodash_1.merge(items[i], items[i].data);
                 break;
             case 'entry_deleted':
-                item._content_type_uid = item.content_type_uid;
-                item._type = config.contentstack.actions.delete;
-                item = lodash_1.merge(item, item.data);
-                // delete item.data
-                // delete item.content_type_uid
+                delete items[i].type;
+                items[i]._content_type_uid = items[i].content_type_uid;
+                items[i]._type = config.contentstack.actions.delete;
+                items[i] = lodash_1.merge(items[i], items[i].data);
                 break;
             case 'content_type_deleted':
-                item._type = config.contentstack.actions.delete;
-                item.uid = item.content_type_uid;
-                item._content_type_uid = formattedContentType;
-                // delete item.content_type_uid
+                delete items[i].type;
+                items[i]._type = config.contentstack.actions.delete;
+                items[i].uid = items[i].content_type_uid;
+                items[i]._content_type_uid = formattedContentType;
                 break;
             default:
+                logger_1.logger.error('Item\'s type did not match any expected case!!');
+                logger_1.logger.error(JSON.stringify(items[i]));
+                // remove the element from items[i]s
+                items[i].splice(i, 1);
+                i--;
                 break;
         }
-    });
+    }
     return items;
 };
 /**
