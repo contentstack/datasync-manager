@@ -354,7 +354,7 @@ exports.getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotReplac
             iterate(schema[i], entry, bucket, isFindNotReplace, parent);
             parent.pop();
         }
-        else if (schema[i].data_type === 'group') {
+        else if (schema[i].data_type === 'group' || schema[i].data_type === 'snippet') {
             parent.push(schema[i].uid);
             exports.getOrSetRTEMarkdownAssets(schema[i].schema, entry, bucket, isFindNotReplace, parent);
             parent.pop();

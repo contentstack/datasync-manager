@@ -16,6 +16,11 @@ exports.buildReferences = (entry, schema, parent = []) => {
                 this.buildReferences(entry, schema[i].schema, parent);
                 parent.pop();
                 break;
+            case 'snippet':
+                parent.push(schema[i].uid);
+                this.buildReferences(entry, schema[i].schema, parent);
+                parent.pop();
+                break;
             case 'blocks':
                 for (let j = 0, d = schema[i].blocks.length; j < d; j++) {
                     parent.push(schema[i].uid);
@@ -43,7 +48,7 @@ exports.buildReferencePaths = (schema, entryReferences = {}, assetReferences = {
                 const fieldPath = ((parent) ? `${parent}.${field.uid}` : field.uid);
                 assetReferences[fieldPath] = '_assets';
             }
-            else if (field.data_type === 'group' && field.schema) {
+            else if ((field.data_type === 'group' && field.schema) || (field.data_type === 'snippet' && field.schema)) {
                 this.buildReferencePaths(field.schema, entryReferences, assetReferences, ((parent) ? `${parent}.${field.uid}` : field.uid));
             }
             else if (field.data_type === 'blocks' && Array.isArray(field.blocks)) {
