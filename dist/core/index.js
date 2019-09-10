@@ -216,7 +216,7 @@ const fire = (req) => {
                     return promise_map_1.map(contentTypeUids, (uid) => {
                         return new Promise((mapResolve, mapReject) => {
                             return api_1.get({
-                                path: `${Contentstack.apis.content_types}${uid}`,
+                                path: `${Contentstack.apis.content_types}${uid}?include_snippet_schema=true`,
                             }).then((contentTypeSchemaResponse) => {
                                 const schemaResponse = contentTypeSchemaResponse;
                                 if (schemaResponse.content_type) {

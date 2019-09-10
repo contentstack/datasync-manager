@@ -261,7 +261,7 @@ const fire = (req: IApiRequest) => {
 
             return new Promise((mapResolve, mapReject) => {
               return get({
-                path: `${Contentstack.apis.content_types}${uid}`,
+                path: `${Contentstack.apis.content_types}${uid}?include_snippet_schema=true`,
               }).then((contentTypeSchemaResponse) => {
                 const schemaResponse: {
                   content_type: any,
