@@ -25,6 +25,7 @@ export const init = (contentstack) => {
     'X-User-Agent': `datasync-manager/v${packageInfo.version}`,
     'access_token': Contentstack.deliveryToken,
     'api_key': Contentstack.apiKey,
+    'sync_cdn_api_key': 'bNwQozprrSXxFGKOSlAO'
   }
 
   if (Contentstack.MAX_RETRY_LIMIT) {
@@ -44,7 +45,6 @@ export const get = (req, RETRY = 1) => {
     }
     req.method = Contentstack.verbs.get
     req.path = req.path || Contentstack.apis.sync
-
     if (req.qs) {
       req.path += `?${stringify(req.qs)}`
     }
@@ -57,6 +57,8 @@ export const get = (req, RETRY = 1) => {
       port: Contentstack.port,
       protocol: Contentstack.protocol,
     }
+
+    console.log(options,"___");
 
     try {
       debug(`${options.method.toUpperCase()}: ${options.path}`)

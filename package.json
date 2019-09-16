@@ -5,6 +5,10 @@
   "description": "The primary module of Contentstack DataSync. Syncs Contentstack data with your server using Contentstack Sync API",
   "main": "dist/index.js",
   "dependencies": {
+    "@contentstack/datasync-asset-store-filesystem": "^1.0.0",
+    "@contentstack/datasync-content-store-filesystem": "^1.0.1",
+    "@contentstack/datasync-content-store-mongodb": "^1.0.1",
+    "@contentstack/webhook-listener": "^1.0.0",
     "debug": "4.1.1",
     "dns-socket": "4.2.0",
     "lodash": "4.17.15",
@@ -30,12 +34,12 @@
     "typescript": "3.5.2"
   },
   "scripts": {
-    "clean": "rimraf dist typings coverage .tokens .ledger .checkpoint",
+    "clean": "rimraf  typings coverage .tokens .ledger .checkpoint",
     "build-ts": "npm run clean && tsc",
     "watch-ts": "npm run clean && tsc -w",
     "compile": "tsc",
     "prepare": "npm run compile",
-    "start": "dist",
+    "start": "npm run clean && node example",
     "tslint": "npx tslint -c tslint.json 'src/**/*.ts' --fix",
     "test": "PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose"
   },
