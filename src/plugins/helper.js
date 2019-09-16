@@ -2,7 +2,9 @@ const { cloneDeep } = require('lodash')
 const { getConfig } = require('../index')
 
 exports.buildReferences = (entry, schema, parent = []) => {
-  for (let i = 0, c = schema.length; i < c; i++) {
+
+  if(schema && Array.isArray(schema)){
+    for (let i = 0, c = schema.length; i < c; i++) {
     switch (schema[i].data_type) {
     case 'reference':
       if (!(schema[i].reference_to instanceof Array)) {
@@ -11,6 +13,7 @@ exports.buildReferences = (entry, schema, parent = []) => {
         parent.pop()
       }
       break
+    case 'snippet':  
     case 'group':
       parent.push(schema[i].uid)
       this.buildReferences(entry, schema[i].schema, parent)
@@ -26,7 +29,8 @@ exports.buildReferences = (entry, schema, parent = []) => {
       }
       break
     }
-  }
+    }
+  } 
 
   return entry
 }
@@ -43,7 +47,7 @@ exports.buildReferencePaths = (schema, entryReferences = {}, assetReferences = {
       } else if (field.data_type === 'file') {
         const fieldPath = ((parent) ? `${parent}.${field.uid}`: field.uid)
         assetReferences[fieldPath] = '_assets'
-      } else if (field.data_type === 'group' && field.schema) {
+      } else if ((field.data_type === 'group' || field.data_type ==='snippet') && field.schema) {
         this.buildReferencePaths(field.schema, entryReferences, assetReferences, ((parent) ? `${parent}.${field.uid}`: field.uid))
       } else if (field.data_type === 'blocks' && Array.isArray(field.blocks)) {
         const blockParent = ((parent)) ? `${parent}.${field.uid}`: `${field.uid}`
@@ -107,7 +111,7 @@ exports.hasRteOrMarkdown = (schema) => {
           return true
         } else if (field && field.field_metadata && field.field_metadata.allow_rich_text) {
           return true
-        } else if (field && field.data_type === 'group' && field.schema) {
+        } else if (field && (field.data_type === 'group' || field.data_type === 'snippet')  && field.schema) {
           if (this.hasRteOrMarkdown(field.schema)) {
             return true
           }
@@ -145,7 +149,7 @@ const checkReferences = (schema, key) => {
           return true
         } else if (field && field.reference_to) {
           return true
-        } else if (field && field.data_type === 'group' && field.schema) {
+        } else if (field && (field.data_type === 'group' || field.data_type ==='snippet')  && field.schema) {
           if (checkReferences(field.schema, key)) {
             return true
           }

@@ -217,6 +217,9 @@ const fire = (req) => {
                         return new Promise((mapResolve, mapReject) => {
                             return api_1.get({
                                 path: `${Contentstack.apis.content_types}${uid}`,
+                                qs: {
+                                    include_snippet_schema: (typeof config.contentstack.query.include_snippet_schema == 'boolean' && config.contentstack.query.include_snippet_schema == true),
+                                }
                             }).then((contentTypeSchemaResponse) => {
                                 const schemaResponse = contentTypeSchemaResponse;
                                 if (schemaResponse.content_type) {
