@@ -2,29 +2,32 @@
 const { cloneDeep } = require('lodash');
 const { getConfig } = require('../index');
 exports.buildReferences = (entry, schema, parent = []) => {
-    for (let i = 0, c = schema.length; i < c; i++) {
-        switch (schema[i].data_type) {
-            case 'reference':
-                if (!(schema[i].reference_to instanceof Array)) {
+    if (schema && Array.isArray(schema)) {
+        for (let i = 0, c = schema.length; i < c; i++) {
+            switch (schema[i].data_type) {
+                case 'reference':
+                    if (!(schema[i].reference_to instanceof Array)) {
+                        parent.push(schema[i].uid);
+                        update(parent, schema[i].reference_to, entry);
+                        parent.pop();
+                    }
+                    break;
+                case 'snippet':
+                case 'group':
                     parent.push(schema[i].uid);
-                    update(parent, schema[i].reference_to, entry);
+                    this.buildReferences(entry, schema[i].schema, parent);
                     parent.pop();
-                }
-                break;
-            case 'group':
-                parent.push(schema[i].uid);
-                this.buildReferences(entry, schema[i].schema, parent);
-                parent.pop();
-                break;
-            case 'blocks':
-                for (let j = 0, d = schema[i].blocks.length; j < d; j++) {
-                    parent.push(schema[i].uid);
-                    parent.push(schema[i].blocks[j].uid);
-                    this.buildReferences(entry, schema[i].blocks[j].schema, parent);
-                    parent.pop();
-                    parent.pop();
-                }
-                break;
+                    break;
+                case 'blocks':
+                    for (let j = 0, d = schema[i].blocks.length; j < d; j++) {
+                        parent.push(schema[i].uid);
+                        parent.push(schema[i].blocks[j].uid);
+                        this.buildReferences(entry, schema[i].blocks[j].schema, parent);
+                        parent.pop();
+                        parent.pop();
+                    }
+                    break;
+            }
         }
     }
     return entry;
@@ -43,7 +46,7 @@ exports.buildReferencePaths = (schema, entryReferences = {}, assetReferences = {
                 const fieldPath = ((parent) ? `${parent}.${field.uid}` : field.uid);
                 assetReferences[fieldPath] = '_assets';
             }
-            else if (field.data_type === 'group' && field.schema) {
+            else if ((field.data_type === 'group' || field.data_type === 'snippet') && field.schema) {
                 this.buildReferencePaths(field.schema, entryReferences, assetReferences, ((parent) ? `${parent}.${field.uid}` : field.uid));
             }
             else if (field.data_type === 'blocks' && Array.isArray(field.blocks)) {
@@ -110,7 +113,7 @@ exports.hasRteOrMarkdown = (schema) => {
                 else if (field && field.field_metadata && field.field_metadata.allow_rich_text) {
                     return true;
                 }
-                else if (field && field.data_type === 'group' && field.schema) {
+                else if (field && (field.data_type === 'group' || field.data_type === 'snippet') && field.schema) {
                     if (this.hasRteOrMarkdown(field.schema)) {
                         return true;
                     }
@@ -149,7 +152,7 @@ const checkReferences = (schema, key) => {
                 else if (field && field.reference_to) {
                     return true;
                 }
-                else if (field && field.data_type === 'group' && field.schema) {
+                else if (field && (field.data_type === 'group' || field.data_type === 'snippet') && field.schema) {
                     if (checkReferences(field.schema, key)) {
                         return true;
                     }

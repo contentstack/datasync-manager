@@ -90,7 +90,8 @@ export const init = (contentStore, assetStore) => {
       } else if (existsSync(paths.token)) {
         const token = JSON.parse(readFileSync(paths.token))
         request.qs[token.name] = token.token
-      } else {
+      } 
+      else {
         request.qs.init = true
         if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
           const filters = config.syncManager.filters
@@ -262,6 +263,9 @@ const fire = (req: IApiRequest) => {
             return new Promise((mapResolve, mapReject) => {
               return get({
                 path: `${Contentstack.apis.content_types}${uid}`,
+                qs:{
+                  include_snippet_schema:(typeof config.contentstack.query.include_snippet_schema == 'boolean' && config.contentstack.query.include_snippet_schema==true),
+                }
               }).then((contentTypeSchemaResponse) => {
                 const schemaResponse: {
                   content_type: any,
