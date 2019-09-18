@@ -1,7 +1,7 @@
 module.exports = {
   contentstack: {
-    apiKey: 'blt5164f917044e6488',
-    deliveryToken: 'csd49da169e70b72158ff28b82'
+    apiKey: '',
+    deliveryToken: ''
   },
   contentStore: {
     dbName: 'contentstack',
