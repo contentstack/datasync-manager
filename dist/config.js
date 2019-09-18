@@ -43,7 +43,7 @@ exports.config = {
             content_types: '/v3/content_types/',
             sync: '/v3/stacks/sync',
         },
-        host: 'dev6-app.contentstack.com',
+        host: 'cdn.contentstack.io',
         options: 'ig',
         port: 443,
         protocol: 'https:',
@@ -62,7 +62,7 @@ exports.config = {
             },
         },
         query: {
-            include_snippet_schema: false,
+            include_snippet_schema: true,
         },
         verbs: {
             get: 'GET',
