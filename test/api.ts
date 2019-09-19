@@ -122,18 +122,18 @@ describe('test api - get()', () => {
     })
   })
 
-  // test('server error', () => {
-  //   const request = {
-  //     path: '/500',
-  //   }
+  test('server error', () => {
+    const request = {
+      path: '/500',
+    }
 
-  //   return get(request).then((response) => {
-  //     expect(response).toBe({})
-  //   }).catch((error) => {
-  //     console.error(error)
-  //     expect(error)
-  //   })
-  // })
+    return get(request).then((response) => {
+      expect(response).toBe({})
+    }).catch((error) => {
+      console.error(error)
+      expect(error)
+    })
+  })
 
   test('retry exceeded', () => {
     const request = {
