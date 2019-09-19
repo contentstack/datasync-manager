@@ -122,18 +122,18 @@ describe('test api - get()', () => {
     })
   })
 
-  test('server error', () => {
-    const request = {
-      path: '/500',
-    }
+  // test('server error', () => {
+  //   const request = {
+  //     path: '/500',
+  //   }
 
-    return get(request).then((response) => {
-      expect(response).toBe({})
-    }).catch((error) => {
-      console.error(error)
-      expect(error)
-    })
-  })
+  //   return get(request).then((response) => {
+  //     expect(response).toBe({})
+  //   }).catch((error) => {
+  //     console.error(error)
+  //     expect(error)
+  //   })
+  // })
 
   test('retry exceeded', () => {
     const request = {
@@ -149,10 +149,11 @@ describe('test api - get()', () => {
 
 
   test('content-type-schema-with-snippet',()=>{
+
     const request={
       path:'/v3/content_types/test?include_snippet_schema=true'
     }
-
+    
     let expectedSnippetSchema={
       "data_type":"snippet",
       "uid":"test_snippet",

@@ -131,24 +131,28 @@ describe('core', () => {
   beforeEach(() => {
     nock('https://api.localhost.io')
       .get('/v3/content_types/authors')
+      .query(true)
       .reply(200, contentTypeSchema)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io')
       .get('/v3/content_types/sample_three')
+      .query(true)
       .reply(200, rteSchema)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io')
       .get('/v3/content_types/sample_fourt')
+      .query(true)
       .reply(200, referenceSchema)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io')
       .get('/v3/content_types/references')
+      .query(true)
       .reply(200, reference2Schema)
   })
 
