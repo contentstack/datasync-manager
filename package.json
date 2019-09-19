@@ -34,12 +34,12 @@
     "typescript": "3.5.2"
   },
   "scripts": {
-    "clean": "rimraf  typings coverage .tokens .ledger .checkpoint",
+    "clean": "rimraf dist typings coverage .tokens .ledger .checkpoint",
     "build-ts": "npm run clean && tsc",
     "watch-ts": "npm run clean && tsc -w",
     "compile": "tsc",
     "prepare": "npm run compile",
-    "start": "npm run clean && node example",
+    "start": "dist",
     "tslint": "npx tslint -c tslint.json 'src/**/*.ts' --fix",
     "test": "PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose"
   },

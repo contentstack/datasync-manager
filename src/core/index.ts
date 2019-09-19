@@ -90,8 +90,7 @@ export const init = (contentStore, assetStore) => {
       } else if (existsSync(paths.token)) {
         const token = JSON.parse(readFileSync(paths.token))
         request.qs[token.name] = token.token
-      } 
-      else {
+      } else {
         request.qs.init = true
         if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
           const filters = config.syncManager.filters
