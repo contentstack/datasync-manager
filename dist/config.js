@@ -62,7 +62,7 @@ exports.config = {
             },
         },
         query: {
-            include_snippet_schema: true,
+            include_snippet_schema: false,
         },
         verbs: {
             get: 'GET',
