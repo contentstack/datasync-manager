@@ -2,7 +2,7 @@ const { cloneDeep } = require('lodash')
 const { getConfig } = require('../index')
 
 
-const schemaType = {
+const fieldType = {
   REFERENCE :'reference',
   SNIPPET   :'snippet',
   GROUP     :'group',
@@ -15,20 +15,20 @@ exports.buildReferences = (entry, schema, parent = []) => {
   if(schema && Array.isArray(schema)){
     for (let i = 0, c = schema.length; i < c; i++) {
     switch (schema[i].data_type) {
-    case schemaType.REFERENCE:
+    case fieldType.REFERENCE:
       if (!(schema[i].reference_to instanceof Array)) {
         parent.push(schema[i].uid)
         update(parent, schema[i].reference_to, entry)
         parent.pop()
       }
       break
-    case schemaType.SNIPPET:  
-    case schemaType.GROUP:
+    case fieldType.SNIPPET:  
+    case fieldType.GROUP:
       parent.push(schema[i].uid)
       this.buildReferences(entry, schema[i].schema, parent)
       parent.pop()
       break
-    case schemaType.BLOCKS:
+    case fieldType.BLOCKS:
       for (let j = 0, d = schema[i].blocks.length; j < d; j++) {
         parent.push(schema[i].uid)
         parent.push(schema[i].blocks[j].uid)
@@ -48,17 +48,17 @@ exports.buildReferencePaths = (schema, entryReferences = {}, assetReferences = {
   for (let i = 0, l = schema.length; i < l; i++) {
     const field = schema[i]
     if (field && field.data_type) {
-      if (field.data_type === schemaType.REFERENCE) {
+      if (field.data_type === fieldType.REFERENCE) {
         const fieldPath = ((parent) ? `${parent}.${schema[i].uid}`: field.uid)
         // all references will now be an array
         // example: { _reference: { field1.product: [''] } }
         entryReferences[fieldPath] = (typeof field.reference_to === 'string') ? [field.reference_to] : field.reference_to
-      } else if (field.data_type === schemaType.FILE) {
+      } else if (field.data_type === fieldType.FILE) {
         const fieldPath = ((parent) ? `${parent}.${field.uid}`: field.uid)
         assetReferences[fieldPath] = '_assets'
-      } else if ((field.data_type === schemaType.GROUP || field.data_type === schemaType.SNIPPET) && field.schema) {
+      } else if ((field.data_type === fieldType.GROUP || field.data_type === fieldType.SNIPPET) && field.schema) {
         this.buildReferencePaths(field.schema, entryReferences, assetReferences, ((parent) ? `${parent}.${field.uid}`: field.uid))
-      } else if (field.data_type === schemaType.BLOCKS && Array.isArray(field.blocks)) {
+      } else if (field.data_type === fieldType.BLOCKS && Array.isArray(field.blocks)) {
         const blockParent = ((parent)) ? `${parent}.${field.uid}`: `${field.uid}`
         field.blocks.forEach((block) => {
           if (block && block.schema && Array.isArray(block.schema)) {
@@ -120,12 +120,12 @@ exports.hasRteOrMarkdown = (schema) => {
           return true
         } else if (field && field.field_metadata && field.field_metadata.allow_rich_text) {
           return true
-        } else if (field && (field.data_type === schemaType.GROUP || field.data_type === schemaType.SNIPPET)  && field.schema) {
+        } else if (field && (field.data_type === fieldType.GROUP || field.data_type === fieldType.SNIPPET)  && field.schema) {
           if (this.hasRteOrMarkdown(field.schema)) {
             return true
           }
           continue
-        } else if (field && field.data_type === schemaType.BLOCKS && field.blocks) {
+        } else if (field && field.data_type === fieldType.BLOCKS && field.blocks) {
           for (let x = 0, y = field.blocks; x < y; x++) {
             if (this.hasRteOrMarkdown(field.blocks[x].schema)) {
               return true
@@ -154,16 +154,16 @@ const checkReferences = (schema, key) => {
     if (typeof schema === 'object' && Array.isArray(schema)) {
       for (let i = 0, j = schema.length; i < j; i++) {
         const field = schema[i]
-        if (field && field.data_type === schemaType.FILE && typeof key === 'object') {
+        if (field && field.data_type === fieldType.FILE && typeof key === 'object') {
           return true
         } else if (field && field.reference_to) {
           return true
-        } else if (field && (field.data_type === schemaType.GROUP || field.data_type ===schemaType.SNIPPET)  && field.schema) {
+        } else if (field && (field.data_type === fieldType.GROUP || field.data_type ===fieldType.SNIPPET)  && field.schema) {
           if (checkReferences(field.schema, key)) {
             return true
           }
           continue
-        } else if (field && field.data_type === schemaType.BLOCKS && field.blocks) {
+        } else if (field && field.data_type === fieldType.BLOCKS && field.blocks) {
           for (let x = 0, y = field.blocks; x < y; x++) {
             if (checkReferences(field.blocks[x].schema, key)) {
               return true
