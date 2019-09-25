@@ -37,17 +37,12 @@ export const init = (contentstack) => {
  * @param {Object} req - API request object
  * @param {Number} RETRY - API request retry counter
  */
- let count = 0;
 export const get = (req, RETRY = 1) => {
   return new Promise((resolve, reject) => {
     if (RETRY > MAX_RETRY_LIMIT) {
       return reject(new Error('Max retry limit exceeded!'))
     }
     req.method = Contentstack.verbs.get
-    if(req.path){
-      console.log(req.path,++count)
-    }
-
     req.path = req.path || Contentstack.apis.sync
 
     if (req.qs) {

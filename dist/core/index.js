@@ -133,15 +133,27 @@ const sync = () => {
     return new Promise((resolve, reject) => {
         return token_management_1.getFinalToken().then((tokenObject) => {
             const token = tokenObject;
-            console.log(token);
-            process.exit(0);
-            const request = {
-                qs: {
-                    environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
-                    limit: config.syncManager.limit,
-                    [token.name]: token.token,
-                },
-            };
+            console.log(token, "=======");
+            let request;
+            if (token.name) {
+                request = {
+                    qs: {
+                        environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
+                        limit: config.syncManager.limit,
+                        [token.name]: token.token,
+                    },
+                };
+            }
+            else {
+                request = {
+                    qs: {
+                        environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
+                        limit: config.syncManager.limit,
+                        "init": true,
+                    },
+                };
+            }
+            console.log(request);
             return fire(request)
                 .then(resolve);
         }).catch((error) => {

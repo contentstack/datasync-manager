@@ -170,19 +170,28 @@ const sync = () => {
     return getFinalToken().then((tokenObject) => {
       const token: IToken = (tokenObject as IToken)
       
-      console.log(token);
+      console.log(token,"=======");
+      let request:any;
+      if(token.name){
+        request = {
+          qs: {
+            environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
+            limit: config.syncManager.limit,
+            [token.name]: token.token,
+          },
+        }
+      } else {
+      request = {
+          qs: {
+            environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
+            limit: config.syncManager.limit,
+            "init":true,
+          },
+        }
 
-      //process.exit(0);
+      } 
 
-      
-
-      const request: any = {
-        qs: {
-          environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
-          limit: config.syncManager.limit,
-          [token.name]: token.token,
-        },
-      }
+      console.log(request);
 
       return fire(request)
         .then(resolve)
