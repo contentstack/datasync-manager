@@ -68,10 +68,10 @@ declare module 'data-sync-manager' {
     }
 
 
-     export  const push: (data: IInputData) => void;
-     export  const unshift: (data: IInputData) => void;
-     export  const pop: () => void;
-     export  const getAssetLocation: (asset: any) => Promise<unknown>; 
+    export  const push: (data: IInputData) => void;
+    export  const unshift: (data: IInputData) => void;
+    export  const pop: () => void;
+    export  const getAssetLocation: (asset: any) => Promise<unknown>; 
 
     /**
      * @public
