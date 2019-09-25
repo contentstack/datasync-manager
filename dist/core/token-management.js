@@ -120,3 +120,22 @@ exports.saveCheckpoint = (name, token) => __awaiter(this, void 0, void 0, functi
     yield fs_1.writeFile(path, JSON.stringify(data));
     return;
 });
+exports.getFinalToken = () => {
+    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+        try {
+            const config = index_1.getConfig();
+            const token = config.paths.token;
+            let data = {};
+            console.log(token);
+            if (fs_1.existsSync(token)) {
+                debug(`Token read:${token}`);
+                const contents = yield fs_1.readFile(token);
+                data = JSON.parse(contents);
+            }
+            return resolve(data);
+        }
+        catch (error) {
+            reject(error);
+        }
+    }));
+};

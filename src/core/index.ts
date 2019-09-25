@@ -15,7 +15,7 @@ import { logger } from '../util/logger'
 import { map } from '../util/promise.map'
 import { netConnectivityIssues } from './inet'
 import { Q as Queue } from './q'
-import { getToken, saveCheckpoint } from './token-management'
+import { getFinalToken, saveCheckpoint } from './token-management'
 
 interface IQueryString {
   init?: true,
@@ -75,6 +75,9 @@ export const init = (contentStore, assetStore) => {
     try {
       Contentstack = config.contentstack
       const paths = config.paths
+      
+      console.log(config.paths);
+
       const environment = process.env.NODE_ENV || Contentstack.environment || 'development'
       debug(`Environment: ${environment}`)
       const request: any = {
@@ -89,6 +92,7 @@ export const init = (contentStore, assetStore) => {
         request.qs.pagination_token = Contentstack.pagination_token
       } else if (existsSync(paths.token)) {
         const token = JSON.parse(readFileSync(paths.token))
+        console.log(paths.token);
         request.qs[token.name] = token.token
       } else {
         request.qs.init = true
@@ -101,6 +105,7 @@ export const init = (contentStore, assetStore) => {
         }
       }
 
+      console.log(JSON.stringify(request));
       return fire(request)
         .then(resolve)
         .catch(reject)
@@ -162,8 +167,15 @@ const check = () => {
  */
 const sync = () => {
   return new Promise((resolve, reject) => {
-    return getToken().then((tokenObject) => {
+    return getFinalToken().then((tokenObject) => {
       const token: IToken = (tokenObject as IToken)
+      
+      console.log(token);
+
+      //process.exit(0);
+
+      
+
       const request: any = {
         qs: {
           environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
@@ -351,7 +363,6 @@ const postProcess = (req, resp) => {
       } else {
         if (name === 'sync_token') {
           flag.SQ = false
-
           return resolve()
         }
 

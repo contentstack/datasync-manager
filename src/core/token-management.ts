@@ -137,3 +137,24 @@ export const saveCheckpoint = async (name, token) => {
 
   return
 }
+
+export const getFinalToken=()=>{
+  return new Promise(async(resolve,reject)=>{
+    try {
+      const config = getConfig();
+      const token = config.paths.token;
+      let data:any={};
+
+      console.log(token);
+      
+      if(existsSync(token)){
+        debug(`Token read:${token}`);
+        const contents:any= await readFile(token);
+        data = JSON.parse(contents);
+      }
+      return resolve(data);
+    } catch(error){
+      reject(error)
+    }
+  })
+}

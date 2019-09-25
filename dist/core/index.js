@@ -46,6 +46,7 @@ exports.init = (contentStore, assetStore) => {
         try {
             Contentstack = config.contentstack;
             const paths = config.paths;
+            console.log(config.paths);
             const environment = process.env.NODE_ENV || Contentstack.environment || 'development';
             debug(`Environment: ${environment}`);
             const request = {
@@ -62,6 +63,7 @@ exports.init = (contentStore, assetStore) => {
             }
             else if (fs_1.existsSync(paths.token)) {
                 const token = JSON.parse(fs_1.readFileSync(paths.token));
+                console.log(paths.token);
                 request.qs[token.name] = token.token;
             }
             else {
@@ -74,6 +76,7 @@ exports.init = (contentStore, assetStore) => {
                     }
                 }
             }
+            console.log(JSON.stringify(request));
             return fire(request)
                 .then(resolve)
                 .catch(reject);
@@ -128,8 +131,10 @@ const check = () => {
  */
 const sync = () => {
     return new Promise((resolve, reject) => {
-        return token_management_1.getToken().then((tokenObject) => {
+        return token_management_1.getFinalToken().then((tokenObject) => {
             const token = tokenObject;
+            console.log(token);
+            process.exit(0);
             const request = {
                 qs: {
                     environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
