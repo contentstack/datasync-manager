@@ -55,7 +55,7 @@
     "type": "git",
     "url": "git+https://github.com/contentstack/datasync-manager"
   },
-  "types": "./typings",
+  "types": "./type/datasyncManager/index.d.ts",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/contentstack/datasync-manager/issues"

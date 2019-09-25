@@ -4,17 +4,17 @@
 * Copyright (c) 2019 Contentstack LLC
 * MIT Licensed
 */
-Object.defineProperty(exports, "__esModule", { value: true });
-const path_1 = require("path");
+exports.__esModule = true;
+var path_1 = require("path");
 /**
  * @description Builds application's config paths where data is stored
  * @returns {Object} Returns config paths
  */
-exports.buildConfigPaths = () => {
+exports.buildConfigPaths = function () {
     //const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
-    let pluginPath;
-    let tokenPath;
-    const baseDir = path_1.resolve(path_1.join(__dirname, '..', '..')); //used for development purpose 
+    var pluginPath;
+    var tokenPath;
+    var baseDir = path_1.resolve(path_1.join(__dirname, '..', '..')); //used for development purpose 
     if (process.env.PLUGIN_PATH) {
         if (!path_1.isAbsolute(process.env.PLUGIN_PATH)) {
             pluginPath = path_1.join(baseDir, process.env.PLUGIN_PATH);
@@ -31,7 +31,7 @@ exports.buildConfigPaths = () => {
             tokenPath = process.env.TOKEN_PATH;
         }
     }
-    const paths = {
+    var paths = {
         baseDir: path_1.resolve(path_1.join(__dirname, '..', '..')),
         checkpoint: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.checkpoint')),
         failed: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), 'unprocessible', 'failed')),
@@ -39,7 +39,7 @@ exports.buildConfigPaths = () => {
         ledger: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.ledger')),
         plugin: path_1.resolve(path_1.join(pluginPath || path_1.join(baseDir, '..'), 'plugins')),
         token: path_1.resolve(path_1.join(tokenPath || path_1.join(baseDir, '..'), '.token')),
-        unprocessibleDir: path_1.resolve(path_1.join(tokenPath || baseDir, 'unprocessible')),
+        unprocessibleDir: path_1.resolve(path_1.join(tokenPath || baseDir, 'unprocessible'))
     };
     return paths;
 };

@@ -4,7 +4,7 @@
 * MIT Licensed
 */
 
-declare module "datasyncManager" {
+declare module 'datasyncManager' {
 
     /**
      * @public
@@ -68,10 +68,10 @@ declare module "datasyncManager" {
     }
 
 
-     export declare const push: (data: IInputData) => void;
-     export declare const unshift: (data: IInputData) => void;
-     export declare const pop: () => void;
-     export declare const getAssetLocation: (asset: any) => Promise<unknown>; 
+     export  const push: (data: IInputData) => void;
+     export  const unshift: (data: IInputData) => void;
+     export  const pop: () => void;
+     export  const getAssetLocation: (asset: any) => Promise<unknown>; 
 
     /**
      * @public
@@ -79,9 +79,9 @@ declare module "datasyncManager" {
      * @summary Sets the application's configuration
      * @param {object} config Application config
      */
-    export declare const setConfig: (config: IConfig) => void;
+    export  const setConfig: (config: IConfig) => void;
 
-    export declare const getConfig: () => IConfig;
+    export  const getConfig: () => IConfig;
 
     /**
      * @public
@@ -89,7 +89,7 @@ declare module "datasyncManager" {
      * @summary Register asset store
      * @param {object} instance Asset store instance
      */
-    export declare const setAssetStore: (instance: IAssetStore) => void;
+    export  const setAssetStore: (instance: IAssetStore) => void;
 
 
     /**
@@ -98,18 +98,7 @@ declare module "datasyncManager" {
      * @summary Register content store
      * @param {object} instance Content store instance
      */
-    export const setContentStore = (instance: IContentStore) => {
-      contentStore = instance
-    }
-
-    /**
-     * @public
-     * @method setLogger
-     * @summary Sets custom logger for logging data sync operations
-     * @param {object} instance Custom logger instance
-     */
-    export { setLogger } from './util/logger'
-
+    export const setContentStore:(instance: IContentStore) => void;
 
     /**
      * @public
@@ -117,7 +106,7 @@ declare module "datasyncManager" {
      * @summary Register listener
      * @param {object} instance Listener instance
      */
-    export declare const setListener: (instance: ILogger) => void;
+    export  const setListener: (instance: ILogger) => void;
 
     /**
      * @public
@@ -129,7 +118,7 @@ declare module "datasyncManager" {
      * @param {object} config Optional application config overrides
      * @returns {Promise} Returns a promise
      */
-    export declare const start: (config?: IConfig) => Promise<{}>;
+    export  const start: (config?: IConfig) => Promise<{}>;
 
     /**
      * @public
@@ -137,19 +126,19 @@ declare module "datasyncManager" {
      * @param {object} item Item being processed
      * @returns {void}
      */
-    export declare const debugNotifications: (action: any) => (item: any) => void;
+    export  const debugNotifications: (action: any) => (item: any) => void;
     /**
      * @description Notifies the sync manager utility to wake up and start syncing..
      */
-    export declare const poke: () => void;
+    export  const poke: () => void;
     /**
      * @description Used to lockdown the 'sync' process in case of exceptions
      */
-    export declare const lock: () => void;
+    export  const lock: () => void;
     /**
      * @description Used to unlock the 'sync' process in case of errors/exceptions
      */
-    export declare const unlock: (refire?: boolean) => any;
+    export  const unlock: (refire?: boolean) => any;
 }
 
 
