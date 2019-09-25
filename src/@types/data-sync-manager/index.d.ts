@@ -4,7 +4,7 @@
 * MIT Licensed
 */
 
-declare module 'datasyncManager' {
+declare module 'data-sync-manager' {
 
     /**
      * @public
