@@ -175,7 +175,7 @@ const sync = () => {
       if(token.name){
         request = {
           qs: {
-            environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
+            environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
             limit: config.syncManager.limit,
             [token.name]: token.token,
           },
@@ -183,7 +183,7 @@ const sync = () => {
       } else {
       request = {
           qs: {
-            environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
+            environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
             limit: config.syncManager.limit,
             "init":true,
           },
