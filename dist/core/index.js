@@ -111,6 +111,7 @@ exports.poke = () => {
  */
 const check = () => {
     debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`);
+    console.log("---inside check");
     if (!flag.SQ && flag.WQ) {
         flag.WQ = false;
         flag.SQ = true;
@@ -205,6 +206,8 @@ const fire = (req) => {
                             .then(resolve)
                             .catch(reject);
                     }
+                    console.log(syncResponse.items);
+                    //process.exit(0);
                     syncResponse.items = index_1.formatItems(syncResponse.items, config);
                     let groupedItems = index_1.groupItems(syncResponse.items);
                     groupedItems = index_1.markCheckpoint(groupedItems, syncResponse);

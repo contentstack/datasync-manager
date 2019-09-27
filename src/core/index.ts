@@ -135,7 +135,7 @@ export const poke = () => {
   if (!flag.lockdown) {
     flag.WQ = true
     check()
-  }
+  } 
 }
 
 /**
@@ -144,6 +144,7 @@ export const poke = () => {
  */
 const check = () => {
   debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`)
+  console.log("---inside check");
   if (!flag.SQ && flag.WQ) {
     flag.WQ = false
     flag.SQ = true
@@ -249,6 +250,8 @@ const fire = (req: IApiRequest) => {
               .then(resolve)
               .catch(reject)
           }
+          console.log(syncResponse.items);
+          //process.exit(0);
           syncResponse.items = formatItems(syncResponse.items, config)
           let groupedItems = groupItems(syncResponse.items)
           groupedItems = markCheckpoint(groupedItems, syncResponse)
