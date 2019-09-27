@@ -50,7 +50,7 @@ export const get = (req, RETRY = 1) => {
 
     }
 
-  
+
 
     const options = {
       headers: Contentstack.headers,

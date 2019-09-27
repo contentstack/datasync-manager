@@ -75,8 +75,8 @@ export const init = (contentStore, assetStore) => {
     try {
       Contentstack = config.contentstack
       const paths = config.paths
-      
-      console.log(config.paths);
+
+      console.log(config.paths)
 
       const environment = process.env.NODE_ENV || Contentstack.environment || 'development'
       debug(`Environment: ${environment}`)
@@ -92,7 +92,7 @@ export const init = (contentStore, assetStore) => {
         request.qs.pagination_token = Contentstack.pagination_token
       } else if (existsSync(paths.token)) {
         const token = JSON.parse(readFileSync(paths.token))
-        console.log(paths.token);
+        console.log(paths.token)
         request.qs[token.name] = token.token
       } else {
         request.qs.init = true
@@ -105,7 +105,8 @@ export const init = (contentStore, assetStore) => {
         }
       }
 
-      console.log(JSON.stringify(request));
+      console.log(JSON.stringify(request))
+
       return fire(request)
         .then(resolve)
         .catch(reject)
@@ -135,7 +136,7 @@ export const poke = () => {
   if (!flag.lockdown) {
     flag.WQ = true
     check()
-  } 
+  }
 }
 
 /**
@@ -144,7 +145,7 @@ export const poke = () => {
  */
 const check = () => {
   debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`)
-  console.log("---inside check");
+  console.log('---inside check')
   if (!flag.SQ && flag.WQ) {
     flag.WQ = false
     flag.SQ = true
@@ -170,10 +171,10 @@ const sync = () => {
   return new Promise((resolve, reject) => {
     return getFinalToken().then((tokenObject) => {
       const token: IToken = (tokenObject as IToken)
-      
-      console.log(token,"=======");
-      let request:any;
-      if(token.name){
+
+      console.log(token, '=======')
+      let request: any
+      if (token.name){
         request = {
           qs: {
             environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
@@ -186,13 +187,13 @@ const sync = () => {
           qs: {
             environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
             limit: config.syncManager.limit,
-            "init":true,
+            init: true,
           },
         }
 
-      } 
+      }
 
-      console.log(request);
+      console.log(request)
 
       return fire(request)
         .then(resolve)
@@ -250,8 +251,8 @@ const fire = (req: IApiRequest) => {
               .then(resolve)
               .catch(reject)
           }
-          console.log(syncResponse.items);
-          //process.exit(0);
+          console.log(syncResponse.items)
+          // process.exit(0);
           syncResponse.items = formatItems(syncResponse.items, config)
           let groupedItems = groupItems(syncResponse.items)
           groupedItems = markCheckpoint(groupedItems, syncResponse)
@@ -286,9 +287,9 @@ const fire = (req: IApiRequest) => {
             return new Promise((mapResolve, mapReject) => {
               return get({
                 path: `${Contentstack.apis.content_types}${uid}`,
-                qs:{
-                  include_snippet_schema:(typeof config.contentstack.query.include_snippet_schema == 'boolean' && config.contentstack.query.include_snippet_schema==true),
-                }
+                qs: {
+                  include_snippet_schema: (typeof config.contentstack.query.include_snippet_schema == 'boolean' && config.contentstack.query.include_snippet_schema == true),
+                },
               }).then((contentTypeSchemaResponse) => {
                 const schemaResponse: {
                   content_type: any,
@@ -375,6 +376,7 @@ const postProcess = (req, resp) => {
       } else {
         if (name === 'sync_token') {
           flag.SQ = false
+
           return resolve()
         }
 

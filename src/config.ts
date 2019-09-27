@@ -60,8 +60,8 @@ export const config = {
         url: 'https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)',
       },
     },
-    query:{
-      include_snippet_schema:true,
+    query: {
+      include_snippet_schema: true,
     },
     verbs: {
       get: 'GET',

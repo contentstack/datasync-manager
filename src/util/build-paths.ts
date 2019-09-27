@@ -11,9 +11,9 @@ import { isAbsolute, join, resolve } from 'path'
  * @returns {Object} Returns config paths
  */
 export const buildConfigPaths = () => {
-  //const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
-  
-  const baseDir = resolve(join(__dirname,'..','..')) //for development purpose only
+  // const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
+
+  const baseDir = resolve(join(__dirname, '..', '..')) // for development purpose only
 
   let pluginPath: string
   let tokenPath: string
