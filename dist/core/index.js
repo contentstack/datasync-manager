@@ -111,7 +111,7 @@ exports.poke = () => {
  */
 const check = () => {
     debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`);
-    console.log("---inside check");
+    console.log('---inside check');
     if (!flag.SQ && flag.WQ) {
         flag.WQ = false;
         flag.SQ = true;
@@ -134,7 +134,7 @@ const sync = () => {
     return new Promise((resolve, reject) => {
         return token_management_1.getFinalToken().then((tokenObject) => {
             const token = tokenObject;
-            console.log(token, "=======");
+            console.log(token, '=======');
             let request;
             if (token.name) {
                 request = {
@@ -150,7 +150,7 @@ const sync = () => {
                     qs: {
                         environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
                         limit: config.syncManager.limit,
-                        "init": true,
+                        init: true,
                     },
                 };
             }
@@ -207,7 +207,7 @@ const fire = (req) => {
                             .catch(reject);
                     }
                     console.log(syncResponse.items);
-                    //process.exit(0);
+                    // process.exit(0);
                     syncResponse.items = index_1.formatItems(syncResponse.items, config);
                     let groupedItems = index_1.groupItems(syncResponse.items);
                     groupedItems = index_1.markCheckpoint(groupedItems, syncResponse);
@@ -239,7 +239,7 @@ const fire = (req) => {
                                 path: `${Contentstack.apis.content_types}${uid}`,
                                 qs: {
                                     include_snippet_schema: (typeof config.contentstack.query.include_snippet_schema == 'boolean' && config.contentstack.query.include_snippet_schema == true),
-                                }
+                                },
                             }).then((contentTypeSchemaResponse) => {
                                 const schemaResponse = contentTypeSchemaResponse;
                                 if (schemaResponse.content_type) {
