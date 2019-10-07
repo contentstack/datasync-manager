@@ -112,7 +112,7 @@ exports.groupItems = (items) => {
  * @param {Object} config - Application config
  */
 exports.formatItems = (items, config) => {
-    const time = new Date().toISOString();
+    //const time = new Date().toISOString()
     for (let i = 0, j = items.length; i < j; i++) {
         switch (items[i].type) {
             case 'asset_published':
@@ -120,7 +120,7 @@ exports.formatItems = (items, config) => {
                 items[i]._content_type_uid = formattedAssetType;
                 items[i]._type = config.contentstack.actions.publish;
                 // extra keys
-                items[i]._synced_at = time;
+                //items[i]._synced_at = time
                 items[i] = lodash_1.merge(items[i], items[i].data);
                 items[i].locale = items[i].data.publish_details.locale;
                 break;
@@ -141,7 +141,7 @@ exports.formatItems = (items, config) => {
                 items[i]._type = config.contentstack.actions.publish;
                 items[i]._content_type_uid = items[i].content_type_uid;
                 // extra keys
-                items[i]._synced_at = time;
+                //items[i]._synced_at = time
                 items[i] = lodash_1.merge(items[i], items[i].data);
                 items[i].locale = items[i].data.publish_details.locale;
                 break;
@@ -433,7 +433,7 @@ exports.getSchema = (action, data) => {
         schema = data._content_type;
         schema._content_type_uid = '_content_types';
         schema.event_at = data.event_at;
-        schema._synced_at = data._synced_at;
+        //schema._synced_at = data._synced_at
         schema.locale = data.locale;
     }
     return { schema };
