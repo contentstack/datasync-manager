@@ -26,7 +26,7 @@ exports.init = (contentstack) => {
     Contentstack.headers = {
         'X-User-Agent': `datasync-manager/v${packageInfo.version}`,
         'access_token': Contentstack.deliveryToken,
-        'api_key': Contentstack.apiKey
+        'api_key': Contentstack.apiKey,
     };
     if (Contentstack.MAX_RETRY_LIMIT) {
         MAX_RETRY_LIMIT = Contentstack.MAX_RETRY_LIMIT;

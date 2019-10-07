@@ -8,7 +8,7 @@ import { config as internalConfig } from '../src/config'
 import { setLogger } from '../src/util/logger'
 import { response as emptyResponse } from './dummy/api-responses/empty'
 import { response as publishResponse } from './dummy/api-responses/publish'
-import { response as contentTypeSnippetResponse } from './dummy/api-responses/snippet'
+import { response as contentTypeWithSnippetResponse } from './dummy/api-responses/snippet'
 import { config as mockConfig } from './dummy/config'
 
 const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -89,7 +89,7 @@ beforeEach(() => {
     },
   })
     .get('/v3/content_types/test?include_snippet_schema=true')
-    .reply(200,contentTypeSnippetResponse)  
+    .reply(200,contentTypeWithSnippetResponse)  
 
 })
 
@@ -140,7 +140,6 @@ describe('test api - get()', () => {
       path: '/retry-exceeded',
     }
     const err = new Error('Max retry limit exceeded!')
-
     return get(request, 9).then((response) => {
       expect(response).toBe({})
     }).catch((error) => {
@@ -154,6 +153,7 @@ describe('test api - get()', () => {
     const request={
       path:'/v3/content_types/test?include_snippet_schema=true'
     }
+    
     let expectedSnippetSchema={
       "data_type":"snippet",
       "uid":"test_snippet",
