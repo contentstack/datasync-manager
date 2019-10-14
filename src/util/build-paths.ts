@@ -39,9 +39,9 @@ export const buildConfigPaths = () => {
     checkpoint: resolve(join(tokenPath || join(baseDir, '..'), '.checkpoint')),
     failed: resolve(join(tokenPath || join(baseDir, '..'), 'unprocessible', 'failed')),
     filtered: resolve(join(tokenPath || join(baseDir, '..'), 'unprocessible', 'filtered')),
-    ledger: resolve(join(tokenPath || join(baseDir, '..'), '.ledger')),
+    ledger: resolve(join(tokenPath || join(baseDir,'..'), '.ledger')),
     plugin: resolve(join(pluginPath || join(baseDir, '..'), 'plugins')),
-    token: resolve(join(tokenPath || join(baseDir), '.token')),
+    token: resolve(join(tokenPath || join(baseDir,'..'), '.token')),
     unprocessibleDir: resolve(join(tokenPath || baseDir, 'unprocessible')),
   }
 

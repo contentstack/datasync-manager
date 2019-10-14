@@ -143,14 +143,18 @@ export const getFinalToken = () => {
     try {
       const config = getConfig()
       const token = config.paths.token
+      const ledger = config.paths.ledger
       let data: any = {}
 
-      console.log(token)
-
-      if (existsSync(token)){
+      if (existsSync(ledger)){
+        debug(`Token read:${ledger}`)
+        const contents: any = await readFile(ledger)
+        data = JSON.parse(contents)[0]
+      } else if(existsSync(token)) {
         debug(`Token read:${token}`)
         const contents: any = await readFile(token)
         data = JSON.parse(contents)
+      } else {
       }
 
       return resolve(data)

@@ -70,14 +70,10 @@ export const init = (contentStore, assetStore) => {
   Q = new Queue(contentStore, assetStore, config)
   initAPI(config.contentstack)
   debug('Sync core:start invoked')
-
   return new Promise((resolve, reject) => {
     try {
       Contentstack = config.contentstack
       const paths = config.paths
-
-      console.log(config.paths)
-
       const environment = process.env.NODE_ENV || Contentstack.environment || 'development'
       debug(`Environment: ${environment}`)
       const request: any = {
@@ -104,9 +100,6 @@ export const init = (contentStore, assetStore) => {
           }
         }
       }
-
-      console.log(JSON.stringify(request))
-
       return fire(request)
         .then(resolve)
         .catch(reject)
@@ -151,7 +144,6 @@ const check = () => {
     flag.SQ = true
     sync().then(() => {
       debug(`Sync completed and SQ flag updated. Cooloff duration is ${config.syncManager.cooloff}`)
-
       setTimeout(() => {
         flag.SQ = false
         emitter.emit('check')
@@ -171,30 +163,14 @@ const sync = () => {
   return new Promise((resolve, reject) => {
     return getFinalToken().then((tokenObject) => {
       const token: IToken = (tokenObject as IToken)
-
-      console.log(token, '=======')
-      let request: any
-      if (token.name){
-        request = {
+      let request: any = {
           qs: {
             environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
             limit: config.syncManager.limit,
-            [token.name]: token.token,
+            [token.name?token.name:"init"]: token.token?token.token:true,
           },
-        }
-      } else {
-      request = {
-          qs: {
-            environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
-            limit: config.syncManager.limit,
-            init: true,
-          },
-        }
-
       }
-
       console.log(request)
-
       return fire(request)
         .then(resolve)
     }).catch((error) => {
@@ -228,7 +204,6 @@ export const unlock = (refire?: boolean) => {
   }
   check()
 }
-
 /**
  * @description Description required
  * @param {Object} req - Contentstack sync API request object
@@ -239,6 +214,7 @@ const fire = (req: IApiRequest) => {
 
   return new Promise((resolve, reject) => {
     return get(req).then((response: ISyncResponse) => {
+
       delete req.qs.init
       delete req.qs.pagination_token
       delete req.qs.sync_token
@@ -251,8 +227,6 @@ const fire = (req: IApiRequest) => {
               .then(resolve)
               .catch(reject)
           }
-          console.log(syncResponse.items)
-          // process.exit(0);
           syncResponse.items = formatItems(syncResponse.items, config)
           let groupedItems = groupItems(syncResponse.items)
           groupedItems = markCheckpoint(groupedItems, syncResponse)
@@ -275,7 +249,6 @@ const fire = (req: IApiRequest) => {
             const contentType = groupedItems[contentTypeUid]
             if (contentType.length === 1 && !contentType[0].publish_details) {
               Q.push(contentType[0])
-
               return true
             }
 
@@ -283,7 +256,6 @@ const fire = (req: IApiRequest) => {
           })
 
           return map(contentTypeUids, (uid) => {
-
             return new Promise((mapResolve, mapReject) => {
               return get({
                 path: `${Contentstack.apis.content_types}${uid}`,

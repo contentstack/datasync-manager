@@ -109,7 +109,6 @@ export class Q extends EventEmitter {
   }
 
   public peek() {
-
     return this.q
   }
 
@@ -127,7 +126,7 @@ export class Q extends EventEmitter {
         this.inProgress = true
         const item = this.q.shift()
         this.process(item)
-      }
+      } 
     } catch (error) {
       logger.error(error)
       this.inProgress = false

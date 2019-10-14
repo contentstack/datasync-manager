@@ -125,12 +125,19 @@ exports.getFinalToken = () => {
         try {
             const config = index_1.getConfig();
             const token = config.paths.token;
+            const ledger = config.paths.ledger;
             let data = {};
-            console.log(token);
-            if (fs_1.existsSync(token)) {
+            if (fs_1.existsSync(ledger)) {
+                debug(`Token read:${ledger}`);
+                const contents = yield fs_1.readFile(ledger);
+                data = JSON.parse(contents)[0];
+            }
+            else if (fs_1.existsSync(token)) {
                 debug(`Token read:${token}`);
                 const contents = yield fs_1.readFile(token);
                 data = JSON.parse(contents);
+            }
+            else {
             }
             return resolve(data);
         }

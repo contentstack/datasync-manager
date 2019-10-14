@@ -46,7 +46,6 @@ exports.init = (contentStore, assetStore) => {
         try {
             Contentstack = config.contentstack;
             const paths = config.paths;
-            console.log(config.paths);
             const environment = process.env.NODE_ENV || Contentstack.environment || 'development';
             debug(`Environment: ${environment}`);
             const request = {
@@ -76,7 +75,6 @@ exports.init = (contentStore, assetStore) => {
                     }
                 }
             }
-            console.log(JSON.stringify(request));
             return fire(request)
                 .then(resolve)
                 .catch(reject);
@@ -134,26 +132,13 @@ const sync = () => {
     return new Promise((resolve, reject) => {
         return token_management_1.getFinalToken().then((tokenObject) => {
             const token = tokenObject;
-            console.log(token, '=======');
-            let request;
-            if (token.name) {
-                request = {
-                    qs: {
-                        environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
-                        limit: config.syncManager.limit,
-                        [token.name]: token.token,
-                    },
-                };
-            }
-            else {
-                request = {
-                    qs: {
-                        environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
-                        limit: config.syncManager.limit,
-                        init: true,
-                    },
-                };
-            }
+            let request = {
+                qs: {
+                    environment: process.env.SYNC_ENV || process.env.NODE_ENV || Contentstack.environment || 'development',
+                    limit: config.syncManager.limit,
+                    [token.name ? token.name : "init"]: token.token ? token.token : true,
+                },
+            };
             console.log(request);
             return fire(request)
                 .then(resolve);
@@ -206,8 +191,6 @@ const fire = (req) => {
                             .then(resolve)
                             .catch(reject);
                     }
-                    console.log(syncResponse.items);
-                    // process.exit(0);
                     syncResponse.items = index_1.formatItems(syncResponse.items, config);
                     let groupedItems = index_1.groupItems(syncResponse.items);
                     groupedItems = index_1.markCheckpoint(groupedItems, syncResponse);
