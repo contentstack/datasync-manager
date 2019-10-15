@@ -138,7 +138,6 @@ export const poke = () => {
  */
 const check = () => {
   debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`)
-  console.log('---inside check')
   if (!flag.SQ && flag.WQ) {
     flag.WQ = false
     flag.SQ = true
