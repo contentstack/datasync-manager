@@ -44,6 +44,5 @@ export const buildConfigPaths = () => {
     token: resolve(join(tokenPath || join(baseDir,'..'), '.token')),
     unprocessibleDir: resolve(join(tokenPath || baseDir, 'unprocessible')),
   }
-
   return paths
 }
