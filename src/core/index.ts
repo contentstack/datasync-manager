@@ -88,7 +88,6 @@ export const init = (contentStore, assetStore) => {
         request.qs.pagination_token = Contentstack.pagination_token
       } else if (existsSync(paths.token)) {
         const token = JSON.parse(readFileSync(paths.token))
-        console.log(paths.token)
         request.qs[token.name] = token.token
       } else {
         request.qs.init = true
@@ -169,7 +168,6 @@ const sync = () => {
             [token.name?token.name:"init"]: token.token?token.token:true,
           },
       }
-      console.log(request)
       return fire(request)
         .then(resolve)
     }).catch((error) => {

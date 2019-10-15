@@ -62,7 +62,6 @@ exports.init = (contentStore, assetStore) => {
             }
             else if (fs_1.existsSync(paths.token)) {
                 const token = JSON.parse(fs_1.readFileSync(paths.token));
-                console.log(paths.token);
                 request.qs[token.name] = token.token;
             }
             else {
@@ -109,7 +108,6 @@ exports.poke = () => {
  */
 const check = () => {
     debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`);
-    console.log('---inside check');
     if (!flag.SQ && flag.WQ) {
         flag.WQ = false;
         flag.SQ = true;
@@ -139,7 +137,6 @@ const sync = () => {
                     [token.name ? token.name : "init"]: token.token ? token.token : true,
                 },
             };
-            console.log(request);
             return fire(request)
                 .then(resolve);
         }).catch((error) => {
