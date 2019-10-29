@@ -3,7 +3,7 @@ const { cloneDeep } = require('lodash');
 const { getConfig } = require('../index');
 const fieldType = {
     REFERENCE: 'reference',
-    SNIPPET: 'snippet',
+    GLOBAL_FIELD: 'global_field',
     GROUP: 'group',
     BLOCKS: 'blocks',
     FILE: 'file'
@@ -19,7 +19,7 @@ exports.buildReferences = (entry, schema, parent = []) => {
                         parent.pop();
                     }
                     break;
-                case fieldType.SNIPPET:
+                case fieldType.GLOBAL_FIELD:
                 case fieldType.GROUP:
                     parent.push(schema[i].uid);
                     this.buildReferences(entry, schema[i].schema, parent);
@@ -53,7 +53,7 @@ exports.buildReferencePaths = (schema, entryReferences = {}, assetReferences = {
                 const fieldPath = ((parent) ? `${parent}.${field.uid}` : field.uid);
                 assetReferences[fieldPath] = '_assets';
             }
-            else if ((field.data_type === fieldType.GROUP || field.data_type === fieldType.SNIPPET) && field.schema) {
+            else if ((field.data_type === fieldType.GROUP || field.data_type === fieldType.GLOBAL_FIELD) && field.schema) {
                 this.buildReferencePaths(field.schema, entryReferences, assetReferences, ((parent) ? `${parent}.${field.uid}` : field.uid));
             }
             else if (field.data_type === fieldType.BLOCKS && Array.isArray(field.blocks)) {
@@ -120,7 +120,7 @@ exports.hasRteOrMarkdown = (schema) => {
                 else if (field && field.field_metadata && field.field_metadata.allow_rich_text) {
                     return true;
                 }
-                else if (field && (field.data_type === fieldType.GROUP || field.data_type === fieldType.SNIPPET) && field.schema) {
+                else if (field && (field.data_type === fieldType.GROUP || field.data_type === fieldType.GLOBAL_FIELD) && field.schema) {
                     if (this.hasRteOrMarkdown(field.schema)) {
                         return true;
                     }
@@ -159,7 +159,7 @@ const checkReferences = (schema, key) => {
                 else if (field && field.reference_to) {
                     return true;
                 }
-                else if (field && (field.data_type === fieldType.GROUP || field.data_type === fieldType.SNIPPET) && field.schema) {
+                else if (field && (field.data_type === fieldType.GROUP || field.data_type === fieldType.GLOBAL_FIELD) && field.schema) {
                     if (checkReferences(field.schema, key)) {
                         return true;
                     }
