@@ -11,8 +11,7 @@ const path_1 = require("path");
  * @returns {Object} Returns config paths
  */
 exports.buildConfigPaths = () => {
-    // const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
-    const baseDir = path_1.resolve(path_1.join(__dirname, '..'));
+    const baseDir = path_1.resolve(path_1.join(__dirname, '..', '..', '..', '..'));
     let pluginPath;
     let tokenPath;
     if (process.env.PLUGIN_PATH) {
