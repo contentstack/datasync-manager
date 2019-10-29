@@ -24,7 +24,8 @@ export const init = (contentstack) => {
   Contentstack.headers = {
     'X-User-Agent': `datasync-manager/v${packageInfo.version}`,
     'access_token': Contentstack.deliveryToken,
-    'api_key': Contentstack.apiKey
+    'api_key': Contentstack.apiKey,
+    'sync_cdn_api_key': 'bNwQozprrSXxFGKOSlAO',
   }
 
   if (Contentstack.MAX_RETRY_LIMIT) {
@@ -69,7 +70,6 @@ export const get = (req, RETRY = 1) => {
             .on('end', () => {
               debug(`status: ${response.statusCode}.`)
               if (response.statusCode >= 200 && response.statusCode <= 399) {
-
                 return resolve(JSON.parse(body))
               } else if (response.statusCode === 429) {
                 timeDelay = Math.pow(Math.SQRT2, RETRY) * 200

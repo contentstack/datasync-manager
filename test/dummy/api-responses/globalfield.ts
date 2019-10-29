@@ -68,13 +68,13 @@ export const response = {
                 "non_localizable": false
             },
             {
-                "data_type": "snippet",
-                "display_name": "Snippet",
+                "data_type": "global_field",
+                "display_name": "Global Field",
                 "reference_to": "blt981fee3f999f3c12",
                 "field_metadata": {
                     "description": ""
                 },
-                "uid": "test_snippet",
+                "uid": "global_field",
                 "multiple": true,
                 "max_instance": 50,
                 "mandatory": false,
