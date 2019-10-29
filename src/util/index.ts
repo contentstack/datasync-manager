@@ -381,7 +381,7 @@ export const getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotR
       parent.push(schema[i].uid)
       iterate(schema[i], entry, bucket, isFindNotReplace, parent)
       parent.pop()
-    } else if ((schema[i].data_type === 'group' || schema[i].data_type ==='snippet') && schema[i].schema) {
+    } else if ((schema[i].data_type === 'group' || schema[i].data_type === 'snippet') && schema[i].schema) {
       parent.push(schema[i].uid)
       getOrSetRTEMarkdownAssets(schema[i].schema, entry, bucket, isFindNotReplace, parent)
       parent.pop()

@@ -262,9 +262,9 @@ const fire = (req: IApiRequest) => {
             return new Promise((mapResolve, mapReject) => {
               return get({
                 path: `${Contentstack.apis.content_types}${uid}`,
-                qs:{
-                  include_snippet_schema:(typeof config.contentstack.query.include_snippet_schema == 'boolean' && config.contentstack.query.include_snippet_schema==true),
-                }
+                qs: {
+                  include_global_field_schema: config.contentstack.query.include_global_field_schema,
+                },
               }).then((contentTypeSchemaResponse) => {
                 const schemaResponse: {
                   content_type: any,

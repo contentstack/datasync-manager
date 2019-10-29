@@ -42,10 +42,13 @@ export const config = {
       content_types: '/v3/content_types/',
       sync: '/v3/stacks/sync',
     },
-    host: 'cdn.contentstack.io',
+    host: 'dev6-new-api.contentstack.io',
     options: 'ig',
     port: 443,
     protocol: 'https:',
+    query: {
+      include_global_field_schema: true,
+    },
     regexp: {
       asset_pattern: {
         options: 'ig',
@@ -59,9 +62,6 @@ export const config = {
         options: 'g',
         url: 'https://(assets|images).contentstack.io/v3/assets/(.*?)/(.*?)/(.*?)/(.*?)(.*)',
       },
-    },
-    query:{
-      include_global_field_schema:true,
     },
     verbs: {
       get: 'GET',
