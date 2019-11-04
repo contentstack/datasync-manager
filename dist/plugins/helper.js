@@ -127,7 +127,7 @@ exports.hasRteOrMarkdown = (schema) => {
                     continue;
                 }
                 else if (field && field.data_type === fieldType.BLOCKS && field.blocks) {
-                    for (let x = 0, y = field.blocks; x < y; x++) {
+                    for (let x = 0, y = field.blocks.length; x < y; x++) {
                         if (this.hasRteOrMarkdown(field.blocks[x].schema)) {
                             return true;
                         }
@@ -166,7 +166,7 @@ const checkReferences = (schema, key) => {
                     continue;
                 }
                 else if (field && field.data_type === fieldType.BLOCKS && field.blocks) {
-                    for (let x = 0, y = field.blocks; x < y; x++) {
+                    for (let x = 0, y = field.blocks.length; x < y; x++) {
                         if (checkReferences(field.blocks[x].schema, key)) {
                             return true;
                         }
