@@ -221,10 +221,13 @@ export class Q extends EventEmitter {
 
         await Promise.all(beforeSyncPlugins)
       }
+      let isInit = data._isInit
+      delete data._isInit
       debug('Before action plugins executed successfully!')
       await this.contentStore[action](data)
 
       debug(`Completed '${action}' on connector successfully!`)
+      data._isInit = isInit
       if (typeof schema !== 'undefined') {
         await this.contentStore.updateContentType(schema)
       }
@@ -254,6 +257,10 @@ export class Q extends EventEmitter {
             (locale) ? `locale: '${locale}',` : ''
           } uid: '${uid}'} was completed successfully!`,
         )
+      if(this.q.length === 0){
+        let syncType = isInit ? "initialSync" : "webhookBasedSync"
+        notify(syncType, data);
+      }
       this.inProgress = false
       this.emit('next', data)
     } catch (error) {

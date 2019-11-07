@@ -22,7 +22,7 @@ module.exports = function SaveRteMarkdownAssets () {
         }
 
         assets = assets.map((asset) => { 
-          return helper.buildAssetObject(asset, data.locale, data.uid, schema.uid)
+          return helper.buildAssetObject(asset, data.locale, data.uid, schema.uid, data._isInit)
         })
 
         const assetBucket = []

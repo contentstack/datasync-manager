@@ -171,8 +171,21 @@ exports.debugNotifications = (action) => {
         debug(`Notifications: ${action} - ${JSON.stringify(item)}`);
     };
 };
+/**
+ * @public
+ * @method syncTypeNotifications
+ * @param {object} item Item being processed
+ * @returns {void}
+ */
+exports.syncTypeNotifications = (type) => {
+    return (item) => {
+        debug(`Notifications: ${type} - ${JSON.stringify(item)}`);
+    };
+};
 q_1.notifications
     .on('publish', exports.debugNotifications('publish'))
     .on('unpublish', exports.debugNotifications('unpublish'))
     .on('delete', exports.debugNotifications('delete'))
-    .on('error', exports.debugNotifications('error'));
+    .on('error', exports.debugNotifications('error'))
+    .on('initialSync', exports.syncTypeNotifications('initialSync'))
+    .on('webhookBasedSync', exports.syncTypeNotifications('webhookBasedSync'));

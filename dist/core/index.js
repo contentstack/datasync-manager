@@ -31,6 +31,7 @@ const flag = {
 };
 let config;
 let Contentstack;
+let isInit = false;
 let Q;
 /**
  * @description Core's primary. This is where it starts..
@@ -66,6 +67,7 @@ exports.init = (contentStore, assetStore) => {
             }
             else {
                 request.qs.init = true;
+                isInit = true;
                 if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
                     const filters = config.syncManager.filters;
                     // tslint:disable-next-line: forin
@@ -129,6 +131,7 @@ const check = () => {
 const sync = () => {
     return new Promise((resolve, reject) => {
         return token_management_1.getToken().then((tokenObject) => {
+            isInit = false;
             const token = tokenObject;
             const request = {
                 qs: {
@@ -180,6 +183,9 @@ const fire = (req) => {
             delete req.qs.pagination_token;
             delete req.qs.sync_token;
             delete req.path;
+            response.items.map(function (item) {
+                item._isInit = isInit;
+            });
             const syncResponse = response;
             if (syncResponse.items.length) {
                 return index_1.filterItems(syncResponse, config).then(() => {

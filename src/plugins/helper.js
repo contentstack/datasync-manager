@@ -166,10 +166,11 @@ const checkReferences = (schema, key) => {
   }
 }
 
-exports.buildAssetObject = (asset, locale, entry_uid, content_type_uid) => {
+exports.buildAssetObject = (asset, locale, entry_uid, content_type_uid, isInit) => {
   const { contentstack } = getConfig()
   // add locale key to inside of asset
   asset.locale = locale
+  asset._isInit = isInit
   const regexp = new RegExp(contentstack.regexp.asset_pattern.url, contentstack.regexp.asset_pattern.options)
   const matches = regexp.exec(asset.url)
 

@@ -249,8 +249,22 @@ export const debugNotifications = (action) => {
   }
 }
 
+/**
+ * @public
+ * @method syncTypeNotifications
+ * @param {object} item Item being processed
+ * @returns {void}
+ */
+export const syncTypeNotifications = (type) => {
+  return (item) => {
+    debug(`Notifications: ${type} - ${JSON.stringify(item)}`)
+  }
+}
+
 notifications
 .on('publish', debugNotifications('publish'))
 .on('unpublish', debugNotifications('unpublish'))
 .on('delete', debugNotifications('delete'))
 .on('error', debugNotifications('error'))
+.on('initialSync', syncTypeNotifications('initialSync'))
+.on('webhookBasedSync', syncTypeNotifications('webhookBasedSync'))

@@ -212,9 +212,12 @@ class Q extends events_1.EventEmitter {
                     });
                     yield Promise.all(beforeSyncPlugins);
                 }
+                let isInit = data._isInit;
+                delete data._isInit;
                 debug('Before action plugins executed successfully!');
                 yield this.contentStore[action](data);
                 debug(`Completed '${action}' on connector successfully!`);
+                data._isInit = isInit;
                 if (typeof schema !== 'undefined') {
                     yield this.contentStore.updateContentType(schema);
                 }
@@ -236,6 +239,10 @@ class Q extends events_1.EventEmitter {
                 }
                 debug('After action plugins executed successfully!');
                 logger_1.logger.log(`${type}: { content_type: '${contentType}', ${(locale) ? `locale: '${locale}',` : ''} uid: '${uid}'} was completed successfully!`);
+                if (this.q.length === 0) {
+                    let syncType = isInit ? "initialSync" : "webhookBasedSync";
+                    notify(syncType, data);
+                }
                 this.inProgress = false;
                 this.emit('next', data);
             }

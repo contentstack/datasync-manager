@@ -32,6 +32,7 @@ interface IItem {
   content_type_uid: string,
   data: any,
   event_at: string,
+  _isInit: boolean,
   locale?: string,
 }
 
@@ -58,6 +59,7 @@ const flag: any = {
 }
 let config
 let Contentstack
+let isInit = false;
 let Q
 
 /**
@@ -92,6 +94,7 @@ export const init = (contentStore, assetStore) => {
         request.qs[token.name] = token.token
       } else {
         request.qs.init = true
+        isInit = true
         if (config.syncManager.filters && typeof config.syncManager.filters === 'object') {
           const filters = config.syncManager.filters
           // tslint:disable-next-line: forin
@@ -163,6 +166,7 @@ const check = () => {
 const sync = () => {
   return new Promise((resolve, reject) => {
     return getToken().then((tokenObject) => {
+      isInit = false
       const token: IToken = (tokenObject as IToken)
       const request: any = {
         qs: {
@@ -220,6 +224,9 @@ const fire = (req: IApiRequest) => {
       delete req.qs.pagination_token
       delete req.qs.sync_token
       delete req.path
+      response.items.map(function(item) {
+        item._isInit = isInit
+      })
       const syncResponse: ISyncResponse = response
       if (syncResponse.items.length) {
         return filterItems(syncResponse, config).then(() => {
