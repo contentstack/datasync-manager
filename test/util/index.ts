@@ -35,6 +35,7 @@ describe('core-utilities', () => {
       const formattedItem = formatItems(items, configs)[0]
       expect(formattedItem).toHaveProperty('_content_type_uid')
       // expect(formattedItem).not.toHaveProperty('content_type_uid')
+      expect(formattedItem).toHaveProperty('_synced_at')
       expect(formattedItem).toHaveProperty('action')
     })
 
@@ -97,6 +98,7 @@ describe('core-utilities', () => {
       const formattedItem = formatItems(items, configs)[0]
       expect(formattedItem).toHaveProperty('_content_type_uid')
       // expect(formattedItem).not.toHaveProperty('content_type_uid')
+      expect(formattedItem).toHaveProperty('_synced_at')
       expect(formattedItem).toHaveProperty('action')
     })
 
