@@ -42,7 +42,7 @@ export const config = {
       content_types: '/v3/content_types/',
       sync: '/v3/stacks/sync',
     },
-    host: 'cdn.contentstack.io',
+    host: 'stag-cdn.contentstack.io',
     options: 'ig',
     port: 443,
     protocol: 'https:',
