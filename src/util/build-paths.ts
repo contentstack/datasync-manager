@@ -12,7 +12,6 @@ import { isAbsolute, join, resolve } from 'path'
  */
 export const buildConfigPaths = () => {
     const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
-    //const baseDir = resolve(join(__dirname, '..', '..'))
     let pluginPath: string
     let tokenPath: string
 
@@ -42,7 +41,5 @@ export const buildConfigPaths = () => {
     token: resolve(join(tokenPath || join(baseDir, '..'), '.token')),
     unprocessibleDir: resolve(join(tokenPath || baseDir, 'unprocessible')),
   }
-    console.log(paths)
-
     return paths
 }
