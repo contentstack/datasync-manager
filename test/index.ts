@@ -18,7 +18,7 @@ import { contentType as reference2Schema } from './dummy/api-responses/reference
 import { response as referencesEntries } from './dummy/api-responses/references-entries'
 import { config as testConfig } from './dummy/config'
 import { assetConnector, contentConnector, listener } from './dummy/connector-listener-instances'
-import { response as contentTypeWithGlobalFieldResponse } from './dummy/api-responses/globalfield'
+import { response as contentTypeWithGlobalFieldResponse } from './dummy/api-responses/global-field'
 
 const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
 
@@ -322,7 +322,6 @@ describe('core', () => {
       "schema":expect.anything()
     }
     return get(request).then((response)=>{
-      console.log(response)
       expect(response['content_type'].schema).toEqual(expect.arrayContaining([
         expect.objectContaining(expectedGlobalFieldSchema)
       ]))
