@@ -134,7 +134,7 @@ export const groupItems = (items) => {
  * @param {Object} config - Application config
  */
 export const formatItems = (items, config) => {
-  //const time = new Date().toISOString()
+  const time = new Date().toISOString()
   for (let i = 0, j = items.length; i < j; i++) {
     switch (items[i].type) {
       case 'asset_published':
@@ -142,7 +142,7 @@ export const formatItems = (items, config) => {
         items[i]._content_type_uid = formattedAssetType
         items[i]._type = config.contentstack.actions.publish
         // extra keys
-        //items[i]._synced_at = time
+        items[i]._synced_at = time
         items[i] = merge(items[i], items[i].data)
         items[i].locale = items[i].data.publish_details.locale
         break
@@ -163,7 +163,7 @@ export const formatItems = (items, config) => {
         items[i]._type = config.contentstack.actions.publish
         items[i]._content_type_uid = items[i].content_type_uid
         // extra keys
-        //items[i]._synced_at = time
+        items[i]._synced_at = time
         items[i] = merge(items[i], items[i].data)
         items[i].locale = items[i].data.publish_details.locale
         break
@@ -381,7 +381,7 @@ export const getOrSetRTEMarkdownAssets = (schema, entry, bucket = [], isFindNotR
       parent.push(schema[i].uid)
       iterate(schema[i], entry, bucket, isFindNotReplace, parent)
       parent.pop()
-    } else if ((schema[i].data_type === 'group' || schema[i].data_type === 'snippet') && schema[i].schema) {
+    } else if ((schema[i].data_type === 'group' || schema[i].data_type === 'global_field') && schema[i].schema) {
       parent.push(schema[i].uid)
       getOrSetRTEMarkdownAssets(schema[i].schema, entry, bucket, isFindNotReplace, parent)
       parent.pop()

@@ -8,7 +8,6 @@ import { config as internalConfig } from '../src/config'
 import { setLogger } from '../src/util/logger'
 import { response as emptyResponse } from './dummy/api-responses/empty'
 import { response as publishResponse } from './dummy/api-responses/publish'
-import { response as contentTypeWithGlobalFieldResponse } from './dummy/api-responses/globalfield'
 import { config as mockConfig } from './dummy/config'
 
 const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
@@ -80,17 +79,6 @@ beforeEach(() => {
     .reply(199, {
       key: 'unknown reject',
     })
-
-  nock('https://api.localhost.io',{
-    reqheaders:{
-      'access_token':'dummyDeliveryToken',
-      'api_key':'dummyApiKey',
-      'x-user-agent':`datasync-manager/v${packageInfo.version}`
-    },
-  })
-    .get('/v3/content_types/test?include_global_field_schema=true')
-    .reply(200,contentTypeWithGlobalFieldResponse)  
-
 })
 
 describe('test api - get()', () => {
@@ -144,22 +132,6 @@ describe('test api - get()', () => {
       expect(response).toBe({})
     }).catch((error) => {
       expect(error).toMatchObject(err)
-    })
-  })
-
-  test('content-type-schema-with-global-field',()=>{
-    const request={
-      path:'/v3/content_types/test?include_global_field_schema=true'
-    }    
-    let expectedGlobalFieldSchema={
-      "data_type":"global_field",
-      "uid":"global_field",
-      "schema":expect.anything()
-    }
-    return get(request).then((response)=>{
-      expect(response['content_type'].schema).toEqual(expect.arrayContaining([
-        expect.objectContaining(expectedGlobalFieldSchema)
-      ]))
     })
   })
 

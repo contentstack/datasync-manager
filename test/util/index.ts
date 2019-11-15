@@ -56,7 +56,6 @@ describe('core-utilities', () => {
       const formattedItem = formatItems(items, configs)[0]
       expect(formattedItem).toHaveProperty('_content_type_uid')
       // expect(formattedItem).not.toHaveProperty('content_type_uid')
-      // expect(formattedItem).not.toHaveProperty('_synced_at')
       expect(formattedItem).toHaveProperty('action')
     })
 
@@ -77,7 +76,6 @@ describe('core-utilities', () => {
       const formattedItem = formatItems(items, configs)[0]
       expect(formattedItem).toHaveProperty('_content_type_uid')
       // expect(formattedItem).not.toHaveProperty('content_type_uid')
-      // expect(formattedItem).not.toHaveProperty('_synced_at')
       expect(formattedItem).toHaveProperty('action')
     })
 
@@ -119,8 +117,6 @@ describe('core-utilities', () => {
       const formattedItem = formatItems(items, configs)[0]
       expect(formattedItem).toHaveProperty('_content_type_uid')
       // expect(formattedItem).not.toHaveProperty('content_type_uid')
-      // expect(formattedItem).not.toHaveProperty('_synced_at')
-
     })
 
     test('entry delete should work without errors', () => {
@@ -139,7 +135,6 @@ describe('core-utilities', () => {
       const formattedItem = formatItems(items, configs)[0]
       expect(formattedItem).toHaveProperty('_content_type_uid')
       // expect(formattedItem).not.toHaveProperty('content_type_uid')
-      // expect(formattedItem).not.toHaveProperty('_synced_at')
       expect(formattedItem).toHaveProperty('action')
     })
   })
@@ -152,7 +147,6 @@ describe('core-utilities', () => {
       item.data.publish_details.locale = 'abcd'
       resp.items.push(item)
       setConfig(conf)
-
       return filterItems(resp, conf).then((output) => {
         expect(output).toBeUndefined()
       }).catch((error) => {
