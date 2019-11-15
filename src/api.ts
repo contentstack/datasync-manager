@@ -44,7 +44,6 @@ export const get = (req, RETRY = 1) => {
     }
     req.method = Contentstack.verbs.get
     req.path = req.path || Contentstack.apis.sync
-
     if (req.qs) {
       req.path += `?${stringify(req.qs)}`
     }
@@ -70,7 +69,6 @@ export const get = (req, RETRY = 1) => {
             .on('end', () => {
               debug(`status: ${response.statusCode}.`)
               if (response.statusCode >= 200 && response.statusCode <= 399) {
-
                 return resolve(JSON.parse(body))
               } else if (response.statusCode === 429) {
                 timeDelay = Math.pow(Math.SQRT2, RETRY) * 200

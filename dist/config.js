@@ -47,6 +47,9 @@ exports.config = {
         options: 'ig',
         port: 443,
         protocol: 'https:',
+        query: {
+            include_global_field_schema: true,
+        },
         regexp: {
             asset_pattern: {
                 options: 'ig',

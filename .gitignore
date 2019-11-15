@@ -3,6 +3,7 @@
 .ledger
 .checkpoint
 _contents
+_development_contents
 unprocessible
 _mongo_assets
 _dev_assets
