@@ -36,7 +36,7 @@ export const validateConfig = (config) => {
  * @public
  * @method validateAssetStore
  * @description Validates if provided asset store has required methods
- * @param {Object} assetStore - Asset store 
+ * @param {Object} assetStore - Asset store
  */
 export const validateAssetStore = (assetStore) => {
   if (typeof assetStore !== 'object' && typeof assetStore !== 'function') {
@@ -54,7 +54,7 @@ export const validateAssetStore = (assetStore) => {
  * @public
  * @method validateContentStore
  * @description Validates if provided content store has required methods
- * @param {Object} contentStore - Content store 
+ * @param {Object} contentStore - Content store
  */
 export const validateContentStore = (contentStore) => {
   if (typeof contentStore !== 'object' && typeof contentStore !== 'function') {

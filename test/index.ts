@@ -2,6 +2,7 @@ import { readFileSync } from 'fs'
 import { cloneDeep, merge } from 'lodash'
 import nock from 'nock'
 import { join } from 'path'
+import { get } from '../src/api'
 import { setAssetStore, setConfig, setContentStore, setListener, start } from '../src'
 import { config as internalConfig } from '../src/config'
 import { setLogger } from '../src/util/logger'
@@ -17,6 +18,7 @@ import { contentType as reference2Schema } from './dummy/api-responses/reference
 import { response as referencesEntries } from './dummy/api-responses/references-entries'
 import { config as testConfig } from './dummy/config'
 import { assetConnector, contentConnector, listener } from './dummy/connector-listener-instances'
+import { response as contentTypeWithGlobalFieldResponse } from './dummy/api-responses/global-field'
 
 const packageInfo: any = JSON.parse(readFileSync(join(__dirname, '..', 'package.json'), 'utf-8'))
 
@@ -131,24 +133,28 @@ describe('core', () => {
   beforeEach(() => {
     nock('https://api.localhost.io')
       .get('/v3/content_types/authors')
+      .query(true)
       .reply(200, contentTypeSchema)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io')
       .get('/v3/content_types/sample_three')
+      .query(true)
       .reply(200, rteSchema)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io')
       .get('/v3/content_types/sample_fourt')
+      .query(true)
       .reply(200, referenceSchema)
   })
 
   beforeEach(() => {
     nock('https://api.localhost.io')
       .get('/v3/content_types/references')
+      .query(true)
       .reply(200, reference2Schema)
   })
 
@@ -158,6 +164,19 @@ describe('core', () => {
       .reply(200, publishResponse)
   })
 
+  beforeEach(() => {
+     nock('https://api.localhost.io',{
+    reqheaders:{
+      'access_token':'dummyDeliveryToken',
+      'api_key':'dummyApiKey',
+      'x-user-agent':`datasync-manager/v${packageInfo.version}`
+    },
+  })
+    .get('/v3/content_types/test?include_global_field_schema=true')
+    .reply(200,contentTypeWithGlobalFieldResponse)  
+
+  })
+ 
   // afterEach((done) => {
   //   // wait 5 sec before continuing
   //   setTimeout(done, 5000)
@@ -291,5 +310,21 @@ describe('core', () => {
     // }).catch((error) => {
     //   expect(error).toBeNull()
     // })
+  })
+
+  test('content-type-schema-with-global-field',()=>{
+    const request={
+      path:'/v3/content_types/test?include_global_field_schema=true'
+    }    
+    let expectedGlobalFieldSchema={
+      "data_type":"global_field",
+      "uid":"global_field",
+      "schema":expect.anything()
+    }
+    return get(request).then((response)=>{
+      expect(response['content_type'].schema).toEqual(expect.arrayContaining([
+        expect.objectContaining(expectedGlobalFieldSchema)
+      ]))
+    })
   })
 })
