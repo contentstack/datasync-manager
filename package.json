@@ -1,14 +1,10 @@
 {
   "name": "@contentstack/datasync-manager",
   "author": "Contentstack LLC <support@contentstack.com>",
-  "version": "1.0.2",
+  "version": "1.1.0",
   "description": "The primary module of Contentstack DataSync. Syncs Contentstack data with your server using Contentstack Sync API",
   "main": "dist/index.js",
   "dependencies": {
-    "@contentstack/datasync-asset-store-filesystem": "^1.0.0",
-    "@contentstack/datasync-content-store-filesystem": "^1.0.1",
-    "@contentstack/datasync-content-store-mongodb": "^1.0.1",
-    "@contentstack/webhook-listener": "^1.0.0",
     "debug": "4.1.1",
     "dns-socket": "4.2.0",
     "lodash": "4.17.15",
