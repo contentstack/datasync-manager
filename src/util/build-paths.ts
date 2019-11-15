@@ -11,11 +11,11 @@ import { isAbsolute, join, resolve } from 'path'
  * @returns {Object} Returns config paths
  */
 export const buildConfigPaths = () => {
-  const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
-  let pluginPath: string
-  let tokenPath: string
+    const baseDir = resolve(join(__dirname, '..', '..', '..', '..'))
+    let pluginPath: string
+    let tokenPath: string
 
-  if (process.env.PLUGIN_PATH) {
+    if (process.env.PLUGIN_PATH) {
     if (!isAbsolute(process.env.PLUGIN_PATH)) {
       pluginPath = join(baseDir, process.env.PLUGIN_PATH)
     } else {
@@ -23,7 +23,7 @@ export const buildConfigPaths = () => {
     }
   }
 
-  if (process.env.TOKEN_PATH) {
+    if (process.env.TOKEN_PATH) {
     if (!isAbsolute(process.env.TOKEN_PATH)) {
       tokenPath = join(baseDir, process.env.TOKEN_PATH)
     } else {
@@ -31,7 +31,7 @@ export const buildConfigPaths = () => {
     }
   }
 
-  const paths: any = {
+    const paths: any = {
     baseDir: resolve(join(__dirname, '..', '..')),
     checkpoint: resolve(join(tokenPath || join(baseDir, '..'), '.checkpoint')),
     failed: resolve(join(tokenPath || join(baseDir, '..'), 'unprocessible', 'failed')),
@@ -42,5 +42,5 @@ export const buildConfigPaths = () => {
     unprocessibleDir: resolve(join(tokenPath || baseDir, 'unprocessible')),
   }
 
-  return paths
+    return paths
 }

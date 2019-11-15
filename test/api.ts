@@ -128,7 +128,6 @@ describe('test api - get()', () => {
       path: '/retry-exceeded',
     }
     const err = new Error('Max retry limit exceeded!')
-
     return get(request, 9).then((response) => {
       expect(response).toBe({})
     }).catch((error) => {
