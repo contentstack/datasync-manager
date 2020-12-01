@@ -9,9 +9,10 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.mkdir = exports.readFileSync = exports.readFile = exports.writeFile = exports.existsSync = void 0;
 const Debug = require("debug");
 const fs_1 = require("fs");
-exports.existsSync = fs_1.existsSync;
+Object.defineProperty(exports, "existsSync", { enumerable: true, get: function () { return fs_1.existsSync; } });
 const mkdirp_1 = __importDefault(require("mkdirp"));
 const path_1 = require("path");
 const write_file_atomic_1 = __importDefault(require("write-file-atomic"));
@@ -94,27 +95,20 @@ exports.readFileSync = (filePath) => {
  */
 exports.mkdir = (path) => {
     debug(`mkdir called on ${path}`);
-    return new Promise((resolve, reject) => {
-        try {
-            return mkdirp_1.default(path, (error) => {
-                if (error) {
-                    return reject(error);
-                }
-                return resolve();
-            });
-        }
-        catch (error) {
+    return new Promise((reject) => {
+        return mkdirp_1.default(path)
+            .catch(error => {
             return reject(error);
-        }
+        });
     });
 };
 /**
  * @description exports fs.stat
  */
 var fs_2 = require("fs");
-exports.stat = fs_2.stat;
+Object.defineProperty(exports, "stat", { enumerable: true, get: function () { return fs_2.stat; } });
 /**
  * @description synchnonous way of creating nested folder directory structure
  */
 var mkdirp_2 = require("mkdirp");
-exports.mkdirpSync = mkdirp_2.sync;
+Object.defineProperty(exports, "mkdirpSync", { enumerable: true, get: function () { return mkdirp_2.sync; } });

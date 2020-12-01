@@ -5,6 +5,7 @@
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.map = void 0;
 /**
  * @description Custom promisified map - mimicing 'Bluebird.map'
  * @param {Object} arr - List of items to be passed to 'fn'

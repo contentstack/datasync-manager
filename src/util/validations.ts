@@ -209,7 +209,7 @@ const assetPublishedStructure = (asset) => {
 
 export const validatePlugin = (plugin) => {
   if (!plugin.name || typeof plugin.name !== 'string' || plugin.name.length < 1) {
-    throw new Error(`Invalid plugin config, 'plugin.name' is a required property!`)
+    throw new Error("Invalid plugin config, 'plugin.name' is a required property!")
   }
 }
 

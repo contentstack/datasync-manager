@@ -191,5 +191,5 @@ exports.buildAssetObject = (asset, locale, entry_uid, content_type_uid) => {
         throw new Error('Unable to determine fine name.\n' + JSON.stringify(matches));
     }
     asset.filename = matches[5];
-    return Object.assign({ _content_type_uid: '_assets' }, asset, { _type: 'publish', entry_content_type: content_type_uid, entry_reffered_in: entry_uid, locale, uid: asset.uid });
+    return Object.assign(Object.assign({ _content_type_uid: '_assets' }, asset), { _type: 'publish', entry_content_type: content_type_uid, entry_reffered_in: entry_uid, locale, uid: asset.uid });
 };
