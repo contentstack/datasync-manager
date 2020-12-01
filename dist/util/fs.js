@@ -95,11 +95,15 @@ exports.readFileSync = (filePath) => {
  */
 exports.mkdir = (path) => {
     debug(`mkdir called on ${path}`);
-    return new Promise((reject) => {
-        return mkdirp_1.default(path)
-            .catch(error => {
+    return new Promise((resolve, reject) => {
+        try {
+            return mkdirp_1.default(path).then(() => {
+                return resolve();
+            });
+        }
+        catch (error) {
             return reject(error);
-        });
+        }
     });
 };
 /**
