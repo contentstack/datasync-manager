@@ -5,6 +5,7 @@
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.config = void 0;
 /**
  * @description Default application's internal config
  */

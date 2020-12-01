@@ -5,6 +5,7 @@
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.validatePlugin = exports.validateItemStructure = exports.validateLogger = exports.validateExternalInput = exports.validateAssetStoreInstance = exports.validateContentStoreInstance = exports.validateListener = exports.validateContentStore = exports.validateAssetStore = exports.validateConfig = void 0;
 const lodash_1 = require("lodash");
 /**
  * @public
@@ -190,7 +191,7 @@ const assetPublishedStructure = (asset) => {
 };
 exports.validatePlugin = (plugin) => {
     if (!plugin.name || typeof plugin.name !== 'string' || plugin.name.length < 1) {
-        throw new Error(`Invalid plugin config, 'plugin.name' is a required property!`);
+        throw new Error("Invalid plugin config, 'plugin.name' is a required property!");
     }
 };
 const entryPublishedStructure = (entry) => {

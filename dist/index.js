@@ -5,10 +5,11 @@
 * MIT Licensed
 */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -16,6 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.debugNotifications = exports.start = exports.notifications = exports.getConfig = exports.setConfig = exports.setListener = exports.setAssetStore = exports.setContentStore = exports.getAssetLocation = exports.pop = exports.unshift = exports.push = void 0;
 const debug_1 = __importDefault(require("debug"));
 const lodash_1 = require("lodash");
 const config_1 = require("./config");
@@ -23,7 +25,7 @@ const index_1 = require("./core/index");
 const inet_1 = require("./core/inet");
 const process_1 = require("./core/process");
 const q_1 = require("./core/q");
-exports.notifications = q_1.notifications;
+Object.defineProperty(exports, "notifications", { enumerable: true, get: function () { return q_1.notifications; } });
 const build_paths_1 = require("./util/build-paths");
 const index_2 = require("./util/index");
 const logger_1 = require("./util/logger");
@@ -46,7 +48,7 @@ exports.pop = () => {
     index_1.pop();
 };
 exports.getAssetLocation = (asset) => {
-    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+    return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const assetStoreConfig = assetStore.getConfig();
             const assetConfig = (assetStoreConfig.assetStore) ? assetStoreConfig.assetStore : assetStoreConfig;
@@ -111,7 +113,7 @@ exports.getConfig = () => {
  * @param {object} instance Custom logger instance
  */
 var logger_2 = require("./util/logger");
-exports.setLogger = logger_2.setLogger;
+Object.defineProperty(exports, "setLogger", { enumerable: true, get: function () { return logger_2.setLogger; } });
 /**
  * @public
  * @method start

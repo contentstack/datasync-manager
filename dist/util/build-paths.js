@@ -5,6 +5,7 @@
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.buildConfigPaths = void 0;
 const path_1 = require("path");
 /**
  * @description Builds application's config paths where data is stored

@@ -103,11 +103,7 @@ export const mkdir = (path) => {
 
   return new Promise((resolve, reject) => {
     try {
-      return mkdirp(path, (error) => {
-        if (error) {
-          return reject(error)
-        }
-
+      return mkdirp(path).then(() => {
         return resolve()
       })
     } catch (error) {

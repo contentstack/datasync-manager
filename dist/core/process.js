@@ -5,6 +5,7 @@
 * MIT Licensed
 */
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.configure = void 0;
 /**
  * @note 'SIGKILL' cannot have a listener installed, it will unconditionally terminate Node.js on all platforms.
  * @note 'SIGSTOP' cannot have a listener installed.

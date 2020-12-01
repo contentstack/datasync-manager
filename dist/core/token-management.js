@@ -5,10 +5,11 @@
 * MIT Licensed
 */
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
         function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
         function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
@@ -16,6 +17,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.saveCheckpoint = exports.saveToken = exports.getToken = void 0;
 const debug_1 = __importDefault(require("debug"));
 const index_1 = require("../index");
 const fs_1 = require("../util/fs");
@@ -27,7 +29,7 @@ let counter = 0;
  * @param {String} type - Token type (checkpoint | current)
  */
 exports.getToken = () => {
-    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+    return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const config = index_1.getConfig();
             const checkpoint = config.paths.checkpoint;
@@ -58,7 +60,7 @@ exports.getToken = () => {
  */
 exports.saveToken = (name, token) => {
     debug(`Save token invoked with name: ${name}, token: ${token}`);
-    return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+    return new Promise((resolve, reject) => __awaiter(void 0, void 0, void 0, function* () {
         try {
             const config = index_1.getConfig();
             const path = config.paths.token;
@@ -108,7 +110,7 @@ exports.saveToken = (name, token) => {
  * @param {String} token - Token value
  * @param {String} type - Token type
  */
-exports.saveCheckpoint = (name, token) => __awaiter(this, void 0, void 0, function* () {
+exports.saveCheckpoint = (name, token) => __awaiter(void 0, void 0, void 0, function* () {
     debug(`Save token invoked with name: ${name}, token: ${token}`);
     const config = index_1.getConfig();
     const path = config.paths.checkpoint;
