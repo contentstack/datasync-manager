@@ -20,6 +20,7 @@
     "@types/node": "10.12.12",
     "@types/rimraf": "2.0.2",
     "@types/write-file-atomic": "2.1.1",
+    "eslint": "^8.14.0",
     "jest": "24.8.0",
     "jest-html-reporter": "^2.5.0",
     "mkdirp": "0.5.1",
@@ -37,7 +38,8 @@
     "prepare": "npm run compile",
     "start": "dist",
     "tslint": "npx tslint -c tslint.json 'src/**/*.ts' --fix",
-    "test": "PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose"
+    "test": "PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose",
+    "lint": "eslint"
   },
   "engines": {
     "node": ">=8"
