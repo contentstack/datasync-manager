@@ -12,6 +12,10 @@
     "write-file-atomic": "2.4.2"
   },
   "devDependencies": {
+    "@semantic-release/commit-analyzer": "^9.0.2",
+    "@semantic-release/git": "^10.0.1",
+    "@semantic-release/npm": "^9.0.1",
+    "@semantic-release/release-notes-generator": "^10.0.3",
     "@types/debug": "0.0.31",
     "@types/jest": "23.3.11",
     "@types/lodash": "4.14.119",
@@ -26,6 +30,7 @@
     "mkdirp": "0.5.1",
     "nock": "10.0.6",
     "rimraf": "2.6.2",
+    "semantic-release": "^19.0.2",
     "ts-jest": "24.0.2",
     "tslint": "5.18.0",
     "typescript": "3.5.2"
@@ -39,7 +44,8 @@
     "start": "dist",
     "tslint": "npx tslint -c tslint.json 'src/**/*.ts' --fix",
     "test": "PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose",
-    "lint": "eslint"
+    "lint": "eslint",
+    "semantic-release": "semantic-release"
   },
   "engines": {
     "node": ">=8"
