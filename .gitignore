@@ -23,3 +23,6 @@ test-report.html
 example/**/*
 !example/config.js
 !example/index.js
+
+dist/
+dist/*
