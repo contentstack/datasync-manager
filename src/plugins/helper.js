@@ -59,7 +59,7 @@ exports.buildReferencePaths = (schema, entryReferences = {}, assetReferences = {
       } else if ((field.data_type === fieldType.GROUP || field.data_type === fieldType.GLOBAL_FIELD) && field.schema) {
         this.buildReferencePaths(field.schema, entryReferences, assetReferences, ((parent) ? `${parent}.${field.uid}`: field.uid))
       } else if (field.data_type === fieldType.BLOCKS && Array.isArray(field.blocks)) {
-        const blockParent = ((parent)) ? `${parent}.${field.uid}`: `${field.uid}`
+        const blockParent = parent ? `${parent}.${field.uid}`: `${field.uid}`
         field.blocks.forEach((block) => {
           if (block && block.schema && Array.isArray(block.schema)) {
             let subBlockParent = `${blockParent}.${block.uid}`

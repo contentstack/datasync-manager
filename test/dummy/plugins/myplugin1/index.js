@@ -1,5 +1,4 @@
 module.exports = function Myplugin1 () {
-  const options = Myplugin1.options
 
   Myplugin1.beforeSync = (action, data, schema) => {
     return new Promise((resolve) => {

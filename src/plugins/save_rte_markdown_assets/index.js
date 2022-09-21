@@ -3,8 +3,6 @@ const index = require('../../index')
 const util = require('../../util/index')
 
 module.exports = function SaveRteMarkdownAssets () {
-  const options = SaveRteMarkdownAssets.options
-
   SaveRteMarkdownAssets.beforeSync = (action, data, schema) => {
     return new Promise((resolve, reject) => {
       try {
