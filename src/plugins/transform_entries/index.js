@@ -1,8 +1,6 @@
 const helper = require('../helper')
 
 module.exports = function TransformEntries () {
-  const options = TransformEntries.options
-
   TransformEntries.beforeSync = (action, data, schema) => {
     return new Promise((resolve, reject) => {
       try {
