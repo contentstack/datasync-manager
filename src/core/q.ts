@@ -141,17 +141,7 @@ export class Q extends EventEmitter {
    */
   private process(data) {
     notify(data._type, data)
-    switch (data._type) {
-    case 'publish':
-      this.exec(data, data._type)
-      break
-    case 'unpublish':
-      this.exec(data, data._type)
-      break
-    default:
-      this.exec(data, data._type)
-      break
-    }
+    this.exec(data, data._type)
   }
 
   /**
