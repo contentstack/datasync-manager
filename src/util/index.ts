@@ -284,7 +284,7 @@ const findAssets = (parentEntry, key, schema, entry, bucket, isFindNotReplace) =
     let matches
     let convertedText
     if (isMarkdown) {
-      convertedText = marked(entry)
+      convertedText = marked.marked(entry)
     } else {
       convertedText = entry
     }
@@ -338,7 +338,7 @@ const iterate = (schema, entry, bucket, findNoteReplace, parentKeys) => {
       const subEntry = entry[parentKey]
 
       if (subEntry && !(isEmpty(subEntry)) && index === (parentKeys.length - 1)) {
-        if (subEntry && subEntry instanceof Array && subEntry.length) {
+        if (subEntry && subEntry.length) {
           subEntry.forEach((subEntryItem, idx) => {
             // tricky!
             if (!(isEmpty(subEntryItem))) {

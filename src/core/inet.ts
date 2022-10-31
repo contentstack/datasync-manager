@@ -80,9 +80,7 @@ export const checkNetConnectivity = () => {
 }
 
 export const netConnectivityIssues = (error) => {
-  if (error.code === 'ENOTFOUND') {
-    return true
-  } else if (error.code === 'ETIMEDOUT') {
+  if (error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT') {
     return true
   }
 
