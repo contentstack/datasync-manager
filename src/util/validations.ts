@@ -21,8 +21,8 @@ export const validateConfig = (config) => {
       throw new Error(`Config '${key}' key cannot be undefined`)
     }
   })
-  if (typeof config.contentstack !== 'object' || !config.contentstack.apiKey || !config.contentstack.deliveryToken) {
-    throw new Error('Config \'contentstack\' should be of type object and have \'apiKey\' and \'token\'')
+  if (typeof config.contentstack !== 'object' || !config.contentstack.apiKey || !config.contentstack.deliveryToken || !config.contentstack.branch) {
+    throw new Error('Config \'contentstack\' should be of type object and have \'apiKey\', \'token\' and \'branch\'')
   }
 
   if (config.queue) {

@@ -25,6 +25,7 @@ export const init = (contentstack) => {
     'X-User-Agent': `datasync-manager/v${packageInfo.version}`,
     'access_token': Contentstack.deliveryToken,
     'api_key': Contentstack.apiKey,
+    branch: Contentstack.branch,
   }
 
   if (Contentstack.MAX_RETRY_LIMIT) {
