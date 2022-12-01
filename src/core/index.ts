@@ -125,11 +125,18 @@ export const pop = () => {
 /**
  * @description Notifies the sync manager utility to wake up and start syncing..
  */
-export const poke = () => {
-  logger.info('Received \'contentstack sync\' notification')
-  if (!flag.lockdown) {
-    flag.WQ = true
-    check()
+export const poke = async () => {
+  try {
+    debug('Invoked poke');
+    logger.info('Received \'contentstack sync\' notification')
+    if (!flag.lockdown) {
+      flag.WQ = true
+      return await check()
+    }
+    return null;
+  } catch (error) {
+    debug('Error [poke]', error);
+    throw error;
   }
 }
 
@@ -137,48 +144,52 @@ export const poke = () => {
  * @description Check's if the status of the app when a new incoming notification is fired
  * @description Starts processing if the 'SQ: false'
  */
-const check = () => {
-  debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`)
-  if (!flag.SQ && flag.WQ) {
-    flag.WQ = false
-    flag.SQ = true
-    sync().then(() => {
+const check = async () => {
+  try {
+    debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`)
+    if (!flag.SQ && flag.WQ) {
+      flag.WQ = false
+      flag.SQ = true
+      await sync();
       debug(`Sync completed and SQ flag updated. Cooloff duration is ${config.syncManager.cooloff}`)
-
       setTimeout(() => {
         flag.SQ = false
         emitter.emit('check')
       }, config.syncManager.cooloff)
+    }
+  } catch (error) {
+    logger.error(error)
+    debug('Error [check]', error);
+    check().then(() => {
+      debug('passed [check] error');
     }).catch((error) => {
-      logger.error(error)
-
-      check()
-    })
+      debug('failed [check] error', error);
+    });
+    throw error;
   }
 }
 
 /**
  * @description Gets saved token, builds request object and fires the sync process
  */
-const sync = () => {
-  return new Promise((resolve, reject) => {
-    return getToken().then((tokenObject) => {
-      const token: IToken = (tokenObject as IToken)
-      const request: any = {
-        qs: {
-          environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
-          limit: config.syncManager.limit,
-          [token.name]: token.token,
-        },
-      }
-
-      return fire(request)
-        .then(resolve)
-    }).catch((error) => {
-
-      return reject(error)
-    })
-  })
+const sync = async () => {
+  try {
+    debug('started [sync]');
+    const tokenObject = await getToken();
+    debug('tokenObject [sync]', tokenObject);
+    const token: IToken = (tokenObject as IToken)
+    const request: any = {
+      qs: {
+        environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
+        limit: config.syncManager.limit,
+        [token.name]: token.token,
+      },
+    }
+    return await fire(request)
+  } catch (error) {
+    debug('Error [sync]', error);
+    throw error
+  }
 }
 
 /**
@@ -221,6 +232,7 @@ const fire = (req: IApiRequest) => {
       delete req.qs.sync_token
       delete req.path
       const syncResponse: ISyncResponse = response
+      debug('Response [fire]', syncResponse.items.length);
       if (syncResponse.items.length) {
         return filterItems(syncResponse, config).then(() => {
           if (syncResponse.items.length === 0) {
@@ -276,7 +288,7 @@ const fire = (req: IApiRequest) => {
                     Q.push(entry)
                   })
 
-                  return mapResolve()
+                  return mapResolve('')
                 }
                 const err: any = new Error('Content type ${uid} schema not found!')
                 // Illegal content type call
@@ -311,6 +323,7 @@ const fire = (req: IApiRequest) => {
       return postProcess(req, syncResponse)
         .then(resolve)
     }).catch((error) => {
+      debug('Error [fire]', error);
       if (netConnectivityIssues(error)) {
         flag.SQ = false
       }
@@ -352,7 +365,7 @@ const postProcess = (req, resp) => {
         if (name === 'sync_token') {
           flag.SQ = false
 
-          return resolve()
+          return resolve('')
         }
 
         return fire(req)
