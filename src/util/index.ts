@@ -56,6 +56,10 @@ export const filterItems = async (response, config) => {
 
       return item
     }
+    // To handle content-type.
+    if (!(item as any).data) {
+      return false;
+    }
     // for published items
     if ((item as any).data.publish_details) {
       return locales.indexOf((item as any).data.publish_details.locale) !== -1
