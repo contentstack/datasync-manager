@@ -461,6 +461,10 @@ export const filterUnwantedKeys = (action, data) => {
 // Add option to delete embedded documents
 const filterKeys = (data, unwantedKeys) => {
   for (const key in unwantedKeys) {
+    // We need _content_type for handling asset published/unpublished events in entry object (Wherever it is referenced).
+    if (key === '_content_type') {
+      continue;
+    }
     if (unwantedKeys[key] && data.hasOwnProperty(key)) {
       delete data[key]
     }
