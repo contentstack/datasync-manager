@@ -8,6 +8,7 @@ import Debug from 'debug'
 import { request } from 'https'
 import { join } from 'path'
 import { stringify } from 'querystring'
+import { sanitizeUrl } from '@braintree/sanitize-url';
 import { readFileSync } from './util/fs'
 
 const debug = Debug('api')
@@ -25,6 +26,7 @@ export const init = (contentstack) => {
     'X-User-Agent': `datasync-manager/v${packageInfo.version}`,
     'access_token': Contentstack.deliveryToken,
     'api_key': Contentstack.apiKey,
+    branch: Contentstack.branch,
   }
 
   if (Contentstack.MAX_RETRY_LIMIT) {
@@ -52,7 +54,7 @@ export const get = (req, RETRY = 1) => {
       headers: Contentstack.headers,
       hostname: Contentstack.host,
       method: Contentstack.verbs.get,
-      path: req.path,
+      path: sanitizeUrl(req.path),
       port: Contentstack.port,
       protocol: Contentstack.protocol,
     }
