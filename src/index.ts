@@ -229,7 +229,7 @@ export const start = (config: IConfig = {}): Promise<{}> => {
       }).then(() => {
         logger.info('Contentstack sync utility started successfully!')
 
-        return resolve()
+        return resolve('')
       }).catch(reject)
     } catch (error) {
       return reject(error)

@@ -14,6 +14,7 @@ import { series } from '../util/series'
 import { saveFailedItems } from '../util/unprocessible'
 import { load } from './plugins'
 import { saveToken } from './token-management'
+import { getConfig } from '../index';
 
 const debug = Debug('q')
 const notifications = new EventEmitter()
@@ -159,6 +160,8 @@ export class Q extends EventEmitter {
       const contentType = data._content_type_uid
       const locale = data.locale
       const uid = data.uid
+      const branch = getConfig().contentstack.branch
+      data.branch = branch
 
       if (data.hasOwnProperty('_checkpoint')) {
         checkpoint = data._checkpoint
@@ -216,6 +219,7 @@ export class Q extends EventEmitter {
 
       debug(`Completed '${action}' on connector successfully!`)
       if (typeof schema !== 'undefined') {
+        schema.branch = branch
         await this.contentStore.updateContentType(schema)
       }
 

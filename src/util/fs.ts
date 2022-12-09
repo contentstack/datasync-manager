@@ -36,7 +36,7 @@ export const writeFile = (filePath, data) => {
           return reject(wfError)
         }
 
-        return resolve()
+        return resolve('')
       })
     } catch (writeFileError) {
 
@@ -108,7 +108,7 @@ export const mkdir = (path) => {
           return reject(error)
         }
 
-        return resolve()
+        return resolve('')
       })
     } catch (error) {
       return reject(error)
