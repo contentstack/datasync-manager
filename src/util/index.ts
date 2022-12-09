@@ -56,6 +56,10 @@ export const filterItems = async (response, config) => {
 
       return item
     }
+    // To handle content-type.
+    if (!(item as any).data) {
+      return false;
+    }
     // for published items
     if ((item as any).data.publish_details) {
       return locales.indexOf((item as any).data.publish_details.locale) !== -1
@@ -461,6 +465,10 @@ export const filterUnwantedKeys = (action, data) => {
 // Add option to delete embedded documents
 const filterKeys = (data, unwantedKeys) => {
   for (const key in unwantedKeys) {
+    // We need _content_type for handling asset published/unpublished events in entry object (Wherever it is referenced).
+    if (key === '_content_type') {
+      continue;
+    }
     if (unwantedKeys[key] && data.hasOwnProperty(key)) {
       delete data[key]
     }
