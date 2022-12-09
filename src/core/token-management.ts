@@ -110,7 +110,7 @@ export const saveToken = (name, token) => {
         await writeFile(file, JSON.stringify(ledgerDetails))
       }
 
-      return resolve()
+      return resolve('')
     } catch (error) {
       return reject(error)
     }
