@@ -50,7 +50,7 @@ export const saveFilteredItems = (items, name, token) => {
       const config = getConfig()
       let filename
       if (!config.syncManager.saveFilteredItems) {
-        return resolve()
+        return resolve('')
       }
       const objDetails = {
         items,
@@ -80,13 +80,13 @@ export const saveFilteredItems = (items, name, token) => {
             logger.error(`Failed to write ${JSON.stringify(loggedItems)} at ${error}`)
             logger.error(error)
 
-            return resolve()
+            return resolve('')
           })
         }).catch((error) => {
           logger.error(`Failed to read file from path ${fail}`)
           logger.error(error)
 
-          return resolve()
+          return resolve('')
         })
       }
 
@@ -94,7 +94,7 @@ export const saveFilteredItems = (items, name, token) => {
         logger.error(`Failed while writing ${JSON.stringify(objDetails)} at ${file}`)
         logger.error(error)
 
-        return resolve()
+        return resolve('')
       })
     } catch (error) {
       return reject(error)
