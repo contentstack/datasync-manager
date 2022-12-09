@@ -28,14 +28,14 @@
     "@types/write-file-atomic": "2.1.1",
     "eslint": "^8.14.0",
     "jest": "^29.0.3",
-    "jest-html-reporter": "^2.5.0",
+    "jest-html-reporter": "^3.7.0",
     "mkdirp": "^1.0.4",
     "nock": "^10.0.6",
     "rimraf": "^2.6.2",
     "semantic-release": "^19.0.5",
     "ts-jest": "^29.0.1",
     "tslint": "^5.18.0",
-    "typescript": "^3.5.2"
+    "typescript": "^4.9.4"
   },
   "scripts": {
     "clean": "rimraf dist typings coverage .tokens .ledger .checkpoint",
