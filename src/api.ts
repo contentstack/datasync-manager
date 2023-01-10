@@ -25,8 +25,11 @@ export const init = (contentstack) => {
   Contentstack.headers = {
     'X-User-Agent': `datasync-manager/v${packageInfo.version}`,
     'access_token': Contentstack.deliveryToken,
-    'api_key': Contentstack.apiKey,
-    branch: Contentstack.branch,
+    'api_key': Contentstack.apiKey
+  }
+
+  if (Contentstack.branch) {
+    Contentstack.headers['branch'] = Contentstack.branch
   }
 
   if (Contentstack.MAX_RETRY_LIMIT) {
