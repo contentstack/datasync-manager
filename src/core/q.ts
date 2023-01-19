@@ -161,7 +161,7 @@ export class Q extends EventEmitter {
       const locale = data.locale
       const uid = data.uid
       const branch = getConfig().contentstack.branch
-      data.branch = branch
+      if (branch) data.branch = branch
 
       if (data.hasOwnProperty('_checkpoint')) {
         checkpoint = data._checkpoint
@@ -219,7 +219,7 @@ export class Q extends EventEmitter {
 
       debug(`Completed '${action}' on connector successfully!`)
       if (typeof schema !== 'undefined') {
-        schema.branch = branch
+        if (branch) schema.branch = branch
         await this.contentStore.updateContentType(schema)
       }
 
