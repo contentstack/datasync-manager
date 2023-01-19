@@ -57,6 +57,11 @@
     "DataSync",
     "utility"
   ],
+  "files": [
+    "/dist",
+    "/typings",
+    "/npm-shrinkwrap.json"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/contentstack/datasync-manager"
