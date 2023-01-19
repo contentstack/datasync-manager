@@ -342,7 +342,7 @@ const iterate = (schema, entry, bucket, findNoteReplace, parentKeys) => {
       const subEntry = entry[parentKey]
 
       if (subEntry && !(isEmpty(subEntry)) && index === (parentKeys.length - 1)) {
-        if (subEntry && subEntry.length) {
+        if (subEntry instanceof Array && subEntry.length) {
           subEntry.forEach((subEntryItem, idx) => {
             // tricky!
             if (!(isEmpty(subEntryItem))) {
