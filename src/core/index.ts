@@ -48,6 +48,13 @@ interface IToken {
 }
 
 const debug = Debug('sync-core')
+if (
+  process.env.DEBUG === "*" ||
+  (process.env.DEBUG || "").includes("sync-core")
+) {
+  debug.enabled = true;
+}
+
 const emitter = new EventEmitter()
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'

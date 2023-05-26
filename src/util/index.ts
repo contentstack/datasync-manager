@@ -38,6 +38,13 @@ import {
 } from './validations'
 
 const debug = Debug('util:index')
+if (
+  process.env.DEBUG === "*" ||
+  (process.env.DEBUG || "").includes("util:index")
+) {
+  debug.enabled = true;
+}
+
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
 const assetType = 'sys_assets'

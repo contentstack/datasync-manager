@@ -10,6 +10,13 @@ import { normalizePluginPath } from '../util/index'
 import { validatePlugin } from '../util/validations'
 
 const debug = Debug('plugins')
+if (
+  process.env.DEBUG === "*" ||
+  (process.env.DEBUG || "").includes("plugins")
+) {
+  debug.enabled = true;
+}
+
 const pluginMethods = ['beforeSync', 'afterSync']
 
 /**
