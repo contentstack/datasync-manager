@@ -12,6 +12,10 @@ import { sanitizeUrl } from '@braintree/sanitize-url';
 import { readFileSync } from './util/fs'
 
 const debug = Debug('api')
+if (process.env.DEBUG === "*" || (process.env.DEBUG || "").includes("api")) {
+  debug.enabled = true;
+}
+
 let MAX_RETRY_LIMIT
 let Contentstack
 

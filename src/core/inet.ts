@@ -27,6 +27,10 @@ interface ISyncManager {
 
 const emitter = new EventEmitter()
 const debug = Debug('inet')
+if (process.env.DEBUG === "*" || (process.env.DEBUG || "").includes("inet")) {
+  debug.enabled = true;
+}
+
 let disconnected = false
 let sm: ISyncManager
 let query
