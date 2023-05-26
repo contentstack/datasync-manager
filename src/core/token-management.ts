@@ -10,6 +10,13 @@ import { existsSync, readFile, writeFile } from '../util/fs'
 import { getFile } from '../util/index'
 
 const debug = Debug('token-management')
+if (
+  process.env.DEBUG === "*" ||
+  (process.env.DEBUG || "").includes("token-management")
+) {
+  debug.enabled = true;
+}
+
 let counter = 0
 
 /**
