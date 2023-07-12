@@ -15,6 +15,6 @@ jobs:
       - name: Build
         run: npm run build-ts
       - name: Publishing datasync manager
-        uses: JS-DevTools/npm-publish@v1
+        uses: JS-DevTools/npm-publish@v2.2.0
         with:
           token: ${{ secrets.NPM_TOKEN }}
