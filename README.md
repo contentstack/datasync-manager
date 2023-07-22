@@ -68,40 +68,12 @@ You can replace [@contentstack/datasync-content-store-filesystem](https://www.np
     <tr>
       <td>enableAssetReferences</td>
       <td>true</td>
-      <td>
-        This would map out all the asset fields and modify/map them to the content type they belong to. Ex:
-        <ul>
-          <li><strong>Before</strong></li>
-            <code>"asset_field": "bltassetuid123"</code>
-          <li><strong>After</strong></li>
-            <code>
-              "asset_field": {
-                "reference_to": "_assets",
-                "values": "bltassetuid123"
-              }
-            </code>
-        </ul>
-      </td>
+      <td>This is not implemented, you can help: <a href="https://github.com/contentstack/datasync-manager/issues/33" target="_blank">#33</a></td>
     </tr>
     <tr>
       <td>enableContentReferences</td>
       <td>true</td>
-      <td>
-        This would map out all the reference fields and modify/map them to the content type they belong to. Ex:
-        <ul>
-          <li><strong>Before</strong></li>
-            <code>
-              "categories": "bltcategoryuid123"
-            </code>
-          <li><strong>After</strong></li>
-            <code>
-              "categories": {
-                "reference_to": "category",
-                "values": "bltcategoryuid123"
-              }
-            </code>
-        </ul>
-      </td>
+      <td>This is not implemented, you can help: <a href="https://github.com/contentstack/datasync-manager/issues/34" target="_blank">#34</a></td>
     </tr>
     <tr>
       <td>limit</td>
