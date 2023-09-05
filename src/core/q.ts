@@ -17,10 +17,6 @@ import { saveToken } from './token-management'
 import { getConfig } from '../index';
 
 const debug = Debug('q')
-if (process.env.DEBUG === "*" || (process.env.DEBUG || "").includes("q")) {
-  debug.enabled = true;
-}
-
 const notifications = new EventEmitter()
 
 let instance = null
@@ -255,24 +251,6 @@ export class Q extends EventEmitter {
       this.inProgress = false
       this.emit('next', data)
     } catch (error) {
-      try {
-        debug(
-          `Error handler called with ${JSON.stringify({
-            data,
-            error,
-            // tslint:disable-next-line: object-literal-sort-keys
-            checkpoint,
-          })}`
-        );
-      } catch (error) {
-        debug("Error occurred in exec method");
-        console.log({
-          data,
-          error,
-          // tslint:disable-next-line: object-literal-sort-keys
-          checkpoint,
-        });
-      }
       this.emit('error', {
         data,
         error,

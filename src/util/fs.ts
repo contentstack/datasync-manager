@@ -13,12 +13,6 @@ import writeFileAtomic from 'write-file-atomic'
 
 export { existsSync }
 const debug = Debug('sm:util-fs')
-if (
-  process.env.DEBUG === "*" ||
-  (process.env.DEBUG || "").includes("sm:util-fs")
-) {
-  debug.enabled = true;
-}
 
 /**
  * @description A wrapper around nodejs fs module's 'writeFile()'
