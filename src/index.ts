@@ -26,12 +26,6 @@ import {
 } from './util/validations'
 
 const debug = Debug('sm:index')
-if (
-  process.env.DEBUG === "*" ||
-  (process.env.DEBUG || "").includes("sm:index")
-) {
-  debug.enabled = true;
-}
 
 let assetStoreInstance
 let appConfig: any = {}
