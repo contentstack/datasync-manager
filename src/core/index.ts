@@ -75,7 +75,7 @@ export const init = (contentStore, assetStore) => {
     try {
       Contentstack = config.contentstack
       const paths = config.paths
-      const environment = process.env.NODE_ENV || Contentstack.environment || 'development'
+      const environment = Contentstack.environment || process.env.NODE_ENV || 'development'
       debug(`Environment: ${environment}`)
       const request: any = {
         qs: {
