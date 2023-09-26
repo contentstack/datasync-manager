@@ -5,7 +5,7 @@
   "description": "The primary module of Contentstack DataSync. Syncs Contentstack data with your server using Contentstack Sync API",
   "main": "dist/index.js",
   "dependencies": {
-    "@braintree/sanitize-url": "^6.0.3",
+    "@braintree/sanitize-url": "^6.0.4",
     "debug": "^4.3.4",
     "dns-socket": "^4.2.2",
     "lodash": "^4.17.21",
