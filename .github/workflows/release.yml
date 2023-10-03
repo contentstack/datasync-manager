@@ -1,7 +1,7 @@
 name: Release datasync manager
 on:
   push:
-    branches: [master]
+    branches: [main]
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -10,11 +10,61 @@ jobs:
       - uses: actions/setup-node@v3.7.0
         with:
           node-version: "18.x"
+# The below action will see the existing tags and will bump the current ones and this is only used to check whether the given tag already exists or not
+# We will be using the previous tag to compare with the current tag in the package.json 
+# If both match then no new release would be triggered
+# Else New release will be created
+      - name: Bump version and push tag
+        id: tag_version
+        uses: mathieudutour/github-tag-action@v6.1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          default_bump: false
+# Getting the version info from package.json
+      - name: get-npm-version
+        id: package-version
+        uses: martinbeentjes/npm-get-version-action@v1.3.1
+# Here we are checking whether this is the first release or not and then checking if it is release or not
+      - name: check-first-release
+        env:
+          First_Release: ${{steps.tag_version.outputs.previous_tag=='v0.0.0'}}
+        run: |
+          if ${First_Release} == true; then
+            echo "fr=true" >> $GITHUB_ENV
+            echo "flag set to true"
+          else
+            echo "fr=false" >> $GITHUB_ENV
+            echo "flag set to false"
+          fi
+      - name: check-release-version
+        if: ${{env.fr=='false'}}
+        env:
+          old_version: ${{steps.tag_version.outputs.previous_tag}}
+          new_version: v${{steps.package-version.outputs.current-version}}
+        run: |
+          echo ${old_version}
+          echo ${new_version}
+          echo ${{env.old_version==env.new_version}}
+          if ${{env.old_version!=env.new_version}}; then
+            echo "fr=true" >> $GITHUB_ENV
+            echo "flag set to true"
+          else
+            echo "fr=false" >> $GITHUB_ENV
+            echo "flag set to false"
+          fi
       - name: Installing dependencies
         run: npm install
       - name: Build
         run: npm run build-ts
       - name: Publishing datasync manager
+        id: publish-core
         uses: JS-DevTools/npm-publish@v2.2.0
+        if: ${{env.fr=='true'}}
         with:
           token: ${{ secrets.NPM_TOKEN }}
+      - name: Create Release
+        id: create_release
+        if: ${{env.fr=='true'}}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release create v${{ steps.publish-core.outputs.version }} --title "Release ${{ steps.publish-core.outputs.version }}" --generate-notes
