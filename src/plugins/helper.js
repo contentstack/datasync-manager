@@ -97,7 +97,12 @@ const update = (parent, reference, entry) => {
           }
         }
       } else {
-        entry = entry[parent[j]]
+        const key = _parent[j];
+        if (Object.prototype.hasOwnProperty.call(entry, key)) {
+          const tempEntry = Object.create(null);
+          _.merge(tempEntry, entry);
+          entry = tempEntry[key];
+        }
         const keys = cloneDeep(parent).splice((j + 1), len)
         if (Array.isArray(entry)) {
           for (let i = 0, l = entry.length; i < l; i++) {
@@ -200,4 +205,8 @@ exports.buildAssetObject = (asset, locale, entry_uid, content_type_uid) => {
     locale,
     uid: asset.uid
   }
+}
+
+exports.sanitizePath = (str) => {
+  return str?.replace(/^(\.\.(\/|\\|$))+/, '');
 }
