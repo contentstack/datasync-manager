@@ -201,3 +201,7 @@ exports.buildAssetObject = (asset, locale, entry_uid, content_type_uid) => {
     uid: asset.uid
   }
 }
+
+exports.sanitizePath = (str) => {
+  return str?.replace(/^(\.\.(\/|\\|$))+/, '');
+}
