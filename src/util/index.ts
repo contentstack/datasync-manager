@@ -37,6 +37,8 @@ import {
   validateItemStructure,
 } from './validations'
 
+import { sanitizePath } from './../plugins/helper';
+
 const debug = Debug('util:index')
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
@@ -418,7 +420,7 @@ export const normalizePluginPath = (config, plugin, isInternal) => {
       return plugin.path
     }
 
-    pluginPath = resolve(join(config.paths.baseDir, plugin.name, 'index.js'))
+    pluginPath = resolve(join(sanitizePath(config.paths.baseDir), sanitizePath(plugin.name), 'index.js'))
 
     if (!existsSync(pluginPath)) {
       throw new Error(`${pluginPath} does not exist!`)
@@ -428,14 +430,14 @@ export const normalizePluginPath = (config, plugin, isInternal) => {
   }
 
   if (isInternal) {
-    pluginPath = join(__dirname, '..', 'plugins', plugin.name.slice(13), 'index.js')
+    pluginPath = join(sanitizePath(__dirname), '..', 'plugins', sanitizePath(plugin.name.slice(13)), 'index.js')
 
     if (existsSync(pluginPath)) {
       return pluginPath
     }
   }
 
-  pluginPath = resolve(join(config.paths.plugin, plugin.name, 'index.js'))
+  pluginPath = resolve(join(sanitizePath(config.paths.plugin), sanitizePath(plugin.name), 'index.js'))
   if (!existsSync(pluginPath)) {
     throw new Error(`Unable to find plugin: ${JSON.stringify(plugin)}`)
   }
