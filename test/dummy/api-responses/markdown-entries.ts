@@ -11,7 +11,7 @@ export const response = {
       // tslint:disable-next-line: object-literal-sort-keys
       file: 'blt0fe00a5122e87aba',
       // tslint:disable-next-line: max-line-length
-      rich_text_editor: '<img data-image="lsjgbuaav0k6" src="https://images.contentstack.io/v3/assets/blt201f6a86befeb0a2/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png" data-sys-asset-uid="blt0fe00a5122e87aba" alt="tumblr.png">',
+      rich_text_editor: '<img data-image="lsjgbuaav0k6" src="https://images.contentstack.io/v3/assets/***REMOVED***/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png" data-sys-asset-uid="blt0fe00a5122e87aba" alt="tumblr.png">',
       tags: [],
       uid: 'blt5ff4abd3822b823e',
       created_by: 'blta8c6c505f1e82dda',
@@ -22,22 +22,22 @@ export const response = {
       _in_progress: false,
       group: [{
           // tslint:disable-next-line: max-line-length
-          rich_text_editor: '<img data-image="p25unekg42ax" src="https://images.contentstack.io/v3/assets/blt201f6a86befeb0a2/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png" data-sys-asset-uid="blt0fe00a5122e87aba" alt="tumblr.png">',
+          rich_text_editor: '<img data-image="p25unekg42ax" src="https://images.contentstack.io/v3/assets/***REMOVED***/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png" data-sys-asset-uid="blt0fe00a5122e87aba" alt="tumblr.png">',
         },
         {
           // tslint:disable-next-line: max-line-length
-          rich_text_editor: '<img data-image="tmali4xtmscf" src="https://images.contentstack.io/v3/assets/blt201f6a86befeb0a2/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png" data-sys-asset-uid="blt0fe00a5122e87aba" alt="tumblr.png">',
+          rich_text_editor: '<img data-image="tmali4xtmscf" src="https://images.contentstack.io/v3/assets/***REMOVED***/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png" data-sys-asset-uid="blt0fe00a5122e87aba" alt="tumblr.png">',
         },
       ],
       modular_blocks: [{
         block_one: {
           markdown: [
             // tslint:disable-next-line: max-line-length
-            '![enter image description here][1]\n\n\n  [1]: https://images.contentstack.io/v3/assets/blt201f6a86befeb0a2/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png',
+            '![enter image description here][1]\n\n\n  [1]: https://images.contentstack.io/v3/assets/***REMOVED***/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png',
           ],
           rich_text_editor: [
             // tslint:disable-next-line: max-line-length
-            '<img data-image="ti7ae0uon7u9" src="https://images.contentstack.io/v3/assets/blt201f6a86befeb0a2/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png" data-sys-asset-uid="blt0fe00a5122e87aba" alt="tumblr.png">',
+            '<img data-image="ti7ae0uon7u9" src="https://images.contentstack.io/v3/assets/***REMOVED***/blt0fe00a5122e87aba/5d25cd501d2c530d6012c8d0/tumblr.png" data-sys-asset-uid="blt0fe00a5122e87aba" alt="tumblr.png">',
           ],
         },
       }, ],
