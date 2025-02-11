@@ -6,10 +6,10 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.5.3
-      - uses: actions/setup-node@v3.7.0
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
-          node-version: "18.x"
+          node-version: "22.x"
 # The below action will see the existing tags and will bump the current ones and this is only used to check whether the given tag already exists or not
 # We will be using the previous tag to compare with the current tag in the package.json 
 # If both match then no new release would be triggered
@@ -58,7 +58,7 @@ jobs:
         run: npm run build-ts
       - name: Publishing datasync manager
         id: publish-core
-        uses: JS-DevTools/npm-publish@v2.2.0
+        uses: JS-DevTools/npm-publish@v3
         if: ${{env.fr=='true'}}
         with:
           token: ${{ secrets.NPM_TOKEN }}
