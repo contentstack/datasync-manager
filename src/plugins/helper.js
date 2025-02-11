@@ -97,7 +97,11 @@ const update = (parent, reference, entry) => {
           }
         }
       } else {
-        entry = entry[parent[j]]
+        const key = parent[j];
+        const tempEntry = Object.create(null);
+        _.merge(tempEntry, entry);
+        entry = tempEntry[key];
+        // entry = entry[parent[j]]
         const keys = cloneDeep(parent).splice((j + 1), len)
         if (Array.isArray(entry)) {
           for (let i = 0, l = entry.length; i < l; i++) {
