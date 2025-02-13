@@ -24,7 +24,7 @@ beforeEach(() => {
       },
     })
     .get('/200')
-    // .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
+    .query({sync_token: 'dummySyncToken', environment: 'test', limit: 100})
     .reply(200, publishResponse)
 
   nock('https://api.localhost.io', {
@@ -46,6 +46,7 @@ beforeEach(() => {
       },
     })
     .get('/429')
+    .query({pagination_token: 'publish-token', environment: 'test', limit: 100})
     .reply(429, emptyResponse)
 
   nock('https://api.localhost.io', {
@@ -56,6 +57,7 @@ beforeEach(() => {
       },
     })
     .get('/500')
+    .query({pagination_token: 'publish-token', environment: 'test', limit: 100})
     .reply(500, publishResponse)
 
   nock('https://api.localhost.io', {
