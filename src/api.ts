@@ -57,7 +57,7 @@ export const get = (req, RETRY = 1) => {
       headers: Contentstack.headers,
       hostname: Contentstack.host,
       method: Contentstack.verbs.get,
-      path: sanitizeUrl(req.path),
+      path: encodeURI(sanitizeUrl(req.path)),
       port: Contentstack.port,
       protocol: Contentstack.protocol,
     }
