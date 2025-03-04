@@ -31,6 +31,7 @@
     "jest-html-reporter": "^3.10.2",
     "mkdirp": "^1.0.4",
     "nock": "^10.0.6",
+    "node-notifier": "^10.0.1",
     "rimraf": "^2.7.1",
     "semantic-release": "^24.2.1",
     "ts-jest": "^29.2.5",
