@@ -272,6 +272,7 @@ const fire = (req: IApiRequest) => {
           return map(contentTypeUids, (uid) => {
 
             return new Promise((mapResolve, mapReject) => {
+              debug(`API called with for content type: ${uid}`)
               return get({
                 path: `${Contentstack.apis.content_types}${uid}`,
                 qs: {
@@ -290,12 +291,12 @@ const fire = (req: IApiRequest) => {
 
                   return mapResolve('')
                 }
-                const err: any = new Error('Content type ${uid} schema not found!')
+                const err: any = new Error(`Content type ${uid} schema not found!`)
                 // Illegal content type call
                 err.code = 'ICTC'
-
                 return mapReject(err)
               }).catch((error) => {
+                debug('Error [map] fetching content type schema:', error)
                 if (netConnectivityIssues(error)) {
                   flag.SQ = false
                 }
@@ -312,16 +313,18 @@ const fire = (req: IApiRequest) => {
               flag.SQ = false
             }
             // Errorred while fetching content type schema
-
+            debug('Error [mapResolve]:', error)
             return reject(error)
           })
         }).catch((processError) => {
+          debug('Error [filterItems]:', processError)
           return reject(processError)
         })
       }
 
       return postProcess(req, syncResponse)
         .then(resolve)
+        .catch(reject)
     }).catch((error) => {
       debug('Error [fire]', error);
       if (netConnectivityIssues(error)) {
@@ -368,9 +371,13 @@ const postProcess = (req, resp) => {
           return resolve('')
         }
 
+        debug(`Re-Fire called with: ${JSON.stringify(req)}`)
+        // Add a small delay before re-firing to prevent recursive overload
+        setTimeout(() => {
         return fire(req)
           .then(resolve)
-          .catch(reject)
+          .catch(reject);
+      }, 1000); // Add 1 second delay before re-firing
       }
     })
     .catch(reject)
