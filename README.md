@@ -9,7 +9,7 @@ Contentstack DataSync lets you sync your Contentstack data with your database, e
 The DataSync Manager is one of the four important components of Contentstack DataSync. When any publish, unpublish, or delete operations are performed on assets or content, the DataSync Manager fetches the data and sends it to Content Store. It uses Contentstack's Sync APIs to sync data from Contentstack with your preferred database — Filesystem and MongoDB in our case.
 
 ### Prerequisite
-- nodejs v8+
+- nodejs v20+
 
 ### Usage
 
