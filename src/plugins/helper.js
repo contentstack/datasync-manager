@@ -207,5 +207,7 @@ exports.buildAssetObject = (asset, locale, entry_uid, content_type_uid) => {
 }
 
 exports.sanitizePath = (str) => {
-  return str?.replace(/^(\.\.(\/|\\|$))+/, '');
+  return str?.replace(/^([\/\\]){2,}/, "./") // Normalize leading slashes/backslashes to ''
+  .replace(/[\/\\]+/g, "/") // Replace multiple slashes/backslashes with a single '/'
+  .replace(/(\.\.(\/|\\|$))+/g, ""); // Remove directory traversal (../ or ..\)
 }
