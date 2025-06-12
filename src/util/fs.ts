@@ -7,7 +7,7 @@
 
 import Debug = require('debug')
 import { existsSync, readFile as rf, readFileSync as rFS, stat } from 'fs'
-import mkdirp from 'mkdirp'
+import { mkdirp, mkdirpSync } from 'mkdirp'
 import { dirname } from 'path'
 import writeFileAtomic from 'write-file-atomic'
 
@@ -28,7 +28,7 @@ export const writeFile = (filePath, data) => {
       const fileDirectory = dirname(filePath)
 
       if (!existsSync(fileDirectory)) {
-        mkdirp.sync(fileDirectory)
+        mkdirpSync(fileDirectory)
       }
 
       return writeFileAtomic(filePath, (typeof data === 'object') ? JSON.stringify(data) : data, (wfError) => {
@@ -103,13 +103,9 @@ export const mkdir = (path) => {
 
   return new Promise((resolve, reject) => {
     try {
-      return mkdirp(path, (error) => {
-        if (error) {
-          return reject(error)
-        }
-
-        return resolve('')
-      })
+      return mkdirp(path)
+        .then(() => resolve(''))
+        .catch(error => reject(error))
     } catch (error) {
       return reject(error)
     }
