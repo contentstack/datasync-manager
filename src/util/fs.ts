@@ -100,7 +100,9 @@ export const readFileSync = (filePath) => {
  */
 export const mkdir = (path) => {
   debug(`mkdir called on ${path}`)
-  return mkdirp(path).then(() => '')
+  return mkdirp(path)
+    .then(() => '')
+    .catch(error => Promise.reject(error))
 }
 
 /**
