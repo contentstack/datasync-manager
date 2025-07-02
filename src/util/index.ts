@@ -149,8 +149,9 @@ export const formatItems = (items, config) => {
         items[i]._type = config.contentstack.actions.publish
         // extra keys
         items[i]._synced_at = time
-        items[i].locale = items[i].data.publish_details.locale
-        items[i] = merge(items[i], items[i].data)
+        const assetLocale = items[i].data.publish_details.locale
+        items[i] = merge(cloneDeep(items[i]), items[i].data)
+        items[i].locale = assetLocale
         break
       case 'asset_unpublished':
         delete items[i].type
@@ -170,8 +171,9 @@ export const formatItems = (items, config) => {
         items[i]._content_type_uid = items[i].content_type_uid
         // extra keys
         items[i]._synced_at = time
-        items[i].locale = items[i].data.publish_details.locale
-        items[i] = merge(items[i], items[i].data)
+        const entryLocale = items[i].data.publish_details.locale
+        items[i] = merge(cloneDeep(items[i]), items[i].data)
+        items[i].locale = entryLocale
         break
       case 'entry_unpublished':
         delete items[i].type
