@@ -146,13 +146,13 @@ const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any): void => {
 function readHiddenFile(filePath: string) {
   try {
     if (!fs.existsSync(filePath)) {
-      console.error("File does not exist:", filePath);
+      logger.error("File does not exist:", filePath);
       return;
     }
     const data = fs.readFileSync(filePath, "utf8"); 
     return JSON.parse(data); 
   } catch (err) {
-    console.error("Error reading file:", err);
+    logger.error("Error reading file:", err);
     return undefined;
   }
 }
