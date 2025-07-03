@@ -127,4 +127,9 @@ export const config = {
     saveFailedItems: true,
     saveFilteredItems: true,
   },
+  checkpoint: {
+    enabled: false, // Set to true if you want to enable checkpoint
+    filePath: ".checkpoint",
+    preserve: false // Set to true if you want to preserve the checkpoint file during clean operation
+  },
 }
