@@ -136,9 +136,9 @@ const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any): void => {
 
   // Set sync token if checkpoint is found
   if (checkpoint) {
-    console.log("Found sync token in checkpoint file:", checkpoint);
+    debug("Found sync token in checkpoint file:", checkpoint);
     Contentstack.sync_token = checkpoint.token;
-    console.log("Using sync token:", Contentstack.sync_token);
+    debug("Using sync token:", Contentstack.sync_token);
   }
 };
 
