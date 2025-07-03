@@ -153,7 +153,7 @@ function readHiddenFile(filePath: string) {
     return JSON.parse(data); 
   } catch (err) {
     console.error("Error reading file:", err);
-    throw new Error(`Failed to read checkpoint file: ${err?.message}`);
+    return undefined;
   }
 }
 
