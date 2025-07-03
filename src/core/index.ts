@@ -119,20 +119,29 @@ export const init = (contentStore, assetStore) => {
   })
 }
 
-const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any) => {
-  if (checkPointConfig?.enabled) {
-    let checkPoint = readHiddenFile(paths.checkpoint);
-    if (!checkPoint) {
-      const checkpointPath = path.join(sanitizePath(__dirname), sanitizePath(checkPointConfig.filePath || ".checkpoint"));
-      checkPoint = readHiddenFile(checkpointPath);
-    }
-    if (checkPoint) {
-      console.log("Found sync token in checkpoint file:", checkPoint);
-      Contentstack.sync_token = checkPoint.token;
-      console.log("Using sync token:", Contentstack.sync_token);
-    }
+const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any): void => {
+  if (!checkPointConfig?.enabled) return;
+
+  // Try reading checkpoint from primary path
+  let checkpoint = readHiddenFile(paths.checkpoint);
+
+  // Fallback to filePath in config if not found
+  if (!checkpoint) {
+    const fallbackPath = path.join(
+      sanitizePath(__dirname),
+      sanitizePath(checkPointConfig.filePath || ".checkpoint")
+    );
+    checkpoint = readHiddenFile(fallbackPath);
   }
-}
+
+  // Set sync token if checkpoint is found
+  if (checkpoint) {
+    console.log("Found sync token in checkpoint file:", checkpoint);
+    Contentstack.sync_token = checkpoint.token;
+    console.log("Using sync token:", Contentstack.sync_token);
+  }
+};
+
 
 function readHiddenFile(filePath: string) {
   try {
