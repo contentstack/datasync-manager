@@ -19,47 +19,52 @@ const pluginMethods = ['beforeSync', 'afterSync']
  */
 export const load = (config) => {
   debug('Plugins load called')
-  const pluginInstances = {
-    external: {},
-    internal: {},
-  }
-  const plugins = config.plugins || []
-  pluginMethods.forEach((pluginMethod) => {
-    pluginInstances.external[pluginMethod] = pluginInstances[pluginMethod] || []
-    pluginInstances.internal[pluginMethod] = pluginInstances[pluginMethod] || []
-  })
-
-  plugins.forEach((plugin) => {
-    validatePlugin(plugin)
-
-    const pluginName = plugin.name
-    const slicedName = pluginName.slice(0, 13)
-    let isInternal = false
-    if (slicedName === '_cs_internal_') {
-      isInternal = true
+  try {
+    const pluginInstances = {
+      external: {},
+      internal: {},
     }
-
-    const pluginPath = normalizePluginPath(config, plugin, isInternal)
-    const Plugin = require(pluginPath)
-    Plugin.options = plugin.options || {}
-    // execute/initiate plugin
-    Plugin()
+    const plugins = config.plugins || []
     pluginMethods.forEach((pluginMethod) => {
-      if (hasIn(Plugin, pluginMethod)) {
-        if (plugin.disabled) {
-          // do nothing
-        } else if (isInternal) {
-          pluginInstances.internal[pluginMethod].push(Plugin[pluginMethod])
-        } else {
-          pluginInstances.external[pluginMethod].push(Plugin[pluginMethod])
-        }
-        debug(`${pluginMethod} loaded from ${pluginName} successfully!`)
-      } else {
-        debug(`${pluginMethod} not found in ${pluginName}`)
-      }
+      pluginInstances.external[pluginMethod] = pluginInstances[pluginMethod] || []
+      pluginInstances.internal[pluginMethod] = pluginInstances[pluginMethod] || []
     })
-  })
-  debug('Plugins loaded successfully!')
-
-  return pluginInstances
+  
+    plugins.forEach((plugin) => {
+      validatePlugin(plugin)
+  
+      const pluginName = plugin.name
+      const slicedName = pluginName.slice(0, 13)
+      let isInternal = false
+      if (slicedName === '_cs_internal_') {
+        isInternal = true
+      }
+  
+      const pluginPath = normalizePluginPath(config, plugin, isInternal)
+      const Plugin = require(pluginPath)
+      Plugin.options = plugin.options || {}
+      // execute/initiate plugin
+      Plugin()
+      pluginMethods.forEach((pluginMethod) => {
+        if (hasIn(Plugin, pluginMethod)) {
+          if (plugin.disabled) {
+            // do nothing
+          } else if (isInternal) {
+            pluginInstances.internal[pluginMethod].push(Plugin[pluginMethod])
+          } else {
+            pluginInstances.external[pluginMethod].push(Plugin[pluginMethod])
+          }
+          debug(`${pluginMethod} loaded from ${pluginName} successfully!`)
+        } else {
+          debug(`${pluginMethod} not found in ${pluginName}`)
+        }
+      })
+    })
+    debug('Plugins loaded successfully!')
+  
+    return pluginInstances
+  } catch (error) {
+    debug('Error while loading plugins:', error)
+    throw new Error(`Failed to load plugins: ${error?.message}`)   
+  }
 }
