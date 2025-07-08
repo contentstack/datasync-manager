@@ -338,9 +338,10 @@ const fire = (req: IApiRequest) => {
 
                   return mapResolve('')
                 }
-                const err: any = new Error(`Content type ${uid} schema not found!`)
+                const err: any = new Error('Content type ${uid} schema not found!')
                 // Illegal content type call
                 err.code = 'ICTC'
+
                 return mapReject(err)
               }).catch((error) => {
                 debug('Error [map] fetching content type schema:', error)
@@ -421,10 +422,10 @@ const postProcess = (req, resp) => {
         debug(`Re-Fire called with: ${JSON.stringify(req)}`)
         // Add a small delay before re-firing to prevent recursive overload
         setTimeout(() => {
-        return fire(req)
-          .then(resolve)
-          .catch(reject);
-      }, 1000); // Add 1 second delay before re-firing
+          fire(req)
+            .then(resolve)
+            .catch(reject);
+        }, 1000);
       }
     })
     .catch(reject)
