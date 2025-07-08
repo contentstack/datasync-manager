@@ -3,7 +3,8 @@
  * Copyright (c) 2019 Contentstack LLC
  * MIT Licensed
  */
-
+import * as fs from 'fs'
+import * as path from 'path'
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep, remove } from 'lodash'
@@ -16,6 +17,7 @@ import { map } from '../util/promise.map'
 import { netConnectivityIssues } from './inet'
 import { Q as Queue } from './q'
 import { getToken, saveCheckpoint } from './token-management'
+import { sanitizePath } from '../plugins/helper'
 
 interface IQueryString {
   init?: true,
@@ -46,6 +48,11 @@ interface IToken {
   name: string
   token: string
 }
+interface ICheckpoint {
+  enabled: boolean,
+  filePath: string,
+  preserve:boolean
+}
 
 const debug = Debug('sync-core')
 const emitter = new EventEmitter()
@@ -74,6 +81,7 @@ export const init = (contentStore, assetStore) => {
   return new Promise((resolve, reject) => {
     try {
       Contentstack = config.contentstack
+      const checkPointConfig: ICheckpoint = config.checkpoint
       const paths = config.paths
       const environment = Contentstack.environment || process.env.NODE_ENV || 'development'
       debug(`Environment: ${environment}`)
@@ -83,6 +91,7 @@ export const init = (contentStore, assetStore) => {
           limit: config.syncManager.limit,
         },
       }
+      loadCheckpoint(checkPointConfig, paths);
       if (typeof Contentstack.sync_token === 'string' && Contentstack.sync_token.length !== 0) {
         request.qs.sync_token = Contentstack.sync_token
       } else if (typeof Contentstack.pagination_token === 'string' && Contentstack.pagination_token.length !== 0) {
@@ -108,6 +117,44 @@ export const init = (contentStore, assetStore) => {
       return reject(error)
     }
   })
+}
+
+const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any): void => {
+  if (!checkPointConfig?.enabled) return;
+
+  // Try reading checkpoint from primary path
+  let checkpoint = readHiddenFile(paths.checkpoint);
+
+  // Fallback to filePath in config if not found
+  if (!checkpoint) {
+    const fallbackPath = path.join(
+      sanitizePath(__dirname),
+      sanitizePath(checkPointConfig.filePath || ".checkpoint")
+    );
+    checkpoint = readHiddenFile(fallbackPath);
+  }
+
+  // Set sync token if checkpoint is found
+  if (checkpoint) {
+    debug("Found sync token in checkpoint file:", checkpoint);
+    Contentstack.sync_token = checkpoint.token;
+    debug("Using sync token:", Contentstack.sync_token);
+  }
+};
+
+
+function readHiddenFile(filePath: string) {
+  try {
+    if (!fs.existsSync(filePath)) {
+      logger.error("File does not exist:", filePath);
+      return;
+    }
+    const data = fs.readFileSync(filePath, "utf8"); 
+    return JSON.parse(data); 
+  } catch (err) {
+    logger.error("Error reading file:", err);
+    return undefined;
+  }
 }
 
 export const push = (data) => {
