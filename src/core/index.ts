@@ -420,12 +420,9 @@ const postProcess = (req, resp) => {
         }
 
         debug(`Re-Fire called with: ${JSON.stringify(req)}`)
-        // Add a small delay before re-firing to prevent recursive overload
-        setTimeout(() => {
-          fire(req)
-            .then(resolve)
-            .catch(reject);
-        }, 1000);
+        return fire(req)
+          .then(resolve)
+          .catch(reject);
       }
     })
     .catch(reject)
