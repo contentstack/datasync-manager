@@ -154,6 +154,23 @@ And here's an example to get you started:
 }
 ```
 
+### Environment Variables
+
+The following environment variables can be used to customize the behavior of Contentstack DataSync Manager:
+
+| Variable      | Description                                                                 | Default                |
+|--------------|-----------------------------------------------------------------------------|------------------------|
+| `TOKEN_PATH` | Path to the directory where token/checkpoint/ledger files are stored.        | Project root directory |
+| `PLUGIN_PATH`| Path to the directory where plugins are loaded from.                         | Project root directory |
+| `NODE_ENV`   | Node.js environment (affects config/environment selection).                  | `development`          |
+| `SYNC_ENV`   | Overrides the environment used for sync operations.                         | Value of `NODE_ENV`    |
+| `KILLDURATION`| Time (in ms) before the process is forcefully killed (overrides config).    | Value from config      |
+
+**Note:**
+- `TOKEN_PATH` is especially useful for storing token data in a custom directory (e.g., for selective re-syncing based on timestamps).
+- If a relative path is provided, it is resolved from the project root.
+- These variables can be set in your shell or in your process manager configuration.
+
 ### Further Reading
 
 - [Getting started with Contentstack DataSync](https://www.contentstack.com/docs/guide/synchronization/contentstack-datasync)
