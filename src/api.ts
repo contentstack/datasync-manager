@@ -60,13 +60,14 @@ export const get = (req, RETRY = 1) => {
       path: sanitizeUrl(encodeURI(req.path)),
       port: Contentstack.port,
       protocol: Contentstack.protocol,
+      timeout: 30000, // 30 second timeout to prevent socket hang ups
     }
 
     try {
       debug(`${options.method.toUpperCase()}: ${options.path}`)
       let timeDelay
       let body = ''
-      request(options, (response) => {
+      const httpRequest = request(options, (response) => {
 
           response
             .setEncoding('utf-8')
@@ -102,8 +103,35 @@ export const get = (req, RETRY = 1) => {
               }
             })
         })
-        .on('error', reject)
-        .end()
+
+      // Set socket timeout to handle socket hang ups
+      httpRequest.setTimeout(30000, () => {
+        debug(`Request timeout for ${options.path}`)
+        httpRequest.destroy()
+        reject(new Error('Request timeout'))
+      })
+
+      // Enhanced error handling for socket hang ups and connection resets
+      httpRequest.on('error', (error: any) => {
+        debug(`Request error for ${options.path}: ${error.message} (${error.code || 'NO_CODE'})`)
+        
+        // Handle socket hang up and connection reset errors with retry
+        if ((error.code === 'ECONNRESET' || error.message?.includes('socket hang up')) && RETRY <= MAX_RETRY_LIMIT) {
+          timeDelay = Math.pow(Math.SQRT2, RETRY) * 200
+          debug(`Socket hang up detected. Retrying ${options.path} with ${timeDelay} ms delay (attempt ${RETRY}/${MAX_RETRY_LIMIT})`)
+          RETRY++
+
+          return setTimeout(() => {
+            return get(req, RETRY)
+              .then(resolve)
+              .catch(reject)
+          }, timeDelay)
+        }
+        
+        return reject(error)
+      })
+
+      httpRequest.end()
     } catch (error) {
       return reject(error)
     }

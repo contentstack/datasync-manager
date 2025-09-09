@@ -80,7 +80,10 @@ export const checkNetConnectivity = () => {
 }
 
 export const netConnectivityIssues = (error) => {
-  if (error.code === 'ENOTFOUND' || error.code === 'ETIMEDOUT') {
+  // Include socket hang up and connection reset errors as network connectivity issues
+  const networkErrorCodes = ['ENOTFOUND', 'ETIMEDOUT', 'ECONNRESET', 'EPIPE', 'EHOSTUNREACH']
+  
+  if (networkErrorCodes.includes(error.code) || error.message?.includes('socket hang up')) {
     return true
   }
 
