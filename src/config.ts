@@ -33,6 +33,8 @@ export const config = {
   },
   contentstack: {
     MAX_RETRY_LIMIT: 6,
+    TIMEOUT: 30000,  // 30 seconds - can be overridden by user config
+    RETRY_DELAY_BASE: 200,  // Base delay for retry logic - can be overridden by user config
     actions: {
       delete: 'delete',
       publish: 'publish',
