@@ -14,6 +14,7 @@ import { notifications } from './core/q'
 import { buildConfigPaths } from './util/build-paths'
 import { formatSyncFilters } from './util/index'
 import { logger, setLogger } from './util/logger'
+import { MESSAGES } from './util/messages'
 
 import {
   validateAssetStore,
@@ -208,26 +209,26 @@ export const start = (config: IConfig = {}): Promise<{}> => {
       configure()
 
       return assetStore.start(appConfig).then((assetInstance: IAssetStore) => {
-        debug('Asset store instance has returned successfully!')
+        debug(MESSAGES.INDEX.ASSET_STORE_INIT)
         validateAssetStoreInstance(assetInstance)
         assetStoreInstance = assetInstance
 
         return contentStore.start(assetInstance, appConfig)
       }).then((contentStoreInstance) => {
-        debug('Content store instance has returned successfully!')
+        debug(MESSAGES.INDEX.CONTENT_STORE_INIT)
         validateContentStoreInstance(contentStoreInstance)
         appConfig = formatSyncFilters(appConfig)
 
         return init(contentStoreInstance, assetStoreInstance)
       }).then(() => {
-        debug('Sync Manager initiated successfully!')
+        debug(MESSAGES.INDEX.SYNC_MANAGER_INIT)
         listener.register(poke)
         // start checking for inet 10 secs after the app has started
         pinger()
 
         return listener.start(appConfig)
       }).then(() => {
-        logger.info('Contentstack sync utility started successfully!')
+        logger.info(MESSAGES.INDEX.SYNC_UTILITY_STARTED)
 
         return resolve('')
       }).catch(reject)
@@ -245,7 +246,7 @@ export const start = (config: IConfig = {}): Promise<{}> => {
  */
 export const debugNotifications = (action) => {
   return (item) => {
-    debug(`Notifications: ${action} - ${JSON.stringify(item)}`)
+    debug(MESSAGES.INDEX.NOTIFICATION(action, item))
   }
 }
 

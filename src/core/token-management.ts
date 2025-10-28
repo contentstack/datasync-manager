@@ -8,6 +8,7 @@ import Debug from 'debug'
 import { getConfig } from '../index'
 import { existsSync, readFile, writeFile } from '../util/fs'
 import { getFile } from '../util/index'
+import { MESSAGES } from '../util/messages'
 
 const debug = Debug('token-management')
 let counter = 0
@@ -43,12 +44,12 @@ export const getToken = () => {
       const token = config.paths.token
       let data: any = {}
       if (existsSync(checkpoint)) {
-        debug(`Checkpoint read: ${checkpoint}`)
+        debug(MESSAGES.TOKEN.CHECKPOINT_READ(checkpoint))
 
         const contents: any = await readFile(checkpoint)
         data = JSON.parse(contents)
       } else if (existsSync(token)) {
-        debug(`Token read: ${token}`)
+        debug(MESSAGES.TOKEN.TOKEN_READ(token))
 
         const contents: any = await readFile(token)
         data = JSON.parse(contents)
@@ -68,7 +69,7 @@ export const getToken = () => {
  * @param {String} type - Token type
  */
 export const saveToken = (name, token) => {
-  debug(`Save token invoked with name: ${name}, token: ${token}`)
+  debug(MESSAGES.TOKEN.SAVE_TOKEN(name))
 
   return new Promise(async (resolve, reject) => {
     try {
@@ -99,7 +100,7 @@ export const saveToken = (name, token) => {
 
         return `${config.paths.ledger}-${counter}`
       }) as any)
-      debug(`ledger file: ${file} exists?(${existsSync(file)})`)
+      debug(MESSAGES.TOKEN.LEDGER_CHECK(file, existsSync(file)))
 
       if (!existsSync(file)) {
         await writeFile(file, JSON.stringify([obj]))
@@ -124,7 +125,7 @@ export const saveToken = (name, token) => {
  * @param {String} type - Token type
  */
 export const saveCheckpoint = async (name, token) => {
-  debug(`Save token invoked with name: ${name}, token: ${token}`)
+  debug(MESSAGES.TOKEN.SAVE_CHECKPOINT(name))
   const config = getConfig()
   const path = config.paths.checkpoint
   const data: IToken = {
