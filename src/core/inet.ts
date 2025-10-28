@@ -9,6 +9,7 @@ import dnsSocket from 'dns-socket'
 import { EventEmitter } from 'events'
 import { getConfig } from '../index'
 import { logger } from '../util/logger'
+import { MESSAGES } from '../util/messages'
 import { poke } from './index'
 
 interface ISyncManager {
@@ -47,7 +48,7 @@ export const init = () => {
   port = sm.inet.port
   dns = sm.inet.dns
   currentTimeout = sm.inet.retryTimeout
-  debug(`inet initiated - waiting ${currentTimeout} before checking connectivity.`)
+  debug(MESSAGES.INET.INITIATED(currentTimeout))
   // start checking for net connectivity, 30 seconds after the app has started
   setTimeout(checkNetConnectivity, currentTimeout)
 }
@@ -57,14 +58,14 @@ export const checkNetConnectivity = () => {
     retries: sm.inet.retries,
     timeout: sm.inet.timeout,
   })
-  debug('checking network connectivity')
+  debug(MESSAGES.INET.CHECKING)
   socket.query(query, port, dns, (err) => {
     if (err) {
-      debug(`errorred.. ${err}`)
+      debug(MESSAGES.INET.CHECK_FAILED(err))
       disconnected = true
 
       return socket.destroy(() => {
-        debug('socket destroyed')
+        debug(MESSAGES.INET.CLEANUP_ERROR)
         emitter.emit('disconnected', currentTimeout += sm.inet.retryIncrement)
       })
     } else if (disconnected) {
@@ -73,7 +74,7 @@ export const checkNetConnectivity = () => {
     disconnected = false
 
     return socket.destroy(() => {
-      debug('socket destroyed')
+      debug(MESSAGES.INET.CLEANUP_SUCCESS)
       emitter.emit('ok')
     })
   })
@@ -92,12 +93,12 @@ export const netConnectivityIssues = (error) => {
 
 emitter.on('ok', () => {
   currentTimeout = sm.inet.retryTimeout
-  debug(`pinging ${sm.inet.host} in ${sm.inet.timeout} ms`)
+  debug(MESSAGES.INET.PINGING(sm.inet.host, sm.inet.timeout))
   setTimeout(checkNetConnectivity, sm.inet.timeout)
 })
 
 emitter.on('disconnected', (timeout) => {
-  logger.warn('Network disconnected')
-  debug(`pinging ${sm.inet.host} in ${timeout} ms`)
+  logger.warn(MESSAGES.INET.DISCONNECTED)
+  debug(MESSAGES.INET.PINGING(sm.inet.host, timeout))
   setTimeout(checkNetConnectivity, timeout)
 })

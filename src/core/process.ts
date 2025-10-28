@@ -11,6 +11,7 @@
 
 import { getConfig } from '../index'
 import { logger } from '../util/logger'
+import { MESSAGES } from '../util/messages'
 import { lock, unlock } from './index'
 
 /**
@@ -21,7 +22,7 @@ const handleExit = (signal) => {
   lock()
   const { syncManager } = getConfig()
   const killDuration = (process.env.KILLDURATION) ? calculateKillDuration() : syncManager.processTimeout
-  logger.info(`Received ${signal}. This will shut down the process in ${killDuration}ms..`)
+  logger.info(MESSAGES.PROCESS.SHUTDOWN(signal, killDuration))
   setTimeout(abort, killDuration)
 }
 
@@ -33,7 +34,7 @@ const handleExit = (signal) => {
  * @param {Object} error - Unhandled error object
  */
 const unhandledErrors = (error) => {
-  logger.error('Unhandled exception caught. Locking down process for 10s to recover..')
+  logger.error(MESSAGES.PROCESS.UNHANDLED_ERROR)
   logger.error(error)
   lock()
   setTimeout(() => {
