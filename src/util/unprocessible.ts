@@ -9,6 +9,7 @@ import { getConfig } from '../index'
 import { existsSync, readFile, writeFile } from './fs'
 import { getFile } from './index'
 import { logger } from './logger'
+import { MESSAGES } from './messages'
 
 const counter = {
   failed: 0,
@@ -77,13 +78,13 @@ export const saveFilteredItems = (items, name, token) => {
 
           return writeFile(file, JSON.stringify(loggedItems)).then(resolve).catch((error) => {
             // failed to log failed items
-            logger.error(`Failed to write ${JSON.stringify(loggedItems)} at ${error}`)
+            logger.error(MESSAGES.UNPROCESSIBLE.WRITE_FAILED(loggedItems, file, error))
             logger.error(error)
 
             return resolve('')
           })
         }).catch((error) => {
-          logger.error(`Failed to read file from path ${fail}`)
+          logger.error(MESSAGES.UNPROCESSIBLE.READ_FAILED(file))
           logger.error(error)
 
           return resolve('')
@@ -91,7 +92,7 @@ export const saveFilteredItems = (items, name, token) => {
       }
 
       return writeFile(file, JSON.stringify([objDetails])).then(resolve).catch((error) => {
-        logger.error(`Failed while writing ${JSON.stringify(objDetails)} at ${file}`)
+        logger.error(MESSAGES.UNPROCESSIBLE.WRITE_OBJECT_FAILED(file, objDetails, error))
         logger.error(error)
 
         return resolve('')
