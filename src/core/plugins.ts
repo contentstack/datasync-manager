@@ -7,6 +7,7 @@
 import Debug from 'debug'
 import { hasIn } from 'lodash'
 import { normalizePluginPath } from '../util/index'
+import { MESSAGES } from '../util/messages'
 import { validatePlugin } from '../util/validations'
 
 const debug = Debug('plugins')
@@ -18,7 +19,7 @@ const pluginMethods = ['beforeSync', 'afterSync']
  * @returns {Object} pluginInstance - An instance of plugins, with valid registered methods
  */
 export const load = (config) => {
-  debug('Plugins load called')
+  debug(MESSAGES.PLUGINS.LOAD_CALLED)
   try {
     const pluginInstances = {
       external: {},
@@ -54,17 +55,17 @@ export const load = (config) => {
           } else {
             pluginInstances.external[pluginMethod].push(Plugin[pluginMethod])
           }
-          debug(`${pluginMethod} loaded from ${pluginName} successfully!`)
+          debug(MESSAGES.PLUGINS.METHOD_LOADED(pluginMethod, pluginName))
         } else {
-          debug(`${pluginMethod} not found in ${pluginName}`)
+          debug(MESSAGES.PLUGINS.METHOD_NOT_FOUND(pluginMethod, pluginName))
         }
       })
     })
-    debug('Plugins loaded successfully!')
+    debug(MESSAGES.PLUGINS.LOAD_SUCCESS)
   
     return pluginInstances
   } catch (error) {
-    debug('Error while loading plugins:', error)
-    throw new Error(`Failed to load plugins: ${error?.message}`)   
+    debug(MESSAGES.PLUGINS.LOAD_ERROR, error)
+    throw new Error(MESSAGES.PLUGINS.LOAD_ERROR_DETAIL(error?.message))   
   }
 }

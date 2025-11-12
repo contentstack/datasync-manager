@@ -10,6 +10,7 @@ import { join } from 'path'
 import { stringify } from 'querystring'
 import { sanitizeUrl } from '@braintree/sanitize-url';
 import { readFileSync } from './util/fs'
+import { MESSAGES } from './util/messages'
 
 const debug = Debug('api')
 let MAX_RETRY_LIMIT
@@ -74,7 +75,7 @@ export const get = (req, RETRY = 1) => {
     }
 
     try {
-      debug(`${options.method.toUpperCase()}: ${options.path}`)
+      debug(MESSAGES.API.REQUEST(options.method, options.path))
       let timeDelay
       let body = ''
       const httpRequest = request(options, (response) => {
@@ -83,12 +84,12 @@ export const get = (req, RETRY = 1) => {
             .setEncoding('utf-8')
             .on('data', (chunk) => body += chunk)
             .on('end', () => {
-              debug(`status: ${response.statusCode}.`)
+              debug(MESSAGES.API.STATUS(response.statusCode))
               if (response.statusCode >= 200 && response.statusCode <= 399) {
                 return resolve(JSON.parse(body))
               } else if (response.statusCode === 429) {
                 timeDelay = Math.pow(Math.SQRT2, RETRY) * RETRY_DELAY_BASE
-                debug(`API rate limit exceeded. Retrying ${options.path} with ${timeDelay} ms delay`)
+                debug(MESSAGES.API.RATE_LIMIT(options.path, timeDelay))
 
                 return setTimeout(() => {
                   return get(req, RETRY)
@@ -98,7 +99,7 @@ export const get = (req, RETRY = 1) => {
               } else if (response.statusCode >= 500) {
                 // retry, with delay
                 timeDelay = Math.pow(Math.SQRT2, RETRY) * RETRY_DELAY_BASE
-                debug(`Retrying ${options.path} with ${timeDelay} ms delay`)
+                debug(MESSAGES.API.RETRY(options.path, timeDelay))
                 RETRY++
 
                 return setTimeout(() => {
@@ -107,7 +108,7 @@ export const get = (req, RETRY = 1) => {
                     .catch(reject)
                 }, timeDelay)
               } else {
-                debug(`Request failed\n${JSON.stringify(options)}`)
+                debug(MESSAGES.API.REQUEST_FAILED(options))
 
                 return reject(body)
               }
@@ -116,19 +117,19 @@ export const get = (req, RETRY = 1) => {
 
       // Set socket timeout to handle socket hang ups
       httpRequest.setTimeout(options.timeout, () => {
-        debug(`Request timeout for ${options.path || 'unknown'}`)
+        debug(MESSAGES.API.REQUEST_TIMEOUT(options.path))
         httpRequest.destroy()
         reject(new Error('Request timeout'))
       })
 
       // Enhanced error handling for socket hang ups and connection resets
       httpRequest.on('error', (error: any) => {
-        debug(`Request error for ${options.path || 'unknown'}: ${error?.message || 'Unknown error'} (${error?.code || 'NO_CODE'})`)
+        debug(MESSAGES.API.REQUEST_ERROR(options.path, error?.message, error?.code))
         
         // Handle socket hang up and connection reset errors with retry
         if ((error?.code === 'ECONNRESET' || error?.message?.includes('socket hang up')) && RETRY <= MAX_RETRY_LIMIT) {
           timeDelay = Math.pow(Math.SQRT2, RETRY) * RETRY_DELAY_BASE
-          debug(`Socket hang up detected. Retrying ${options.path || 'unknown'} with ${timeDelay} ms delay (attempt ${RETRY}/${MAX_RETRY_LIMIT})`)
+          debug(MESSAGES.API.SOCKET_HANGUP_RETRY(options.path, timeDelay, RETRY, MAX_RETRY_LIMIT))
           RETRY++
 
           return setTimeout(() => {

@@ -31,6 +31,9 @@ import {
   logger,
 } from './logger'
 import {
+  MESSAGES,
+} from './messages'
+import {
   saveFilteredItems,
 } from './unprocessible'
 import {
@@ -40,6 +43,9 @@ import {
 import { sanitizePath } from './../plugins/helper';
 
 const debug = Debug('util:index')
+
+// Re-export messages for convenience
+export { MESSAGES } from './messages'
 const formattedAssetType = '_assets'
 const formattedContentType = '_content_types'
 const assetType = 'sys_assets'
@@ -194,8 +200,8 @@ export const formatItems = (items, config) => {
         items[i]._content_type_uid = formattedContentType
         break
       default:
-        logger.error('Item\'s type did not match any expected case!!')
-        logger.error(JSON.stringify(items[i]))
+        logger.error(MESSAGES.UTIL.ITEM_TYPE_MISMATCH)
+        logger.error(MESSAGES.UTIL.ITEM_SERIALIZED(items[i]))
         // remove the element from items[i]s
         items[i].splice(i, 1)
         i--
@@ -216,7 +222,7 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
   const tokenValue = syncResponse[tokenName]
   const contentTypeUids = Object.keys(groupedItems)
   if (contentTypeUids.length === 1 && contentTypeUids[0] === '_assets') {
-    debug(`Only assets found in SYNC API response. Last content type is ${contentTypeUids[0]}`)
+    debug(MESSAGES.UTIL.ONLY_ASSETS(contentTypeUids[0]))
     const items = groupedItems[contentTypeUids[0]]
     // find the last item, add checkpoint to it
     items[items.length - 1]._checkpoint = {
@@ -224,7 +230,7 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
       token: tokenValue,
     }
   } else if (contentTypeUids.length === 1 && contentTypeUids[0] === '_content_types') {
-    debug(`Only content type events found in SYNC API response. Last content type is ${contentTypeUids[0]}`)
+    debug(MESSAGES.UTIL.ONLY_CT_EVENTS(contentTypeUids[0]))
     const items = groupedItems[contentTypeUids[0]]
     // find the last item, add checkpoint to it
     items[items.length - 1]._checkpoint = {
@@ -233,7 +239,7 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
     }
   } else if (contentTypeUids.length === 2 && (contentTypeUids.indexOf('_assets') !== -1 && contentTypeUids.indexOf(
       '_content_types'))) {
-    debug(`Assets & content types found found in SYNC API response. Last content type is ${contentTypeUids[1]}`)
+    debug(MESSAGES.UTIL.ASSETS_AND_CT(contentTypeUids[1]))
     const items = groupedItems[contentTypeUids[1]]
     // find the last item, add checkpoint to it
     items[items.length - 1]._checkpoint = {
@@ -242,7 +248,7 @@ export const markCheckpoint = (groupedItems, syncResponse) => {
     }
   } else {
     const lastContentTypeUid = contentTypeUids[contentTypeUids.length - 1]
-    debug(`Mixed content types found in SYNC API response. Last content type is ${lastContentTypeUid}`)
+    debug(MESSAGES.UTIL.MIXED_CT(lastContentTypeUid))
     const entries = groupedItems[lastContentTypeUid]
     entries[entries.length - 1]._checkpoint = {
       name: tokenName,
@@ -274,7 +280,7 @@ export const getFile = (file, rotate) => {
 
           return resolve(file)
         } else {
-          return reject(new Error(`${file} is not of type file`))
+          return reject(new Error(MESSAGES.UTIL.FILE_NOT_TYPE(file)))
         }
       })
     } else {
@@ -416,7 +422,7 @@ export const normalizePluginPath = (config, plugin, isInternal) => {
   if (plugin.path && typeof plugin.path === 'string' && plugin.path.length > 0) {
     if (isAbsolute(plugin.path)) {
       if (!existsSync(plugin.path)) {
-        throw new Error(`${plugin.path} does not exist!`)
+        throw new Error(MESSAGES.UTIL.PLUGIN_PATH_NOT_EXIST(plugin.path))
       }
 
       return plugin.path
@@ -425,7 +431,7 @@ export const normalizePluginPath = (config, plugin, isInternal) => {
     pluginPath = resolve(join(sanitizePath(config.paths.baseDir), sanitizePath(plugin.name), 'index.js'))
 
     if (!existsSync(pluginPath)) {
-      throw new Error(`${pluginPath} does not exist!`)
+      throw new Error(MESSAGES.UTIL.PLUGIN_PATH_NOT_EXIST(pluginPath))
     }
 
     return pluginPath
@@ -441,7 +447,7 @@ export const normalizePluginPath = (config, plugin, isInternal) => {
 
   pluginPath = resolve(join(sanitizePath(config.paths.plugin), sanitizePath(plugin.name), 'index.js'))
   if (!existsSync(pluginPath)) {
-    throw new Error(`Unable to find plugin: ${JSON.stringify(plugin)}`)
+    throw new Error(MESSAGES.UTIL.UNABLE_TO_FIND_PLUGIN(plugin))
   }
 
   return pluginPath
