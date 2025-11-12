@@ -10,6 +10,7 @@ import { existsSync, readFile as rf, readFileSync as rFS, stat } from 'fs'
 import { mkdirp, mkdirpSync } from 'mkdirp'
 import { dirname } from 'path'
 import writeFileAtomic from 'write-file-atomic'
+import { MESSAGES } from './messages'
 
 export { existsSync }
 const debug = Debug('sm:util-fs')
@@ -21,7 +22,7 @@ const debug = Debug('sm:util-fs')
  * @returns {Promise} Returns a promise
  */
 export const writeFile = (filePath, data) => {
-  debug(`Write file called on ${filePath}`)
+  debug(MESSAGES.FS.WRITE_FILE(filePath))
 
   return new Promise((resolve, reject) => {
     try {
@@ -51,7 +52,7 @@ export const writeFile = (filePath, data) => {
  * @returns {Promise} Returns a promise
  */
 export const readFile = (filePath) => {
-  debug(`Read file called on ${filePath}`)
+  debug(MESSAGES.FS.READ_FILE(filePath))
 
   return new Promise((resolve, reject) => {
     try {
@@ -67,7 +68,7 @@ export const readFile = (filePath) => {
             return resolve(data)
           })
         }
-        const err: any = new Error(`Invalid 'read' operation on file. Expected ${filePath} to be of type 'file'!`)
+        const err: any = new Error(MESSAGES.FS.INVALID_READ(filePath))
         err.code = 'IOORF'
 
         return reject(err)
@@ -84,11 +85,11 @@ export const readFile = (filePath) => {
  * @returns {String} Returns the data that's been read
  */
 export const readFileSync = (filePath) => {
-  debug(`Read file sync called on ${filePath}`)
+  debug(MESSAGES.FS.READ_FILE_SYNC(filePath))
   if (existsSync(filePath)) {
     return rFS(filePath, {encoding: 'utf-8'})
   }
-  const err: any = new Error(`Invalid 'read' operation on file. Expected ${filePath} to be of type 'file'!`)
+  const err: any = new Error(MESSAGES.FS.INVALID_READ(filePath))
   err.code = 'IOORFS'
   throw err
 }
@@ -99,7 +100,7 @@ export const readFileSync = (filePath) => {
  * @returns {String} Returns a promise
  */
 export const mkdir = (path) => {
-  debug(`mkdir called on ${path}`)
+  debug(MESSAGES.FS.MKDIR(path))
   return mkdirp(path)
     .then(() => '')
     .catch(error => Promise.reject(error))

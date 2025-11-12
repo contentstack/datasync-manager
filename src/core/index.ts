@@ -13,6 +13,7 @@ import { get, init as initAPI } from '../api'
 import { existsSync, readFileSync } from '../util/fs'
 import { filterItems, formatItems, groupItems, markCheckpoint } from '../util/index'
 import { logger } from '../util/logger'
+import { MESSAGES } from '../util/messages'
 import { map } from '../util/promise.map'
 import { netConnectivityIssues } from './inet'
 import { Q as Queue } from './q'
@@ -76,7 +77,7 @@ export const init = (contentStore, assetStore) => {
   config = getConfig()
   Q = new Queue(contentStore, assetStore, config)
   initAPI(config.contentstack)
-  debug('Sync core:start invoked')
+  debug(MESSAGES.SYNC_CORE.START)
 
   return new Promise((resolve, reject) => {
     try {
@@ -84,7 +85,7 @@ export const init = (contentStore, assetStore) => {
       const checkPointConfig: ICheckpoint = config.checkpoint
       const paths = config.paths
       const environment = Contentstack.environment || process.env.NODE_ENV || 'development'
-      debug(`Environment: ${environment}`)
+      debug(MESSAGES.SYNC_CORE.ENVIRONMENT(environment))
       const request: any = {
         qs: {
           environment,
@@ -136,9 +137,9 @@ const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any): void => {
 
   // Set sync token if checkpoint is found
   if (checkpoint) {
-    debug("Found sync token in checkpoint file:", checkpoint);
+    debug(MESSAGES.SYNC_CORE.TOKEN_FOUND, checkpoint);
     Contentstack.sync_token = checkpoint.token;
-    debug("Using sync token:", Contentstack.sync_token);
+    debug(MESSAGES.SYNC_CORE.TOKEN_USING, Contentstack.sync_token);
   }
 };
 
@@ -146,13 +147,13 @@ const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any): void => {
 function readHiddenFile(filePath: string) {
   try {
     if (!fs.existsSync(filePath)) {
-      logger.error("File does not exist:", filePath);
+      logger.error(MESSAGES.SYNC_CORE.FILE_NOT_FOUND(filePath));
       return;
     }
     const data = fs.readFileSync(filePath, "utf8"); 
     return JSON.parse(data); 
   } catch (err) {
-    logger.error("Error reading file:", err);
+    logger.error(MESSAGES.SYNC_CORE.FILE_READ_ERROR(err));
     return undefined;
   }
 }
@@ -174,15 +175,15 @@ export const pop = () => {
  */
 export const poke = async () => {
   try {
-    debug('Invoked poke');
-    logger.info('Received \'contentstack sync\' notification')
+    debug(MESSAGES.SYNC_CORE.POKE_INVOKED);
+    logger.info(MESSAGES.SYNC_CORE.POKE_NOTIFICATION)
     if (!flag.lockdown) {
       flag.WQ = true
       return await check()
     }
     return null;
   } catch (error) {
-    debug('Error [poke]', error);
+    debug(MESSAGES.SYNC_CORE.POKE_ERROR, error);
     throw error;
   }
 }
@@ -193,12 +194,12 @@ export const poke = async () => {
  */
 const check = async () => {
   try {
-    debug(`Check called. SQ status is ${flag.SQ} and WQ status is ${flag.WQ}`)
+    debug(MESSAGES.SYNC_CORE.CHECK_CALLED(flag.SQ, flag.WQ))
     if (!flag.SQ && flag.WQ) {
       flag.WQ = false
       flag.SQ = true
       await sync();
-      debug(`Sync completed and SQ flag updated. Cooloff duration is ${config.syncManager.cooloff}`)
+      debug(MESSAGES.SYNC_CORE.CHECK_COMPLETE(config.syncManager.cooloff))
       setTimeout(() => {
         flag.SQ = false
         emitter.emit('check')
@@ -206,11 +207,11 @@ const check = async () => {
     }
   } catch (error) {
     logger.error(error)
-    debug('Error [check]', error);
+    debug(MESSAGES.SYNC_CORE.CHECK_ERROR, error);
     check().then(() => {
-      debug('passed [check] error');
+      debug(MESSAGES.SYNC_CORE.CHECK_RECOVERED);
     }).catch((error) => {
-      debug('failed [check] error', error);
+      debug(MESSAGES.SYNC_CORE.CHECK_FAILED, error);
     });
     throw error;
   }
@@ -221,9 +222,9 @@ const check = async () => {
  */
 const sync = async () => {
   try {
-    debug('started [sync]');
+    debug(MESSAGES.SYNC_CORE.SYNC_STARTED);
     const tokenObject = await getToken();
-    debug('tokenObject [sync]', tokenObject);
+    debug(MESSAGES.SYNC_CORE.SYNC_TOKEN_OBJECT, tokenObject);
     const token: IToken = (tokenObject as IToken)
     const request: any = {
       qs: {
@@ -234,7 +235,7 @@ const sync = async () => {
     }
     return await fire(request)
   } catch (error) {
-    debug('Error [sync]', error);
+    debug(MESSAGES.SYNC_CORE.SYNC_ERROR, error);
     throw error
   }
 }
@@ -243,7 +244,7 @@ const sync = async () => {
  * @description Used to lockdown the 'sync' process in case of exceptions
  */
 export const lock = () => {
-  debug('Contentstack sync locked..')
+  debug(MESSAGES.SYNC_CORE.SYNC_LOCKED)
   flag.lockdown = true
 }
 
@@ -251,7 +252,7 @@ export const lock = () => {
  * @description Used to unlock the 'sync' process in case of errors/exceptions
  */
 export const unlock = (refire?: boolean) => {
-  debug('Contentstack sync unlocked..', refire)
+  debug(MESSAGES.SYNC_CORE.SYNC_UNLOCKED, refire)
   flag.lockdown = false
   if (typeof refire === 'boolean' && refire) {
     flag.WQ = true
@@ -269,7 +270,7 @@ export const unlock = (refire?: boolean) => {
  * @param {Object} req - Contentstack sync API request object
  */
 const fire = (req: IApiRequest) => {
-  debug(`Fire called with: ${JSON.stringify(req)}`)
+  debug(MESSAGES.SYNC_CORE.FIRE_CALLED(req))
   flag.SQ = true
 
   return new Promise((resolve, reject) => {
@@ -279,7 +280,7 @@ const fire = (req: IApiRequest) => {
       delete req.qs.sync_token
       delete req.path
       const syncResponse: ISyncResponse = response
-      debug('Response [fire]', syncResponse.items.length);
+      debug(MESSAGES.SYNC_CORE.FIRE_COMPLETE(syncResponse.items.length));
       if (syncResponse.items.length) {
         return filterItems(syncResponse, config).then(() => {
           if (syncResponse.items.length === 0) {
@@ -319,7 +320,7 @@ const fire = (req: IApiRequest) => {
           return map(contentTypeUids, (uid) => {
 
             return new Promise((mapResolve, mapReject) => {
-              debug(`API called with for content type: ${uid}`)
+              debug(MESSAGES.SYNC_CORE.API_CALL_CT(uid))
               return get({
                 path: `${Contentstack.apis.content_types}${uid}`,
                 qs: {
@@ -344,7 +345,7 @@ const fire = (req: IApiRequest) => {
 
                 return mapReject(err)
               }).catch((error) => {
-                debug('Error [map] fetching content type schema:', error)
+                debug(MESSAGES.SYNC_CORE.ERROR_MAP, error)
                 if (netConnectivityIssues(error)) {
                   flag.SQ = false
                 }
@@ -361,11 +362,11 @@ const fire = (req: IApiRequest) => {
               flag.SQ = false
             }
             // Errorred while fetching content type schema
-            debug('Error [mapResolve]:', error)
+            debug(MESSAGES.SYNC_CORE.ERROR_MAP_RESOLVE, error)
             return reject(error)
           })
         }).catch((processError) => {
-          debug('Error [filterItems]:', processError)
+          debug(MESSAGES.SYNC_CORE.ERROR_FILTER_ITEMS, processError)
           return reject(processError)
         })
       }
@@ -374,7 +375,7 @@ const fire = (req: IApiRequest) => {
         .then(resolve)
         .catch(reject)
     }).catch((error) => {
-      debug('Error [fire]', error);
+      debug(MESSAGES.SYNC_CORE.ERROR_FIRE, error);
       if (netConnectivityIssues(error)) {
         flag.SQ = false
       }
@@ -406,7 +407,7 @@ const postProcess = (req, resp) => {
       req.qs[name] = resp[name]
 
       if (flag.lockdown) {
-        logger.log('Checkpoint: lockdown has been invoked')
+        logger.log(MESSAGES.SYNC_CORE.CHECKPOINT_LOCKDOWN)
         flag.requestCache = {
           params: req,
           reject,
@@ -419,7 +420,7 @@ const postProcess = (req, resp) => {
           return resolve('')
         }
 
-        debug(`Re-Fire called with: ${JSON.stringify(req)}`)
+        debug(MESSAGES.SYNC_CORE.REFIRE_CALLED(req))
         return fire(req)
           .then(resolve)
           .catch(reject);

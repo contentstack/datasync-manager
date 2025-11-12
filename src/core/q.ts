@@ -10,6 +10,7 @@ import { cloneDeep } from 'lodash'
 import { lock, unlock } from '.'
 import { filterUnwantedKeys, getSchema } from '../util/index'
 import { logger } from '../util/logger'
+import { MESSAGES } from '../util/messages'
 import { series } from '../util/series'
 import { saveFailedItems } from '../util/unprocessible'
 import { load } from './plugins'
@@ -54,7 +55,7 @@ export class Q extends EventEmitter {
       this.on('push', this.push)
       this.on('unshift', this.unshift)
       instance = this
-      debug('Core \'Q\' constructor initiated')
+      debug(MESSAGES.QUEUE.CONSTRUCTOR)
     }
 
     return instance
@@ -66,7 +67,7 @@ export class Q extends EventEmitter {
       this.iLock = true
       lock()
     }
-    debug(`Content type '${data._content_type_uid}' received for '${data._type}'`)
+    debug(MESSAGES.QUEUE.CONTENT_TYPE_RECEIVED(data._content_type_uid, data._type))
     this.emit('next')
   }
 
@@ -80,7 +81,7 @@ export class Q extends EventEmitter {
       this.iLock = true
       lock()
     }
-    debug(`Content type '${data._content_type_uid}' received for '${data._type}'`)
+    debug(MESSAGES.QUEUE.CONTENT_TYPE_RECEIVED(data._content_type_uid, data._type))
     this.emit('next')
   }
 
@@ -93,7 +94,7 @@ export class Q extends EventEmitter {
     try {
       notify('error', obj)
       logger.error(obj)
-      debug(`Error handler called with ${JSON.stringify(obj)}`)
+      debug(MESSAGES.QUEUE.ERROR_HANDLER_CALLED(obj))
       if (typeof obj.checkpoint !== 'undefined') {
         await saveToken(obj.checkpoint.name, obj.checkpoint.token)
       }
@@ -102,7 +103,7 @@ export class Q extends EventEmitter {
       this.emit('next')
     } catch (error) {
       // probably, the context could change
-      logger.error('Something went wrong in errorHandler!')
+      logger.error(MESSAGES.QUEUE.ERROR_IN_HANDLER)
       logger.error(error)
       that.inProgress = false
       that.emit('next')
@@ -123,7 +124,7 @@ export class Q extends EventEmitter {
         unlock(true)
         this.iLock = false
       }
-      debug(`Calling 'next'. In progress status is ${this.inProgress}, and Q length is ${this.q.length}`)
+      debug(MESSAGES.QUEUE.NEXT_CALLED(this.inProgress, this.q.length))
       if (!this.inProgress && this.q.length) {
         this.inProgress = true
         const item = this.q.shift()
@@ -167,7 +168,7 @@ export class Q extends EventEmitter {
         checkpoint = data._checkpoint
         delete data._checkpoint
       }
-      debug(`Executing: ${JSON.stringify(data)}`)
+      debug(MESSAGES.QUEUE.EXECUTING(data))
       const beforeSyncInternalPlugins = []
       // re-initializing everytime with const.. avoids memory leaks
       const beforeSyncPlugins = []
@@ -214,16 +215,16 @@ export class Q extends EventEmitter {
 
         await Promise.all(beforeSyncPlugins)
       }
-      debug('Before action plugins executed successfully!')
+      debug(MESSAGES.QUEUE.BEFORE_PLUGINS)
       await this.contentStore[action](data)
 
-      debug(`Completed '${action}' on connector successfully!`)
+      debug(MESSAGES.QUEUE.ACTION_COMPLETE(action))
       if (typeof schema !== 'undefined') {
         if (branch) schema.branch = branch
         await this.contentStore.updateContentType(schema)
       }
 
-      debug('Connector instance called successfully!')
+      debug(MESSAGES.QUEUE.CONNECTOR_CALLED)
       if (this.syncManager.serializePlugins) {
         this.pluginInstances.external.afterSync.forEach((method) => {
           afterSyncPlugins.push(() => method(action, transformedData, transformedSchema))
@@ -242,7 +243,7 @@ export class Q extends EventEmitter {
         await saveToken(checkpoint.name, checkpoint.token)
       }
 
-      debug('After action plugins executed successfully!')
+      debug(MESSAGES.QUEUE.AFTER_PLUGINS)
       logger.log(
         `${type}: { content_type: '${contentType}', ${
             (locale) ? `locale: '${locale}',` : ''
