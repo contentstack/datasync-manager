@@ -263,6 +263,7 @@ export const unlock = (refire?: boolean) => {
     }
   }
   check()
+  return Promise.resolve()
 }
 
 /**
