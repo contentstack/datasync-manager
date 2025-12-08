@@ -227,7 +227,10 @@ export const start = (config: IConfig = {}): Promise<{}> => {
         pinger()
 
         return listener.start(appConfig)
-      }).then(() => {
+      }).then((webhookServer) => {
+        // Set up webhook listener monitoring and fallback mechanism
+        setupWebhookMonitoring(webhookServer)
+        
         logger.info(MESSAGES.INDEX.SYNC_UTILITY_STARTED)
 
         return resolve('')
@@ -255,3 +258,74 @@ notifications
 .on('unpublish', debugNotifications('unpublish'))
 .on('delete', debugNotifications('delete'))
 .on('error', debugNotifications('error'))
+
+/**
+ * Set up webhook listener monitoring and fallback polling mechanism
+ * @param {object} webhookServer The webhook server instance
+ */
+function setupWebhookMonitoring(webhookServer) {
+  const FALLBACK_POLL_INTERVAL = 60000 // 1 minute fallback polling
+  let fallbackTimer: NodeJS.Timeout | null = null
+  let webhookHealthy = true
+  
+  debug('Webhook monitoring initialized. Server:', !!webhookServer, 'Healthy:', webhookHealthy)
+  
+  
+  // Start fallback polling when webhook is unhealthy
+  const startFallbackPolling = () => {
+    if (fallbackTimer) return // Already running
+    
+    logger.info(`Starting fallback polling every ${FALLBACK_POLL_INTERVAL}ms`)
+    fallbackTimer = setInterval(() => {
+      debug('Fallback polling: triggering sync check')
+      try {
+        poke().catch((error) => {
+          debug('Fallback polling error:', error)
+        })
+      } catch (error) {
+        debug('Fallback polling exception:', error)
+      }
+    }, FALLBACK_POLL_INTERVAL)
+  }
+  
+  // Stop fallback polling when webhook is healthy
+  const stopFallbackPolling = () => {
+    if (fallbackTimer) {
+      clearInterval(fallbackTimer)
+      fallbackTimer = null
+      logger.info('Fallback polling stopped')
+    }
+  }
+  
+  // Webhook activity is tracked via events, no need to wrap poke function
+  
+  
+  // Handle process cleanup
+  const cleanup = () => {
+    if (fallbackTimer) {
+      clearInterval(fallbackTimer)
+      fallbackTimer = null
+    }
+  }
+  
+  process.on('SIGINT', cleanup)
+  process.on('SIGTERM', cleanup)
+  process.on('exit', cleanup)
+  
+  // Handle webhook server events if available
+  if (listener.getEventEmitter) {
+    const webhookEmitter = listener.getEventEmitter()
+    
+    webhookEmitter.on('server-error', (error) => {
+      logger.warn('Webhook server error detected:', error.message)
+      webhookHealthy = false
+      startFallbackPolling()
+    })
+    
+    webhookEmitter.on('reconnect-success', () => {
+      logger.info('Webhook server reconnected successfully')
+      webhookHealthy = true
+      stopFallbackPolling()
+    })
+  }
+}
