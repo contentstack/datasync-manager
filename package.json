@@ -1,7 +1,7 @@
 {
   "name": "@contentstack/datasync-manager",
   "author": "Contentstack LLC <support@contentstack.com>",
-  "version": "2.2.0",
+  "version": "2.3.0",
   "description": "The primary module of Contentstack DataSync. Syncs Contentstack data with your server using Contentstack Sync API",
   "main": "dist/index.js",
   "dependencies": {
@@ -9,8 +9,8 @@
     "debug": "^4.4.1",
     "dns-socket": "^4.2.2",
     "lodash": "^4.17.21",
-    "marked": "^4.3.0",
-    "write-file-atomic": "4.0.2"
+    "marked": "^17.0.1",
+    "write-file-atomic": "7.0.0"
   },
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^9.0.2",
