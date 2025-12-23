@@ -9,7 +9,7 @@
     "debug": "^4.4.1",
     "dns-socket": "^4.2.2",
     "lodash": "^4.17.21",
-    "marked": "^4.3.0",
+    "marked": "^17.0.1",
     "write-file-atomic": "4.0.2"
   },
   "devDependencies": {
