@@ -8,7 +8,7 @@
     "@braintree/sanitize-url": "^7.1.1",
     "debug": "^4.4.1",
     "dns-socket": "^4.2.2",
-    "lodash": "^4.17.21",
+    "lodash": "^4.17.23",
     "marked": "^17.0.1",
     "write-file-atomic": "7.0.0"
   },
