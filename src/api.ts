@@ -175,16 +175,23 @@ export const get = (req, RETRY = 1) => {
                 try {
                   const errorBody = JSON.parse(body)
                   
-                  // Check for Error 141 - Invalid sync_token
-                  if (errorBody.error_code === 141 && 
-                      errorBody.errors && 
-                      errorBody.errors.sync_token) {
+                  // Validate error response structure and check for Error 141
+                  if (errorBody && typeof errorBody === 'object' && errorBody.error_code === 141 &&  errorBody.errors &&  typeof errorBody.errors === 'object' && errorBody.errors.sync_token) {
                     
                     debug('Error 141 detected: Invalid sync_token. Triggering auto-recovery with init=true')
                     
+                    // Ensure req.qs exists before modifying
+                    if (!req.qs) {
+                      req.qs = {}
+                    }
+                    
                     // Clear the invalid token parameters and reinitialize
-                    delete req.qs.sync_token
-                    delete req.qs.pagination_token
+                    if (req.qs.sync_token) {
+                      delete req.qs.sync_token
+                    }
+                    if (req.qs.pagination_token) {
+                      delete req.qs.pagination_token
+                    }
                     req.qs.init = true
                     
                     // Mark this as a recovery attempt to prevent infinite loops
@@ -199,7 +206,8 @@ export const get = (req, RETRY = 1) => {
                     }
                   }
                 } catch (parseError) {
-                  // Body is not JSON, continue with normal error handling
+                  // Body is not JSON or parsing failed, continue with normal error handling
+                  debug('Error response parsing failed:', parseError)
                 }
                 
                 debug(MESSAGES.API.REQUEST_FAILED(options))
