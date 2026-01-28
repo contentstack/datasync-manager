@@ -171,8 +171,46 @@ export const get = (req, RETRY = 1) => {
                     .catch(reject)
                 }, timeDelay)
               } else {
+                // Enhanced error handling for Error 141 (Invalid sync_token)
+                try {
+                  const errorBody = JSON.parse(body)
+                  
+                  // Validate error response structure and check for Error 141
+                  if (errorBody && typeof errorBody === 'object' && errorBody.error_code === 141 &&  errorBody.errors &&  typeof errorBody.errors === 'object' && errorBody.errors.sync_token) {
+                    
+                    debug('Error 141 detected: Invalid sync_token. Triggering auto-recovery with init=true')
+                    
+                    // Ensure req.qs exists before modifying
+                    if (!req.qs) {
+                      req.qs = {}
+                    }
+                    
+                    // Clear the invalid token parameters and reinitialize
+                    if (req.qs.sync_token) {
+                      delete req.qs.sync_token
+                    }
+                    if (req.qs.pagination_token) {
+                      delete req.qs.pagination_token
+                    }
+                    req.qs.init = true
+                    
+                    // Mark this as a recovery attempt to prevent infinite loops
+                    if (!req._error141Recovery) {
+                      req._error141Recovery = true
+                      debug('Retrying with init=true after Error 141')
+                      return get(req, 1) // Reset retry counter for fresh start
+                        .then(resolve)
+                        .catch(reject)
+                    } else {
+                      debug('Error 141 recovery already attempted, failing to prevent infinite loop')
+                    }
+                  }
+                } catch (parseError) {
+                  // Body is not JSON or parsing failed, continue with normal error handling
+                  debug('Error response parsing failed:', parseError)
+                }
+                
                 debug(MESSAGES.API.REQUEST_FAILED(options))
-
                 return reject(body)
               }
             })
