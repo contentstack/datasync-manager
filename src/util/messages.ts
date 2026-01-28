@@ -41,6 +41,9 @@ export const MESSAGES = {
       `Request error for ${path || 'unknown'}: ${message || 'Unknown error'} (${code || 'NO_CODE'})`,
     SOCKET_HANGUP_RETRY: (path: string, delay: number, attempt: number, max: number) => 
       `Socket hang up detected. Retrying ${path || 'unknown'} with ${delay} ms delay (attempt ${attempt}/${max})`,
+    ERROR_141_DETECTED: 'Error 141: Invalid sync_token detected. Token is no longer valid.',
+    ERROR_141_RECOVERY: 'Attempting automatic recovery with init=true to get fresh token.',
+    ERROR_141_RETRY: 'Retrying sync operation with fresh initialization after Error 141.',
   },
 
   // Plugin messages (plugins.ts)

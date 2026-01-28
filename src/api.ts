@@ -171,8 +171,38 @@ export const get = (req, RETRY = 1) => {
                     .catch(reject)
                 }, timeDelay)
               } else {
+                // Enhanced error handling for Error 141 (Invalid sync_token)
+                try {
+                  const errorBody = JSON.parse(body)
+                  
+                  // Check for Error 141 - Invalid sync_token
+                  if (errorBody.error_code === 141 && 
+                      errorBody.errors && 
+                      errorBody.errors.sync_token) {
+                    
+                    debug('Error 141 detected: Invalid sync_token. Triggering auto-recovery with init=true')
+                    
+                    // Clear the invalid token parameters and reinitialize
+                    delete req.qs.sync_token
+                    delete req.qs.pagination_token
+                    req.qs.init = true
+                    
+                    // Mark this as a recovery attempt to prevent infinite loops
+                    if (!req._error141Recovery) {
+                      req._error141Recovery = true
+                      debug('Retrying with init=true after Error 141')
+                      return get(req, 1) // Reset retry counter for fresh start
+                        .then(resolve)
+                        .catch(reject)
+                    } else {
+                      debug('Error 141 recovery already attempted, failing to prevent infinite loop')
+                    }
+                  }
+                } catch (parseError) {
+                  // Body is not JSON, continue with normal error handling
+                }
+                
                 debug(MESSAGES.API.REQUEST_FAILED(options))
-
                 return reject(body)
               }
             })
