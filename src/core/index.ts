@@ -376,6 +376,21 @@ const fire = (req: IApiRequest) => {
         .catch(reject)
     }).catch((error) => {
       debug(MESSAGES.SYNC_CORE.ERROR_FIRE, error);
+      
+      // Check if this is an Error 141 (invalid token) - enhanced handling
+      try {
+        const parsedError = typeof error === 'string' ? JSON.parse(error) : error
+        if (parsedError.error_code === 141) {
+          logger.error('Error 141: Invalid sync_token detected. Token has been reset.')
+          logger.info('System will automatically re-initialize with fresh token on next sync.')
+          // The error has already been handled in api.ts with init=true
+          // Just ensure we don't keep retrying with the bad token
+          flag.SQ = false
+        }
+      } catch (parseError) {
+        // Not a JSON error or not Error 141, continue with normal handling
+      }
+      
       if (netConnectivityIssues(error)) {
         flag.SQ = false
       }
