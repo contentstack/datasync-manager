@@ -60,7 +60,7 @@ import { MESSAGES } from './util/messages'
 const debug = Debug('api')
 let MAX_RETRY_LIMIT
 let RETRY_DELAY_BASE = 200 // Default base delay in milliseconds
-let TIMEOUT = 30000 // Default timeout in milliseconds
+let TIMEOUT = 60000 // Increased from 30000 to 60000 (60 seconds) for large stack syncs
 let Contentstack
 
 /**
