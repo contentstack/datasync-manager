@@ -184,7 +184,13 @@ const checkReferences = (schema, key) => {
 }
 
 exports.buildAssetObject = (asset, locale, entry_uid, content_type_uid) => {
-  const { contentstack } = getConfig()
+  // Lazy-load getConfig at runtime to avoid circular dependency issues
+  const indexModule = require('../index')
+  const getConfigFn = indexModule.getConfig
+  if (typeof getConfigFn !== 'function') {
+    throw new Error('getConfig is not available in datasync-manager index module')
+  }
+  const { contentstack } = getConfigFn()
   // add locale key to inside of asset
   asset.locale = locale
   const regexp = new RegExp(contentstack.regexp.asset_pattern.url, contentstack.regexp.asset_pattern.options)

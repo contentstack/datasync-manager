@@ -4,7 +4,6 @@
  * MIT Licensed
  */
 import * as fs from 'fs'
-import * as path from 'path'
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep, remove } from 'lodash'
@@ -18,7 +17,6 @@ import { map } from '../util/promise.map'
 import { netConnectivityIssues } from './inet'
 import { Q as Queue } from './q'
 import { getToken, saveCheckpoint } from './token-management'
-import { sanitizePath } from '../plugins/helper'
 
 interface IQueryString {
   init?: true,
@@ -123,17 +121,8 @@ export const init = (contentStore, assetStore) => {
 const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any): void => {
   if (!checkPointConfig?.enabled) return;
 
-  // Try reading checkpoint from primary path
+  // Read checkpoint from configured path only
   let checkpoint = readHiddenFile(paths.checkpoint);
-
-  // Fallback to filePath in config if not found
-  if (!checkpoint) {
-    const fallbackPath = path.join(
-      sanitizePath(__dirname),
-      sanitizePath(checkPointConfig.filePath || ".checkpoint")
-    );
-    checkpoint = readHiddenFile(fallbackPath);
-  }
 
   // Set sync token if checkpoint is found
   if (checkpoint) {
@@ -377,15 +366,59 @@ const fire = (req: IApiRequest) => {
     }).catch((error) => {
       debug(MESSAGES.SYNC_CORE.ERROR_FIRE, error);
       
-      // Check if this is an Error 141 (invalid token) - enhanced handling
+      // Check if this is an Error 141 (invalid token) - enhanced handling with smart checkpoint update
       try {
         const parsedError = typeof error === 'string' ? JSON.parse(error) : error
         if (parsedError.error_code === 141) {
-          logger.error('Error 141: Invalid sync_token detected. Token has been reset.')
-          logger.info('System will automatically re-initialize with fresh token on next sync.')
-          // The error has already been handled in api.ts with init=true
-          // Just ensure we don't keep retrying with the bad token
+          logger.error('Error 141: Invalid sync_token detected. Attempting recovery.')
+          
+          // Update checkpoint with recovery metadata
+          const checkpointPath = config.paths.checkpoint
+          let currentCheckpoint: any
+          try {
+            currentCheckpoint = JSON.parse(fs.readFileSync(checkpointPath, 'utf8'))
+          } catch (readErr) {
+            // Checkpoint doesn't exist or is invalid, continue
+          }
+          
+          const recoveryCheckpoint = {
+            name: 'sync_token',
+            timestamp: new Date().toISOString(),
+            token: null,  // Force init=true on next restart
+            recovery_mode: true,
+            error_code: 141,
+            error_message: 'Invalid sync_token - forcing fresh sync',
+            error_at: new Date().toISOString(),
+            previous_token: currentCheckpoint?.token,
+            previous_timestamp: currentCheckpoint?.timestamp,
+            recovery_count: (currentCheckpoint?.recovery_count || 0) + 1
+          }
+          
+          try {
+            fs.writeFileSync(checkpointPath, JSON.stringify(recoveryCheckpoint, null, 2))
+            logger.info(`Checkpoint updated to force fresh sync on restart. Recovery count: ${recoveryCheckpoint.recovery_count}`)
+            if (recoveryCheckpoint.recovery_count > 3) {
+              logger.warn(`⚠️ Error 141 occurred ${recoveryCheckpoint.recovery_count} times. Possible token expiry or API issues.`)
+            }
+          } catch (updateError) {
+            logger.error('Failed to update checkpoint:', updateError)
+            // Fallback: try to delete checkpoint
+            try {
+              if (fs.existsSync(checkpointPath)) {
+                fs.unlinkSync(checkpointPath)
+                logger.info('Deleted checkpoint as fallback.')
+              }
+            } catch (deleteError) {
+              logger.error('Failed to delete checkpoint:', deleteError)
+            }
+          }
+          
+          // Clear tokens from memory
+          delete Contentstack.sync_token
+          delete Contentstack.pagination_token
           flag.SQ = false
+          
+          logger.info('System will automatically re-initialize with fresh token on next sync.')
         }
       } catch (parseError) {
         // Not a JSON error or not Error 141, continue with normal handling
