@@ -88,6 +88,8 @@ export const MESSAGES = {
     ERROR_FIRE: 'Error during fire operation.',
     REFIRE_CALLED: (req: any) => `Re-fire operation triggered with: ${JSON.stringify(req)}`,
     CHECKPOINT_LOCKDOWN: 'Checkpoint: lockdown has been invoked',
+    OUTDATED_SYNC_TOKEN: 'Sync token is outdated and no longer accepted by the API. Recovering...',
+    SYNC_TOKEN_RENEWAL: 'Renewing sync token. This typically happens after network interruptions or long inactivity.',
   },
 
   // Main index messages (index.ts)
