@@ -186,14 +186,13 @@ export const get = (req, RETRY = 1) => {
                     }
                     
                     // Clear the invalid token parameters and reinitialize
-                    if (req.qs.sync_token) {
-                      delete req.qs.sync_token
-                    }
-                    if (req.qs.pagination_token) {
-                      delete req.qs.pagination_token
-                    }
+                    delete req.qs.sync_token
+                    delete req.qs.pagination_token
                     req.qs.init = true
-                    
+                    // Reset req.path so it gets rebuilt from Contentstack.apis.sync
+                    // (req.path has the old query string baked in from line 109)
+                    delete req.path
+
                     // Mark this as a recovery attempt to prevent infinite loops
                     if (!req._error141Recovery) {
                       req._error141Recovery = true

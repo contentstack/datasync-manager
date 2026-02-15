@@ -365,69 +365,24 @@ const fire = (req: IApiRequest) => {
         .catch(reject)
     }).catch((error) => {
       debug(MESSAGES.SYNC_CORE.ERROR_FIRE, error);
-      
-      // Check if this is an Error 141 (invalid token) - enhanced handling with smart checkpoint update
+
+      // Check if this is an Error 141 (outdated token)
+      // Note: api.ts already handles recovery by retrying with init=true
       try {
         const parsedError = typeof error === 'string' ? JSON.parse(error) : error
         if (parsedError.error_code === 141) {
-          logger.error('Error 141: Invalid sync_token detected. Attempting recovery.')
-          
-          // Update checkpoint with recovery metadata
-          const checkpointPath = config.paths.checkpoint
-          let currentCheckpoint: any
-          try {
-            currentCheckpoint = JSON.parse(fs.readFileSync(checkpointPath, 'utf8'))
-          } catch (readErr) {
-            // Checkpoint doesn't exist or is invalid, continue
-          }
-          
-          const recoveryCheckpoint = {
-            name: 'sync_token',
-            timestamp: new Date().toISOString(),
-            token: null,  // Force init=true on next restart
-            recovery_mode: true,
-            error_code: 141,
-            error_message: 'Invalid sync_token - forcing fresh sync',
-            error_at: new Date().toISOString(),
-            previous_token: currentCheckpoint?.token,
-            previous_timestamp: currentCheckpoint?.timestamp,
-            recovery_count: (currentCheckpoint?.recovery_count || 0) + 1
-          }
-          
-          try {
-            fs.writeFileSync(checkpointPath, JSON.stringify(recoveryCheckpoint, null, 2))
-            logger.info(`Checkpoint updated to force fresh sync on restart. Recovery count: ${recoveryCheckpoint.recovery_count}`)
-            if (recoveryCheckpoint.recovery_count > 3) {
-              logger.warn(`⚠️ Error 141 occurred ${recoveryCheckpoint.recovery_count} times. Possible token expiry or API issues.`)
-            }
-          } catch (updateError) {
-            logger.error('Failed to update checkpoint:', updateError)
-            // Fallback: try to delete checkpoint
-            try {
-              if (fs.existsSync(checkpointPath)) {
-                fs.unlinkSync(checkpointPath)
-                logger.info('Deleted checkpoint as fallback.')
-              }
-            } catch (deleteError) {
-              logger.error('Failed to delete checkpoint:', deleteError)
-            }
-          }
-          
-          // Clear tokens from memory
-          delete Contentstack.sync_token
-          delete Contentstack.pagination_token
+          logger.error(MESSAGES.SYNC_CORE.OUTDATED_SYNC_TOKEN)
+          logger.info(MESSAGES.SYNC_CORE.SYNC_TOKEN_RENEWAL)
+          // Reset flag so next webhook notification can trigger a fresh sync
           flag.SQ = false
-          
-          logger.info('System will automatically re-initialize with fresh token on next sync.')
         }
       } catch (parseError) {
         // Not a JSON error or not Error 141, continue with normal handling
       }
-      
+
       if (netConnectivityIssues(error)) {
         flag.SQ = false
       }
-      // do something
 
       return reject(error)
     })
