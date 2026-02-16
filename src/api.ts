@@ -197,9 +197,15 @@ export const get = (req, RETRY = 1) => {
                     if (!req._error141Recovery) {
                       req._error141Recovery = true
                       debug('Retrying with init=true after Error 141')
-                      return get(req, 1) // Reset retry counter for fresh start
-                        .then(resolve)
-                        .catch(reject)
+                      // Use delayed retry
+                      timeDelay = Math.pow(Math.SQRT2, RETRY) * RETRY_DELAY_BASE
+                      debug(`Error 141 recovery: waiting ${timeDelay}ms before retry`)
+                      
+                      return setTimeout(() => {
+                        return get(req, RETRY)
+                          .then(resolve)
+                          .catch(reject)
+                      }, timeDelay)
                     } else {
                       debug('Error 141 recovery already attempted, failing to prevent infinite loop')
                     }
@@ -222,14 +228,30 @@ export const get = (req, RETRY = 1) => {
         reject(new Error('Request timeout'))
       })
 
-      // Enhanced error handling for socket hang ups and connection resets
+      // Enhanced error handling for network and connection errors
       httpRequest.on('error', (error: any) => {
         debug(MESSAGES.API.REQUEST_ERROR(options.path, error?.message, error?.code))
         
-        // Handle socket hang up and connection reset errors with retry
-        if ((error?.code === 'ECONNRESET' || error?.message?.includes('socket hang up')) && RETRY <= MAX_RETRY_LIMIT) {
+        // List of retryable network error codes
+        const retryableErrors = [
+          'ECONNRESET',    // Connection reset by peer
+          'ETIMEDOUT',     // Connection timeout
+          'ECONNREFUSED',  // Connection refused
+          'ENOTFOUND',     // DNS lookup failed
+          'ENETUNREACH',   // Network unreachable
+          'EAI_AGAIN',     // DNS lookup timeout
+          'EPIPE',         // Broken pipe
+          'EHOSTUNREACH',  // Host unreachable
+        ]
+        
+        // Check if error is retryable
+        const isRetryable = retryableErrors.includes(error?.code) || 
+                          error?.message?.includes('socket hang up') ||
+                          error?.message?.includes('ETIMEDOUT')
+        
+        if (isRetryable && RETRY <= MAX_RETRY_LIMIT) {
           timeDelay = Math.pow(Math.SQRT2, RETRY) * RETRY_DELAY_BASE
-          debug(MESSAGES.API.SOCKET_HANGUP_RETRY(options.path, timeDelay, RETRY, MAX_RETRY_LIMIT))
+          debug(`Network error ${error?.code || error?.message}: waiting ${timeDelay}ms before retry ${RETRY}/${MAX_RETRY_LIMIT}`)
           RETRY++
 
           return setTimeout(() => {

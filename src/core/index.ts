@@ -375,6 +375,8 @@ const fire = (req: IApiRequest) => {
           logger.info(MESSAGES.SYNC_CORE.SYNC_TOKEN_RENEWAL)
           // Reset flag so next webhook notification can trigger a fresh sync
           flag.SQ = false
+          // Reset sync_token so next sync starts fresh with init=true
+          Contentstack.sync_token = undefined
         }
       } catch (parseError) {
         // Not a JSON error or not Error 141, continue with normal handling
