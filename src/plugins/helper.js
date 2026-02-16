@@ -1,5 +1,4 @@
 const { cloneDeep } = require('lodash')
-const { getConfig } = require('../index')
 
 
 const fieldType = {
@@ -184,6 +183,9 @@ const checkReferences = (schema, key) => {
 }
 
 exports.buildAssetObject = (asset, locale, entry_uid, content_type_uid) => {
+  // Lazy-load getConfig at runtime to avoid circular dependency
+  // (helper.js is loaded during plugin init before index.ts finishes exporting)
+  const { getConfig } = require('../index')
   const { contentstack } = getConfig()
   // add locale key to inside of asset
   asset.locale = locale

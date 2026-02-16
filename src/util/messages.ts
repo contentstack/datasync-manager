@@ -41,6 +41,9 @@ export const MESSAGES = {
       `Request error for ${path || 'unknown'}: ${message || 'Unknown error'} (${code || 'NO_CODE'})`,
     SOCKET_HANGUP_RETRY: (path: string, delay: number, attempt: number, max: number) => 
       `Socket hang up detected. Retrying ${path || 'unknown'} with ${delay} ms delay (attempt ${attempt}/${max})`,
+    ERROR_141_DETECTED: 'Error 141: Invalid sync_token detected. Token is no longer valid.',
+    ERROR_141_RECOVERY: 'Attempting automatic recovery with init=true to get fresh token.',
+    ERROR_141_RETRY: 'Retrying sync operation with fresh initialization after Error 141.',
   },
 
   // Plugin messages (plugins.ts)
@@ -85,6 +88,8 @@ export const MESSAGES = {
     ERROR_FIRE: 'Error during fire operation.',
     REFIRE_CALLED: (req: any) => `Re-fire operation triggered with: ${JSON.stringify(req)}`,
     CHECKPOINT_LOCKDOWN: 'Checkpoint: lockdown has been invoked',
+    OUTDATED_SYNC_TOKEN: 'Sync token is outdated and no longer accepted by the API. Recovering...',
+    SYNC_TOKEN_RENEWAL: 'Renewing sync token. This typically happens after network interruptions or long inactivity.',
   },
 
   // Main index messages (index.ts)
