@@ -4,7 +4,6 @@
  * MIT Licensed
  */
 import * as fs from 'fs'
-import * as path from 'path'
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep, remove } from 'lodash'
@@ -18,7 +17,6 @@ import { map } from '../util/promise.map'
 import { netConnectivityIssues } from './inet'
 import { Q as Queue } from './q'
 import { getToken, saveCheckpoint } from './token-management'
-import { sanitizePath } from '../plugins/helper'
 
 interface IQueryString {
   init?: true,
@@ -123,17 +121,8 @@ export const init = (contentStore, assetStore) => {
 const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any): void => {
   if (!checkPointConfig?.enabled) return;
 
-  // Try reading checkpoint from primary path
+  // Read checkpoint from configured path only
   let checkpoint = readHiddenFile(paths.checkpoint);
-
-  // Fallback to filePath in config if not found
-  if (!checkpoint) {
-    const fallbackPath = path.join(
-      sanitizePath(__dirname),
-      sanitizePath(checkPointConfig.filePath || ".checkpoint")
-    );
-    checkpoint = readHiddenFile(fallbackPath);
-  }
 
   // Set sync token if checkpoint is found
   if (checkpoint) {
@@ -376,25 +365,26 @@ const fire = (req: IApiRequest) => {
         .catch(reject)
     }).catch((error) => {
       debug(MESSAGES.SYNC_CORE.ERROR_FIRE, error);
-      
-      // Check if this is an Error 141 (invalid token) - enhanced handling
+
+      // Check if this is an Error 141 (outdated token)
+      // Note: api.ts already handles recovery by retrying with init=true
       try {
         const parsedError = typeof error === 'string' ? JSON.parse(error) : error
         if (parsedError.error_code === 141) {
-          logger.error('Error 141: Invalid sync_token detected. Token has been reset.')
-          logger.info('System will automatically re-initialize with fresh token on next sync.')
-          // The error has already been handled in api.ts with init=true
-          // Just ensure we don't keep retrying with the bad token
+          logger.error(MESSAGES.SYNC_CORE.OUTDATED_SYNC_TOKEN)
+          logger.info(MESSAGES.SYNC_CORE.SYNC_TOKEN_RENEWAL)
+          // Reset flag so next webhook notification can trigger a fresh sync
           flag.SQ = false
+          // Reset sync_token so next sync starts fresh with init=true
+          Contentstack.sync_token = undefined
         }
       } catch (parseError) {
         // Not a JSON error or not Error 141, continue with normal handling
       }
-      
+
       if (netConnectivityIssues(error)) {
         flag.SQ = false
       }
-      // do something
 
       return reject(error)
     })
