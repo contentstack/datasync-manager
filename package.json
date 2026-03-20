@@ -10,7 +10,7 @@
     "dns-socket": "^4.2.2",
     "lodash": "^4.17.21",
     "marked": "^17.0.1",
-    "write-file-atomic": "7.0.0"
+    "write-file-atomic": "7.0.1"
   },
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^9.0.2",
