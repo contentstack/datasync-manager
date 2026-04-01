@@ -1,0 +1,32 @@
+---
+description: Jest tests, nock mocks, PLUGIN_PATH, dummy fixtures
+globs: "{test/**/*.ts,jest.config.js}"
+alwaysApply: false
+---
+
+# Testing
+
+## Runner and config
+
+- **Jest** with **ts-jest** (`jest.config.js`): Node environment, `test/**/*.ts` + `test/**/*.js`, verbose, coverage to `coverage/`, HTML reporter.
+- **`test/dummy/`** is **ignored** as test paths (`testPathIgnorePatterns`) — holds plugins, API response fixtures, `config.ts`, connector mocks.
+
+## Running tests
+
+- **`npm test`** runs: `PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose`  
+  - `PLUGIN_PATH` points at dummy plugins under `test/dummy/plugins/`.
+
+## Structure
+
+- **`test/index.ts`**, **`test/api.ts`**, **`test/core/*.ts`** — suites exercising sync flows with **nock** against a fake host (e.g. `https://api.localhost.io` from dummy config).
+- **`test/util/`** — shared test helpers.
+- **`test/dummy/api-responses/`** — canned JSON-like payloads for publish/unpublish/delete, references, markdown, etc.
+
+## Live stack / env
+
+- Default tests do **not** require real Contentstack credentials; they use dummy `apiKey` / `deliveryToken` in `test/dummy/config.ts`.
+- If you add true integration tests later, document required env vars (e.g. stack token, host) in the test file and in `skills/testing/SKILL.md`.
+
+## Naming
+
+- No strict `*.spec.ts` convention — files are descriptive (`sync.ts`, `token-management.ts`, etc.) under `test/`.
