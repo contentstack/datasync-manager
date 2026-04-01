@@ -7,8 +7,8 @@ alwaysApply: false
 
 ## Branches
 
-- Default release branch per `.releaserc`: **`master`** (semantic-release publishes from there).
-- Use feature branches and open PRs against the team’s usual base branch (commonly `master`).
+- Use **feature branches** for new work; open pull requests against **`development`** to integrate changes.
+- For a **release**, open a pull request from **`development`** into **`master`**. Releases to npm are driven from **`master`**.
 
 ## Running checks locally
 
@@ -29,7 +29,6 @@ alwaysApply: false
 - Run **`npm test`** before pushing when touching runtime logic.
 - If you add or change **secrets or tokens**, ensure Talisman allowlists (e.g. `.talismanrc`) are updated only with team approval.
 
-## Versioning and releases
+## Versioning
 
-- **semantic-release** (see `.releaserc`) drives npm releases from **`master`** with conventional commits.
 - `package.json` version must advance for releases; a PR check (`.github/workflows/check-version-bump.yml`) may enforce bumps when certain files change — **note:** that workflow’s path filters may still reflect a boilerplate layout; confirm with maintainers whether `src/` changes are included in “code changed” for your PR.
