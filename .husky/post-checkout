@@ -1,0 +1,40 @@
+#!/usr/bin/env sh
+# When switching to a branch that doesn't exist on remote (e.g. newly created),
+# pull and merge origin/main or origin/master into current branch. Does not push.
+
+# Only run on branch checkout (not file checkout)
+if [ "$3" != "1" ]; then
+  exit 0
+fi
+
+# Skip if we don't have a remote
+if ! git rev-parse --verify origin 2>/dev/null; then
+  exit 0
+fi
+
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+
+# Skip main/master - no need to merge base into these
+case "$CURRENT_BRANCH" in
+  main|master) exit 0 ;;
+esac
+
+# Only run when current branch does not exist on origin (treat as new local branch)
+if git ls-remote --heads origin "$CURRENT_BRANCH" 2>/dev/null | grep -q .; then
+  echo "post-checkout: $CURRENT_BRANCH exists on origin, skipping merge."
+  exit 0
+fi
+
+# Prefer main, fallback to master
+if git rev-parse --verify origin/main 2>/dev/null; then
+  BASE=origin/main
+elif git rev-parse --verify origin/master 2>/dev/null; then
+  BASE=origin/master
+else
+  exit 0
+fi
+
+echo "New branch detected: merging latest $BASE into $CURRENT_BRANCH (local only, not pushing)..."
+git fetch origin
+git merge "$BASE" --no-edit --no-ff
+echo "Done. Merge is local only; push when ready."

@@ -1,0 +1,31 @@
+---
+description: Contentstack DataSync Sync API patterns (delivery token, retries, HTTPS)
+globs: "{src/api.ts,src/config.ts,src/core/**/*.ts}"
+alwaysApply: false
+---
+
+# DataSync Manager ↔ Sync API (not CMA)
+
+This package is **not** the Content Management API (CMA) client. It synchronizes stack data using the **Sync API** with a **delivery token** and stack metadata.
+
+## Configuration (`src/config.ts` / runtime `contentstack` object)
+
+- **Host / protocol / port**: Defaults include `host: 'cdn.contentstack.io'`, `protocol: 'https:'`, `port: 443`.
+- **Endpoints**: e.g. `apis.sync: '/v3/stacks/sync'`, `apis.content_types: '/v3/content_types/'`.
+- **Auth headers** (set in `src/api.ts` `init`): `api_key`, `access_token` (delivery token), optional `branch`, `X-User-Agent` (`datasync-manager/v<version>`).
+- **Retries / timing**: `MAX_RETRY_LIMIT`, `RETRY_DELAY_BASE`, `TIMEOUT` — overridable from user config.
+
+## HTTP client behavior (`src/api.ts`)
+
+- Uses Node **`https.request`**; paths are built from config and query strings; **SSRF** mitigation uses `URL` + `@braintree/sanitize-url` on path/query.
+- **429** and **5xx**: Retries with backoff (`Math.pow(Math.SQRT2, RETRY) * RETRY_DELAY_BASE`).
+- **Error 141** (invalid `sync_token`): Clears tokens, sets `init: true`, single recovery attempt to avoid loops.
+- **Network errors** (`ECONNRESET`, `ETIMEDOUT`, etc.): Retries up to `MAX_RETRY_LIMIT`.
+
+## Core sync (`src/core/`)
+
+- Queue, plugin pipeline, token persistence (`.tokens`, `.checkpoint`, `.ledger` — see `npm run clean`), and webhook/fallback behavior tie back to Sync API semantics — preserve on-disk contract when changing persistence.
+
+## Wording
+
+- Say **Sync API**, **delivery token**, **DataSync** — not “CMA” for this module’s primary behavior.

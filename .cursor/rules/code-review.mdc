@@ -1,0 +1,33 @@
+---
+description: PR review checklist for DataSync Manager (Sync API, TypeScript, Jest)
+alwaysApply: true
+---
+
+# Code review checklist
+
+## Product and API
+
+- **Terminology**: This repo is **DataSync Manager** + **Sync API** + **delivery token**. Do not describe it as the **CMA** (Management API) SDK unless the change truly involves management APIs (rare here).
+- **Public API**: Exported functions/types in `src/index.ts` (and any new entry points) need accurate **JSDoc** where the project already documents behavior.
+
+## Behavior and compatibility
+
+- **Backward compatibility**: Avoid breaking changes to `start`, `setConfig`, store interfaces, queue behavior, and on-disk token/checkpoint files without a major version and migration notes.
+- **Errors**: Rejections and thrown errors should remain actionable; Sync API **error 141** recovery and retry paths in `src/api.ts` must not regress into infinite loops.
+- **Null / undefined**: Keep defensive checks consistent with `src/util/validations.ts` patterns.
+
+## Security and dependencies
+
+- **SSRF / URL handling**: Changes to request path construction must preserve sanitization (`URL` + `sanitize-url`) in `src/api.ts`.
+- **Dependencies / SCA**: New packages need justification; align with Snyk pre-commit expectations.
+
+## Tests
+
+- **Unit / integration**: Exercise new logic with Jest + nock where HTTP is involved; mirror patterns in `test/`.
+- **Coverage**: Meaningful branches for retries, errors, and core sync paths.
+
+## Severity (optional labels)
+
+- **Blocker**: Security regression, data loss risk, infinite retry loops, broken public API contract.
+- **Major**: Incorrect Sync API behavior, missing tests for critical paths, breaking change without version strategy.
+- **Minor**: Style, logging, non-user-facing refactors, doc-only gaps.
