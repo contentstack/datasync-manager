@@ -1,0 +1,57 @@
+name: Release
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.x"
+
+      # Install dependencies
+      - name: Install dependencies
+        run: npm install
+
+      # Build (dist/ is published per package.json "files")
+      - name: Build
+        run: npm run build-ts
+
+      # Fetch package details (name and version)
+      - name: Get package details
+        id: package
+        uses: codex-team/action-nodejs-package-info@v1.1
+
+      # Pack the package into a .tgz archive (@contentstack/datasync-manager → contentstack-datasync-manager-<version>.tgz)
+      - name: Pack the npm package
+        run: npm pack
+
+      # Publish the package to npm
+      - name: Publish to npm
+        id: publish_npm
+        uses: JS-DevTools/npm-publish@v3
+        with:
+          token: ${{ secrets.NPM_TOKEN }}
+          # access: public # Uncomment if you need to publish a scoped package as public for the first time
+
+      # Upload the packaged .tgz to the release that triggered this workflow
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: "./contentstack-datasync-manager-${{ steps.package.outputs.version }}.tgz"
+          asset_name: "contentstack-datasync-manager-${{ steps.package.outputs.version }}.tgz"
+          asset_content_type: application/tgz
