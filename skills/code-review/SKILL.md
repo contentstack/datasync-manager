@@ -1,43 +1,56 @@
 ---
 name: code-review
-description: PR review checklist for Contentstack DataSync Manager (Sync API, TypeScript, Jest, security)
+description: PR review checklist for DataSync Manager—Sync API terminology, security, tests, optional severity labels
 ---
 
-# Code review (expanded)
+# Code review – @contentstack/datasync-manager
 
-Use this alongside [.cursor/rules/code-review.mdc](../../.cursor/rules/code-review.mdc).
+## When to use
 
-## Scope and naming
+- Reviewing a pull request or preparing one for review.
+- You need a consistent checklist for **DataSync** / **Sync API** changes (not CMA).
 
-- **DataSync Manager** syncs content via the **Contentstack Sync API** using a **delivery token**. It is **not** the CMA SDK; avoid calling it “management” or “CMA” unless the code path actually uses Management APIs (this codebase generally does not).
+## Instructions
 
-## Public surface
+### Scope and naming
 
-- **`src/index.ts`**: Document new or changed exports (JSDoc style matching existing blocks).
-- **Config**: Document new `contentstack` / `syncManager` options in code comments or consumer-facing docs when behavior is user-visible.
+- **DataSync Manager** uses the **Contentstack Sync API** and a **delivery token**. It is **not** the CMA SDK; do not describe it as “management” or “CMA” unless the code path actually uses Management APIs (rare here).
 
-## Correctness
+### Public surface
 
-- **Queues and notifications**: `push`/`unshift`/`pop` and `notifications` events (`publish`, `unpublish`, `delete`, `error`) must stay consistent for integrators.
-- **Token lifecycle**: `.tokens`, `.ledger`, `.checkpoint` behavior and Error **141** recovery in `src/api.ts` are sensitive — verify edge cases.
-- **Webhook + fallback polling**: Changes in `src/index.ts` monitoring should not leak timers or duplicate `poke()` calls.
+- **`src/index.ts`**: JSDoc for new or changed exports, matching existing style.
+- **Config**: Document new `contentstack` / `syncManager` options when behavior is user-visible.
 
-## Security
+### Correctness
 
-- Path and query handling for HTTPS requests must remain safe from SSRF (see `src/api.ts`).
-- No secrets in logs; Talisman/Snyk expectations remain satisfied.
+- **Queues and notifications**: `push` / `unshift` / `pop` and `notifications` events (`publish`, `unpublish`, `delete`, `error`) must stay consistent for integrators.
+- **Token lifecycle**: `.tokens`, `.ledger`, `.checkpoint` and **Error 141** recovery in `src/api.ts`—verify edge cases and no infinite loops.
+- **Webhook + fallback polling** (`src/index.ts`): no timer leaks or duplicate `poke()` calls.
 
-## Dependencies
+### Security
 
-- Prefer minimal, audited dependencies; align with `package.json` and team policy.
+- HTTPS path/query handling must remain safe from SSRF (`src/api.ts`).
+- No secrets in logs; **Talisman** / **Snyk** expectations stay satisfied.
 
-## Tests
+### Dependencies
 
-- Add or update Jest tests with **nock** for HTTP; use `test/dummy` patterns.
-- Run **`npm test`** locally before approving.
+- Prefer minimal, audited dependencies per team policy.
 
-## Severity
+### Tests
 
-- **Blocker**: Security, data corruption, broken sync or infinite retries.
-- **Major**: Wrong API semantics, missing tests for risky changes.
-- **Minor**: Style, comments, small refactors without behavior change.
+- Add or update **Jest** tests with **nock** for HTTP; follow `test/dummy` patterns.
+- Run **`npm test`** before approving risky changes.
+
+### Severity (optional labels)
+
+| Label | Examples |
+|-------|----------|
+| **Blocker** | Security regression, data loss risk, infinite retries, broken public API contract |
+| **Major** | Wrong Sync API semantics, missing tests for critical paths, breaking change without version strategy |
+| **Minor** | Style, logging, non-user-facing refactors, doc-only gaps |
+
+## References
+
+- [contentstack-datasync/SKILL.md](../contentstack-datasync/SKILL.md) — intended semantics.
+- [testing/SKILL.md](../testing/SKILL.md) — test expectations.
+- [AGENTS.md](../../AGENTS.md) — project entry point.

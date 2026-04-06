@@ -1,61 +1,47 @@
-# @contentstack/datasync-manager
+# @contentstack/datasync-manager – Agent guide
 
-## What this package is
+*Universal entry point* for contributors and AI agents. Detailed conventions live in **skills/*/SKILL.md**.
 
-**Contentstack DataSync Manager** — the primary Node.js module for [Contentstack DataSync](https://www.contentstack.com/docs/guide/synchronization/contentstack-datasync). It runs on your server, coordinates **content stores**, **asset stores**, and a **listener** (webhooks), and pulls stack changes via the **Contentstack Sync API** using a **delivery token** (read/sync path).
+## What this repo is
 
-This is **not** the general-purpose Content Delivery API (CDA) or Content Management API (CMA) SDK packages. It is purpose-built for **synchronization** (`/v3/stacks/sync`, tokens, plugins, queues). Terminology in reviews and docs should say **DataSync** / **Sync API**, not “CMA” unless you are discussing something that truly uses Management APIs (this codebase does not).
+| Field | Detail |
+|-------|--------|
+| *Name:* | [`@contentstack/datasync-manager`](https://github.com/contentstack/datasync-manager) |
+| *Purpose:* | Primary Node.js module for [Contentstack DataSync](https://www.contentstack.com/docs/guide/synchronization/contentstack-datasync): coordinates content stores, asset stores, and a listener (webhooks), and pulls stack changes via the **Contentstack Sync API** with a **delivery token**. |
+| *Out of scope (if any):* | Not the standalone CDA or CMA client SDKs; not a generic HTTP client library—sync orchestration and Node **`https`** to the Sync API only. Say **DataSync** / **Sync API**, not “CMA”, for this package’s main behavior. |
 
-- **Repository:** https://github.com/contentstack/datasync-manager  
-- **Homepage / product docs:** https://www.contentstack.com/docs/guide/synchronization/contentstack-datasync  
-
-## Tech stack
+## Tech stack (at a glance)
 
 | Area | Details |
 |------|---------|
-| Language | TypeScript **4.9.x** (compiles to ES6, CommonJS) |
-| Runtime | Node.js **>= 8** (`engines` in `package.json`) |
-| Build | `tsc` → `dist/`; types path `typings` (see `package.json` `types`) |
-| Tests | **Jest** **29** + **ts-jest**; **nock** for HTTP mocking |
-| HTTP client | Node **`https`** (no axios/fetch dependency) |
-| Logging | **`debug`** (namespaces such as `sm:index`, `api`) + pluggable logger via `util/logger` |
-| Other libs | `lodash`, `marked`, `@braintree/sanitize-url`, `write-file-atomic`, etc. (see `package.json`) |
+| Language | TypeScript **4.9.x** → ES6, CommonJS (`tsconfig.json`); Node **>= 8** (`package.json` `engines`) |
+| Build | `tsc` → `dist/`; `types` → `typings` (`package.json`) |
+| Tests | **Jest** **29** + **ts-jest**; patterns in `jest.config.js`; tests under `test/**/*.ts` |
+| Lint / coverage | **ESLint** (`npm run lint`); legacy **TSLint** (`tslint.json`, `npm run tslint`); Jest coverage to `coverage/` |
+| Other | HTTP via Node **`https`**; logging via **`debug`** + `src/util/logger`; pre-commit **Talisman** + **Snyk** (`.husky/pre-commit`) |
 
-## Public entry points and layout
+## Commands (quick reference)
 
-| Role | Path |
-|------|------|
-| Package main | `dist/index.js` (built from `src/index.ts`) |
-| Sync HTTP API wrapper | `src/api.ts` |
-| Default config (Sync API paths, host, retries) | `src/config.ts` |
-| Core sync loop, queue, plugins | `src/core/` |
-| Utilities (logger, validation, paths) | `src/util/` |
-| Built-in plugins (JS) | `src/plugins/` |
-| Example consumer | `example/` |
-| Tests + dummy stack config / mocks | `test/` (`test/dummy/` is fixtures; ignored as tests by Jest `testPathIgnorePatterns`) |
+| Command type | Command |
+|--------------|---------|
+| Build | `npm run compile` or `npm run build-ts` (`clean` + `tsc`) |
+| Test | `npm test` (`PLUGIN_PATH=./test/dummy` + Jest, coverage, verbose) |
+| Lint | `npm run lint` / `npm run tslint` |
 
-Exports from `src/index.ts` include `start`, `setConfig`, `getConfig`, `setContentStore`, `setAssetStore`, `setListener`, `push` / `unshift` / `pop`, `notifications`, etc.
+CI: [.github/workflows/check-version-bump.yml](.github/workflows/check-version-bump.yml) (version bump checks on PRs when applicable).
 
-## Common commands
+## Where the documentation lives: skills
 
-| Command | Purpose |
-|---------|---------|
-| `npm run compile` | TypeScript compile to `dist/` |
-| `npm run build-ts` | Clean + full compile (`clean` + `tsc`) |
-| `npm test` | Jest with coverage and verbose output; sets `PLUGIN_PATH=./test/dummy` |
-| `npm run lint` | ESLint (ensure project config exists or use defaults) |
-| `npm run tslint` | TSLint on `src/**/*.ts` (legacy; still in `package.json`) |
+| Skill | Path | What it covers |
+|-------|------|----------------|
+| Development workflow | [skills/dev-workflow/SKILL.md](skills/dev-workflow/SKILL.md) | Branches (`development` / `master`), release flow, build/test/lint, PR expectations, versioning |
+| TypeScript conventions | [skills/typescript/SKILL.md](skills/typescript/SKILL.md) | `src/` layout, compiler settings, logging, lint |
+| DataSync & Sync API | [skills/contentstack-datasync/SKILL.md](skills/contentstack-datasync/SKILL.md) | Public API, config, HTTP client, retries, tokens, core sync—**not** CMA |
+| Testing | [skills/testing/SKILL.md](skills/testing/SKILL.md) | Jest, nock, `PLUGIN_PATH`, fixtures, credentials policy |
+| Code review | [skills/code-review/SKILL.md](skills/code-review/SKILL.md) | PR checklist, severity (Blocker / Major / Minor) |
 
-Tests are **unit/integration-style** against **nock**-mocked HTTP and dummy connectors; there is no separate “live stack” test suite in-repo by default.
+An index with “when to use” hints is in [skills/README.md](skills/README.md).
 
-## Credentials and environment
+## Using Cursor (optional)
 
-- **Live / integration** tests against a real stack are **not** wired in this repo’s default `npm test`.  
-- Dummy config uses **delivery token** + **api key** in `test/dummy/config.ts` (mock values).  
-- Real deployments need stack **delivery token**, **api key**, optional **branch**, **environment**, sync tokens, and host/protocol as your app supplies via config (see `src/config.ts` and `src/api.ts` `init`).  
-- Pre-commit may run **Talisman** and **Snyk** (see `.husky/pre-commit`); use `SKIP_HOOK=1` only when appropriate.
-
-## Agent guidance index
-
-- **Cursor rules (overview):** [.cursor/rules/README.md](.cursor/rules/README.md)  
-- **Skills (deep dives):** [skills/README.md](skills/README.md)  
+If you use *Cursor*, [.cursor/rules/README.md](.cursor/rules/README.md) only points to *AGENTS.md*—same docs as everyone else.
