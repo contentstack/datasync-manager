@@ -1,70 +1,57 @@
-name: Release datasync manager
+name: Release
+
 on:
-  push:
-    branches: [master]
+  release:
+    types: [created]
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      # Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # Setup Node.js environment
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: "22.x"
-# The below action will see the existing tags and will bump the current ones and this is only used to check whether the given tag already exists or not
-# We will be using the previous tag to compare with the current tag in the package.json 
-# If both match then no new release would be triggered
-# Else New release will be created
-      - name: Bump version and push tag
-        id: tag_version
-        uses: mathieudutour/github-tag-action@v6.1
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          default_bump: false
-# Getting the version info from package.json
-      - name: get-npm-version
-        id: package-version
-        uses: martinbeentjes/npm-get-version-action@v1.3.1
-# Here we are checking whether this is the first release or not and then checking if it is release or not
-      - name: check-first-release
-        env:
-          First_Release: ${{steps.tag_version.outputs.previous_tag=='v0.0.0'}}
-        run: |
-          if ${First_Release} == true; then
-            echo "fr=true" >> $GITHUB_ENV
-            echo "flag set to true"
-          else
-            echo "fr=false" >> $GITHUB_ENV
-            echo "flag set to false"
-          fi
-      - name: check-release-version
-        if: ${{env.fr=='false'}}
-        env:
-          old_version: ${{steps.tag_version.outputs.previous_tag}}
-          new_version: v${{steps.package-version.outputs.current-version}}
-        run: |
-          echo ${old_version}
-          echo ${new_version}
-          echo ${{env.old_version==env.new_version}}
-          if ${{env.old_version!=env.new_version}}; then
-            echo "fr=true" >> $GITHUB_ENV
-            echo "flag set to true"
-          else
-            echo "fr=false" >> $GITHUB_ENV
-            echo "flag set to false"
-          fi
-      - name: Installing dependencies
+
+      # Install dependencies
+      - name: Install dependencies
         run: npm install
+
+      # Build (dist/ is published per package.json "files")
       - name: Build
         run: npm run build-ts
-      - name: Publishing datasync manager
-        id: publish-core
+
+      # Fetch package details (name and version)
+      - name: Get package details
+        id: package
+        uses: codex-team/action-nodejs-package-info@v1.1
+
+      # Pack the package into a .tgz archive (@contentstack/datasync-manager → contentstack-datasync-manager-<version>.tgz)
+      - name: Pack the npm package
+        run: npm pack
+
+      # Publish the package to npm
+      - name: Publish to npm
+        id: publish_npm
         uses: JS-DevTools/npm-publish@v3
-        if: ${{env.fr=='true'}}
         with:
           token: ${{ secrets.NPM_TOKEN }}
-      - name: Create Release
-        id: create_release
-        if: ${{env.fr=='true'}}
+          # access: public # Uncomment if you need to publish a scoped package as public for the first time
+
+      # Upload the packaged .tgz to the release that triggered this workflow
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: gh release create v${{ steps.publish-core.outputs.version }} --title "Release ${{ steps.publish-core.outputs.version }}" --generate-notes
+        with:
+          upload_url: ${{ github.event.release.upload_url }}
+          asset_path: "./contentstack-datasync-manager-${{ steps.package.outputs.version }}.tgz"
+          asset_name: "contentstack-datasync-manager-${{ steps.package.outputs.version }}.tgz"
+          asset_content_type: application/tgz
