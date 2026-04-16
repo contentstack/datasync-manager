@@ -150,3 +150,5 @@ describe('test api - get()', () => {
   // })
 
 })
+
+// Socket timeout + ETIMEDOUT: covered by test/core/inet.ts, scripts/sync-api-mock-server (MOCK_SCENARIO=hang).
