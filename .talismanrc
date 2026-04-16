@@ -1,4 +1,13 @@
 fileignoreconfig:
-- filename: package-lock.json
-  checksum: 009fb6f2f26eda48369458fddb51a255ebbb4c73bd66d247d428c3a0faf2ec1b
-version: ""
+- filename: .github/workflows/secrets-scan.yml
+  ignore_detectors:
+    - filecontent
+- filename: .github/workflows/check-version-bump.yml
+  ignore_detectors:
+- filename: skills/dev-workflow/SKILL.md
+  checksum: c9fa42c57463f3d00aa34ab6c8b4e58b984cd6a3a5878d25596e6e66abb4a129
+- filename: skills/contentstack-datasync/SKILL.md
+  checksum: 62cf62a46c4dcdd9603b1e6ef910e0d77dfa39d2350db992a6a45d3a2791eaee
+- filename: skills/testing/SKILL.md
+  checksum: ab1f82b284189e2779570d4fd5edcde93494c1ee01110da9f0be6f1f5cf5177b
+version: "1.0"
