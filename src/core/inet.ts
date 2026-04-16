@@ -81,10 +81,23 @@ export const checkNetConnectivity = () => {
 }
 
 export const netConnectivityIssues = (error) => {
-  // Include socket hang up and connection reset errors as network connectivity issues
-  const networkErrorCodes = ['ENOTFOUND', 'ETIMEDOUT', 'ECONNRESET', 'EPIPE', 'EHOSTUNREACH']
-  
-  if (networkErrorCodes.includes(error.code) || error.message?.includes('socket hang up')) {
+  // Align with retryable codes in api.ts plus client-side timeout (no .code on Request timeout)
+  const networkErrorCodes = [
+    'ENOTFOUND',
+    'ETIMEDOUT',
+    'ECONNRESET',
+    'EPIPE',
+    'EHOSTUNREACH',
+    'ECONNREFUSED',
+    'ENETUNREACH',
+    'EAI_AGAIN',
+  ]
+  const msg = typeof error?.message === 'string' ? error.message : ''
+
+  if (networkErrorCodes.includes(error?.code)) {
+    return true
+  }
+  if (msg.includes('socket hang up') || msg.includes('Request timeout')) {
     return true
   }
 
