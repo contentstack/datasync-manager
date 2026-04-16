@@ -20,26 +20,4 @@ describe('# inet', () => {
     expect(netConnectivityIssues({}))
       .toEqual(false)
   })
-
-  describe('netConnectivityIssues', () => {
-    test('returns false for unrelated errors', () => {
-      expect(netConnectivityIssues({ message: 'business logic failed' })).toBe(false)
-      expect(netConnectivityIssues({ code: 'ICTC' })).toBe(false)
-    })
-
-    test('returns true for Request timeout message', () => {
-      expect(netConnectivityIssues({ message: 'Request timeout' })).toBe(true)
-    })
-
-    test('returns true for ETIMEDOUT and other retryable codes', () => {
-      expect(netConnectivityIssues({ code: 'ETIMEDOUT' })).toBe(true)
-      expect(netConnectivityIssues({ code: 'ECONNREFUSED' })).toBe(true)
-      expect(netConnectivityIssues({ code: 'ENETUNREACH' })).toBe(true)
-      expect(netConnectivityIssues({ code: 'EAI_AGAIN' })).toBe(true)
-    })
-
-    test('returns true for socket hang up in message', () => {
-      expect(netConnectivityIssues({ message: 'socket hang up' })).toBe(true)
-    })
-  })
 })

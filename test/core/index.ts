@@ -13,7 +13,6 @@ describe('check lock-unlock', () => {
   })
   test('lock-unlock', () => {
     expect(lock()).toBeUndefined()
-    // unlock(true) would run check() -> sync() and requires init(); use unlock(false) to only exercise the gate
-    expect(unlock(false)).toBeUndefined()
+    expect(unlock(true)).toBeUndefined()
   })
 })

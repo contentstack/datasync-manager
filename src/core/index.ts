@@ -4,6 +4,7 @@
  * MIT Licensed
  */
 import * as fs from 'fs'
+import * as path from 'path'
 import Debug from 'debug'
 import { EventEmitter } from 'events'
 import { cloneDeep, remove } from 'lodash'
@@ -17,6 +18,7 @@ import { map } from '../util/promise.map'
 import { netConnectivityIssues } from './inet'
 import { Q as Queue } from './q'
 import { getToken, saveCheckpoint } from './token-management'
+import { sanitizePath } from '../plugins/helper'
 
 interface IQueryString {
   init?: true,
@@ -121,8 +123,17 @@ export const init = (contentStore, assetStore) => {
 const loadCheckpoint = (checkPointConfig: ICheckpoint, paths: any): void => {
   if (!checkPointConfig?.enabled) return;
 
-  // Read checkpoint from configured path only
+  // Try reading checkpoint from primary path
   let checkpoint = readHiddenFile(paths.checkpoint);
+
+  // Fallback to filePath in config if not found
+  if (!checkpoint) {
+    const fallbackPath = path.join(
+      sanitizePath(__dirname),
+      sanitizePath(checkPointConfig.filePath || ".checkpoint")
+    );
+    checkpoint = readHiddenFile(fallbackPath);
+  }
 
   // Set sync token if checkpoint is found
   if (checkpoint) {
@@ -212,16 +223,9 @@ const check = async () => {
 const sync = async () => {
   try {
     debug(MESSAGES.SYNC_CORE.SYNC_STARTED);
-    let tokenObject: IToken
-    try {
-      tokenObject = await getToken() as IToken
-    } catch (tokenError) {
-      // check() sets SQ before sync(); fire() is never entered — release the gate
-      flag.SQ = false
-      throw tokenError
-    }
+    const tokenObject = await getToken();
     debug(MESSAGES.SYNC_CORE.SYNC_TOKEN_OBJECT, tokenObject);
-    const token: IToken = tokenObject
+    const token: IToken = (tokenObject as IToken)
     const request: any = {
       qs: {
         environment: process.env.SYNC_ENV || Contentstack.environment || 'development',
@@ -258,7 +262,7 @@ export const unlock = (refire?: boolean) => {
         .catch(flag.requestCache.reject)
     }
   }
-  return check()
+  check()
 }
 
 /**
@@ -372,23 +376,10 @@ const fire = (req: IApiRequest) => {
         .catch(reject)
     }).catch((error) => {
       debug(MESSAGES.SYNC_CORE.ERROR_FIRE, error);
-
-      // Check if this is an Error 141 (outdated token)
-      // Note: api.ts already handles recovery by retrying with init=true
-      try {
-        const parsedError = typeof error === 'string' ? JSON.parse(error) : error
-        if (parsedError.error_code === 141) {
-          logger.error(MESSAGES.SYNC_CORE.OUTDATED_SYNC_TOKEN)
-          logger.info(MESSAGES.SYNC_CORE.SYNC_TOKEN_RENEWAL)
-          // Reset sync_token so next sync starts fresh with init=true
-          Contentstack.sync_token = undefined
-        }
-      } catch (parseError) {
-        // Not a JSON error or not Error 141, continue with normal handling
+      if (netConnectivityIssues(error)) {
+        flag.SQ = false
       }
-
-      // Any failed sync API attempt must release the gate so the next notify/poke can run
-      flag.SQ = false
+      // do something
 
       return reject(error)
     })
