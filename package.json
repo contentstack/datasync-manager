@@ -1,7 +1,7 @@
 {
   "name": "@contentstack/datasync-manager",
   "author": "Contentstack LLC <support@contentstack.com>",
-  "version": "2.4.0-beta.2",
+  "version": "2.4.0-beta.3",
   "description": "The primary module of Contentstack DataSync. Syncs Contentstack data with your server using Contentstack Sync API",
   "main": "dist/index.js",
   "dependencies": {
@@ -9,17 +9,17 @@
     "debug": "^4.4.3",
     "dns-socket": "^4.2.2",
     "lodash": "^4.18.1",
-    "marked": "^17.0.5",
+    "marked": "^17.0.6",
     "write-file-atomic": "7.0.1"
   },
   "devDependencies": {
     "@semantic-release/commit-analyzer": "^9.0.2",
     "@semantic-release/git": "^10.0.1",
-    "@semantic-release/npm": "^12.0.1",
+    "@semantic-release/npm": "^12.0.2",
     "@semantic-release/release-notes-generator": "^10.0.3",
     "@types/debug": "0.0.31",
     "@types/jest": "23.3.14",
-    "@types/lodash": "4.17.15",
+    "@types/lodash": "4.17.24",
     "@types/marked": "^4.3.2",
     "@types/mkdirp": "0.5.2",
     "@types/nock": "9.3.1",
@@ -48,6 +48,9 @@
     "start": "dist",
     "tslint": "npx tslint -c tslint.json 'src/**/*.ts' --fix",
     "test": "PLUGIN_PATH=./test/dummy jest --colors --coverage --verbose",
+    "mock:sync-api": "node scripts/sync-api-mock-server/server.js",
+    "mock:run-all-scenarios": "node scripts/sync-api-mock-server/run-all-scenarios.js",
+    "demo:mock": "node scripts/demo-with-mock.js",
     "lint": "eslint",
     "semantic-release": "semantic-release",
     "husky-check": "npx husky && chmod +x .husky/pre-commit"
