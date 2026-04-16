@@ -43,6 +43,7 @@ jobs:
         uses: JS-DevTools/npm-publish@v3
         with:
           token: ${{ secrets.NPM_TOKEN }}
+          tag: beta
           # access: public # Uncomment if you need to publish a scoped package as public for the first time
 
       # Upload the packaged .tgz to the release that triggered this workflow
