@@ -225,7 +225,10 @@ export const get = (req, RETRY = 1) => {
       httpRequest.setTimeout(options.timeout, () => {
         debug(MESSAGES.API.REQUEST_TIMEOUT(options.path))
         httpRequest.destroy()
-        reject(new Error('Request timeout'))
+        const timeoutError = Object.assign(new Error('Request timeout'), {
+          code: 'ETIMEDOUT',
+        }) as Error & { code: string }
+        reject(timeoutError)
       })
 
       // Enhanced error handling for network and connection errors

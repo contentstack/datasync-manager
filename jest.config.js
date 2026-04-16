@@ -102,6 +102,8 @@ module.exports = {
   // The test environment that will be used for testing
   testEnvironment: 'node',
 
+  setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
+
   // Options that will be passed to the testEnvironment
   // testEnvironmentOptions: {},
   testPathIgnorePatterns: [
