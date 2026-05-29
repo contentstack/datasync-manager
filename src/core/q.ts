@@ -22,6 +22,27 @@ const notifications = new EventEmitter()
 
 let instance = null
 
+const ASSET_RETRY_MAX = 3
+const ASSET_RETRY_BACKOFF_MS = 1000
+const RETRYABLE_CODES = new Set(['ECONNRESET', 'ETIMEDOUT', 'ECONNABORTED'])
+
+const withRetry = async (fn: () => Promise<any>, uid: string): Promise<any> => {
+  for (let attempt = 1; attempt <= ASSET_RETRY_MAX; attempt++) {
+    try {
+      return await fn()
+    } catch (err) {
+      const error = err as any
+      if (attempt < ASSET_RETRY_MAX && RETRYABLE_CODES.has(error.code)) {
+        const delay = ASSET_RETRY_BACKOFF_MS * attempt
+        logger.warn(`Asset ${uid}: ${error.code}, retry ${attempt}/${ASSET_RETRY_MAX - 1} in ${delay}ms`)
+        await new Promise(r => setTimeout(r, delay))
+      } else {
+        throw err
+      }
+    }
+  }
+}
+
 /**
  * @summary Manages sync utilitiy's item queue
  * @description
@@ -42,8 +63,8 @@ export class Q extends EventEmitter {
    * @returns {Object} Returns 'Q's instance
    */
   constructor(contentStore, assetStore, config) {
+    super()
     if (!instance && contentStore && assetStore && config) {
-      super()
       this.pluginInstances = load(config)
       this.contentStore = contentStore
       this.syncManager = config.syncManager
@@ -216,7 +237,11 @@ export class Q extends EventEmitter {
         await Promise.all(beforeSyncPlugins)
       }
       debug(MESSAGES.QUEUE.BEFORE_PLUGINS)
-      await this.contentStore[action](data)
+      if (data._content_type_uid === '_assets') {
+        await withRetry(() => this.contentStore[action](data), data.uid)
+      } else {
+        await this.contentStore[action](data)
+      }
 
       debug(MESSAGES.QUEUE.ACTION_COMPLETE(action))
       if (typeof schema !== 'undefined') {
