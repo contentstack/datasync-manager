@@ -255,6 +255,13 @@ export const lock = () => {
 export const unlock = (refire?: boolean) => {
   debug(MESSAGES.SYNC_CORE.SYNC_UNLOCKED, refire)
   flag.lockdown = false
+  // Callers (process.ts, q.ts) invoke unlock() fire-and-forget. check()/fire()
+  // reject on a sync failure and would otherwise surface as an UNHANDLED rejection
+  // that re-trips the process-level lockdown, undoing the recovery this enables.
+  // Swallow+log here so unlock() is a safe, self-contained gate toggle for callers.
+  const swallow = (error) => {
+    debug(MESSAGES.SYNC_CORE.CHECK_FAILED, error)
+  }
   if (typeof refire === 'boolean' && refire) {
     // Fully re-arm the sync gate. Clearing lockdown alone is not enough: the
     // failed sync left SQ=true / WQ=false, so check()'s (!SQ && WQ) gate would
@@ -268,9 +275,10 @@ export const unlock = (refire?: boolean) => {
       return fire(cached.params)
         .then(cached.resolve)
         .catch(cached.reject)
+        .catch(swallow)
     }
   }
-  return check()
+  return check().catch(swallow)
 }
 
 /**
