@@ -100,8 +100,26 @@ export const init = (contentstack) => {
  */
 export const get = (req, RETRY = 1) => {
   return new Promise((resolve, reject) => {
+    // Ensure this request settles exactly once. Previously a socket timeout both
+    // reject()ed AND (via destroy() -> 'error') scheduled a detached retry whose
+    // result landed on an already-settled promise and was silently discarded.
+    let settled = false
+    let retryScheduled = false
+    const resolveOnce = (value) => {
+      if (!settled) {
+        settled = true
+        resolve(value)
+      }
+    }
+    const rejectOnce = (err) => {
+      if (!settled) {
+        settled = true
+        reject(err)
+      }
+    }
+
     if (RETRY > MAX_RETRY_LIMIT) {
-      return reject(new Error('Max retry limit exceeded!'))
+      return rejectOnce(new Error('Max retry limit exceeded!'))
     }
     req.method = Contentstack.verbs.get
     req.path = req.path || Contentstack.apis.sync
@@ -149,15 +167,15 @@ export const get = (req, RETRY = 1) => {
             .on('end', () => {
               debug(MESSAGES.API.STATUS(response.statusCode))
               if (response.statusCode >= 200 && response.statusCode <= 399) {
-                return resolve(JSON.parse(body))
+                return resolveOnce(JSON.parse(body))
               } else if (response.statusCode === 429) {
                 timeDelay = Math.pow(Math.SQRT2, RETRY) * RETRY_DELAY_BASE
                 debug(MESSAGES.API.RATE_LIMIT(options.path, timeDelay))
 
                 return setTimeout(() => {
                   return get(req, RETRY)
-                    .then(resolve)
-                    .catch(reject)
+                    .then(resolveOnce)
+                    .catch(rejectOnce)
                 }, timeDelay)
               } else if (response.statusCode >= 500) {
                 // retry, with delay
@@ -167,8 +185,8 @@ export const get = (req, RETRY = 1) => {
 
                 return setTimeout(() => {
                   return get(req, RETRY)
-                    .then(resolve)
-                    .catch(reject)
+                    .then(resolveOnce)
+                    .catch(rejectOnce)
                 }, timeDelay)
               } else {
                 // Enhanced error handling for Error 141 (Invalid sync_token)
@@ -203,8 +221,8 @@ export const get = (req, RETRY = 1) => {
                       
                       return setTimeout(() => {
                         return get(req, RETRY)
-                          .then(resolve)
-                          .catch(reject)
+                          .then(resolveOnce)
+                          .catch(rejectOnce)
                       }, timeDelay)
                     } else {
                       debug('Error 141 recovery already attempted, failing to prevent infinite loop')
@@ -216,7 +234,7 @@ export const get = (req, RETRY = 1) => {
                 }
                 
                 debug(MESSAGES.API.REQUEST_FAILED(options))
-                return reject(body)
+                return rejectOnce(body)
               }
             })
         })
@@ -224,17 +242,42 @@ export const get = (req, RETRY = 1) => {
       // Set socket timeout to handle socket hang ups
       httpRequest.setTimeout(options.timeout, () => {
         debug(MESSAGES.API.REQUEST_TIMEOUT(options.path))
-        httpRequest.destroy()
+        if (settled) {
+          return
+        }
         const timeoutError = Object.assign(new Error('Request timeout'), {
           code: 'ETIMEDOUT',
         }) as Error & { code: string }
-        reject(timeoutError)
+        // Retry the timed-out request in place so a subsequent success actually
+        // settles THIS promise (and the sync_token/checkpoint advances). Mark
+        // retryScheduled so the destroy()-triggered 'error' does not double-handle.
+        if (RETRY < MAX_RETRY_LIMIT) {
+          retryScheduled = true
+          timeDelay = Math.pow(Math.SQRT2, RETRY) * RETRY_DELAY_BASE
+          RETRY++
+          debug(`Request timeout: waiting ${timeDelay}ms before retry ${RETRY}/${MAX_RETRY_LIMIT}`)
+          httpRequest.destroy()
+
+          return setTimeout(() => {
+            return get(req, RETRY)
+              .then(resolveOnce)
+              .catch(rejectOnce)
+          }, timeDelay)
+        }
+        httpRequest.destroy()
+        return rejectOnce(timeoutError)
       })
 
       // Enhanced error handling for network and connection errors
       httpRequest.on('error', (error: any) => {
         debug(MESSAGES.API.REQUEST_ERROR(options.path, error?.message, error?.code))
-        
+
+        // Ignore errors once the promise has settled or a retry is already scheduled
+        // (e.g. the 'error' emitted by our own destroy() inside the timeout handler).
+        if (settled || retryScheduled) {
+          return
+        }
+
         // List of retryable network error codes
         const retryableErrors = [
           'ECONNRESET',    // Connection reset by peer
@@ -259,17 +302,17 @@ export const get = (req, RETRY = 1) => {
 
           return setTimeout(() => {
             return get(req, RETRY)
-              .then(resolve)
-              .catch(reject)
+              .then(resolveOnce)
+              .catch(rejectOnce)
           }, timeDelay)
         }
-        
-        return reject(error)
+
+        return rejectOnce(error)
       })
 
       httpRequest.end()
     } catch (error) {
-      return reject(error)
+      return rejectOnce(error)
     }
   })
 }

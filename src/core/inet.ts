@@ -69,7 +69,11 @@ export const checkNetConnectivity = () => {
         emitter.emit('disconnected', currentTimeout += sm.inet.retryIncrement)
       })
     } else if (disconnected) {
-      poke()
+      // poke() rejects if the resumed sync fails; without a catch that rejection
+      // would be unhandled and trip the process-level lockdown.
+      poke().catch((error) => {
+        debug('poke after reconnect failed:', error)
+      })
     }
     disconnected = false
 
