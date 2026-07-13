@@ -38,7 +38,10 @@ const unhandledErrors = (error) => {
   logger.error(error)
   lock()
   setTimeout(() => {
-    unlock()
+    // Pass refire=true so recovery re-arms the sync gate (resets SQ, sets WQ)
+    // and replays/continues syncing. unlock() with no arg only cleared the
+    // lockdown flag and left the gate closed, permanently stopping sync.
+    unlock(true)
   }, 10000)
 }
 
