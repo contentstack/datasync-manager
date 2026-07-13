@@ -122,7 +122,11 @@ export const get = (req, RETRY = 1) => {
       return rejectOnce(new Error('Max retry limit exceeded!'))
     }
     req.method = Contentstack.verbs.get
-    req.path = req.path || Contentstack.apis.sync
+    // Strip any previously-appended query string. On a retry, req.path already
+    // holds the fully-built path (base + '?' + qs) from the prior attempt; without
+    // this, the query string would be appended again, producing a malformed URL
+    // like '/v3/stacks/sync?...&sync_token=x?...&sync_token=x' that the API rejects.
+    req.path = (req.path || Contentstack.apis.sync).split('?')[0]
     if (req.qs) {
       req.path += `?${stringify(req.qs)}`
     }
