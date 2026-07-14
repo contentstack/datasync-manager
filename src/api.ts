@@ -171,7 +171,15 @@ export const get = (req, RETRY = 1) => {
             .on('end', () => {
               debug(MESSAGES.API.STATUS(response.statusCode))
               if (response.statusCode >= 200 && response.statusCode <= 399) {
-                return resolveOnce(JSON.parse(body))
+                // JSON.parse can throw on an empty/invalid body despite a 2xx/3xx.
+                // This runs in the 'end' handler, so an uncaught throw would bypass
+                // rejectOnce and crash the process / re-trigger the global lockdown.
+                try {
+                  return resolveOnce(JSON.parse(body))
+                } catch (parseError) {
+                  debug('Failed to parse success response body:', parseError)
+                  return rejectOnce(parseError)
+                }
               } else if (response.statusCode === 429) {
                 timeDelay = Math.pow(Math.SQRT2, RETRY) * RETRY_DELAY_BASE
                 debug(MESSAGES.API.RATE_LIMIT(options.path, timeDelay))
