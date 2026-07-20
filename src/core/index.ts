@@ -197,6 +197,11 @@ const check = async () => {
   } catch (error) {
     logger.error(error)
     debug(MESSAGES.SYNC_CORE.CHECK_ERROR, error);
+    // Invariant: always release the sync gate on ANY failure (network or not),
+    // so the next notify/poke can restart syncing. Several failure paths (e.g. a
+    // non-network content-type schema error, filterItems/plugin errors, or a
+    // failed checkpoint save) otherwise left SQ=true and wedged the loop shut.
+    flag.SQ = false
     check().then(() => {
       debug(MESSAGES.SYNC_CORE.CHECK_RECOVERED);
     }).catch((error) => {
@@ -250,15 +255,30 @@ export const lock = () => {
 export const unlock = (refire?: boolean) => {
   debug(MESSAGES.SYNC_CORE.SYNC_UNLOCKED, refire)
   flag.lockdown = false
+  // Callers (process.ts, q.ts) invoke unlock() fire-and-forget. check()/fire()
+  // reject on a sync failure and would otherwise surface as an UNHANDLED rejection
+  // that re-trips the process-level lockdown, undoing the recovery this enables.
+  // Swallow+log here so unlock() is a safe, self-contained gate toggle for callers.
+  const swallow = (error) => {
+    debug(MESSAGES.SYNC_CORE.CHECK_FAILED, error)
+  }
   if (typeof refire === 'boolean' && refire) {
+    // Fully re-arm the sync gate. Clearing lockdown alone is not enough: the
+    // failed sync left SQ=true / WQ=false, so check()'s (!SQ && WQ) gate would
+    // stay shut and sync would never resume.
+    flag.SQ = false
     flag.WQ = true
-    if (flag.requestCache && Object.keys(flag.requestCache)) {
-      return fire(flag.requestCache.params)
-        .then(flag.requestCache.resolve)
-        .catch(flag.requestCache.reject)
+    if (flag.requestCache && Object.keys(flag.requestCache).length) {
+      const cached = flag.requestCache
+      // Clear before replaying so a later unlock() cannot re-fire a stale request
+      flag.requestCache = undefined
+      return fire(cached.params)
+        .then(cached.resolve)
+        .catch(cached.reject)
+        .catch(swallow)
     }
   }
-  return check()
+  return check().catch(swallow)
 }
 
 /**
@@ -439,4 +459,11 @@ const postProcess = (req, resp) => {
   })
 }
 
-emitter.on('check', check)
+// check() rejects on a failed sync; when invoked as an event callback that
+// rejection would be unhandled and trip the process-level lockdown. Catch it
+// here — check()'s own catch already released the gate, so the next poke resumes.
+emitter.on('check', () => {
+  check().catch((error) => {
+    debug(MESSAGES.SYNC_CORE.CHECK_FAILED, error)
+  })
+})
