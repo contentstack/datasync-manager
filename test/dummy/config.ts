@@ -1,5 +1,6 @@
 export const config = {
   contentstack: {
+    // deepcode ignore HardcodedNonCryptoSecret: test fixture value, not a real secret
     apiKey: 'dummyApiKey',
     deliveryToken: 'dummyDeliveryToken',
     host: 'api.localhost.io',
