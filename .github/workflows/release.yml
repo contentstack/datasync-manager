@@ -19,6 +19,15 @@ jobs:
           node-version: 24
           registry-url: https://registry.npmjs.org/
           cache: 'npm'
+      - name: Check the release tag matches package.json
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          if [ "$RELEASE_TAG" != "$PKG_VERSION" ]; then
+            echo "::error::release tag $RELEASE_TAG does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
       - run: npm ci
       - run: npm run build-ts
       - name: Update npm
@@ -45,6 +54,7 @@ jobs:
       - name: Pack
         run: npm pack
       - name: Attach the tarball to the release
-        run: gh release upload "${{ github.event.release.tag_name }}" ./*.tgz --clobber
         env:
           GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: gh release upload "$RELEASE_TAG" ./*.tgz --clobber
